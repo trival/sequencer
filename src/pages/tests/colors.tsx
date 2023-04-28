@@ -1,9 +1,11 @@
 import { ToneHighlight, ToneValue, chromaticBgColor } from '@/utils/tone-colors'
 
-const TestColor: React.FC<{ color: string; value: ToneValue }> = ({
-	color,
-	value,
-}) => {
+interface Props {
+	color: string
+	value: ToneValue
+}
+
+const TestColor = ({ color, value }: Props) => {
 	return (
 		<div
 			className="w-20 h-20 m-1 py-3 px-4 rounded-md box-border select-none touch-none text-gray-800"

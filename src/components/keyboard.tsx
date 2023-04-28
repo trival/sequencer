@@ -69,12 +69,14 @@ export const Keyboard: React.FC<Props> = ({
 			onNoteActivated(midi)
 		}
 	}
+
 	const onPointerUp = (midi: number) => {
 		pointerdown = false
 		if (mode === 'Play') {
 			onNoteDeactivated(midi)
 		}
 	}
+
 	const onPointerEnter = (midi: number) => {
 		if (pointerdown) {
 			if (mode === 'Record') {
@@ -88,6 +90,7 @@ export const Keyboard: React.FC<Props> = ({
 			}
 		}
 	}
+
 	const onPointerOut = (midi: number) => {
 		if (pointerdown) {
 			if (mode === 'Play') {
