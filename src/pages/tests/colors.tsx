@@ -58,31 +58,33 @@ const ColorTestPage = () => {
 	]
 
 	return (
-		<div>
-			<h2 className="my-6 font-bold">Chromatic Scale</h2>
-			<h3>No Highlight</h3>
-			<TestColors values={chromaticValues} highlight={ToneHighlight.None} />
-			<h3>Soft Highlight</h3>
-			<TestColors values={chromaticValues} highlight={ToneHighlight.Soft} />
-			<h3>Strong Highlight</h3>
-			<TestColors values={chromaticValues} highlight={ToneHighlight.Strong} />
+		<div className="flex justify-center items-center">
+			<div>
+				<h2 className="my-6 font-bold">Chromatic Scale</h2>
+				<h3>No Highlight</h3>
+				<TestColors values={chromaticValues} highlight={ToneHighlight.None} />
+				<h3>Soft Highlight</h3>
+				<TestColors values={chromaticValues} highlight={ToneHighlight.Soft} />
+				<h3>Strong Highlight</h3>
+				<TestColors values={chromaticValues} highlight={ToneHighlight.Strong} />
 
-			<h2 className="my-6 font-bold">Circle of Fifths</h2>
-			<h3>No Highlight</h3>
-			<TestColors
-				values={circleOfFifthsValues}
-				highlight={ToneHighlight.None}
-			/>
-			<h3>Soft Highlight</h3>
-			<TestColors
-				values={circleOfFifthsValues}
-				highlight={ToneHighlight.Soft}
-			/>
-			<h3>Strong Highlight</h3>
-			<TestColors
-				values={circleOfFifthsValues}
-				highlight={ToneHighlight.Strong}
-			/>
+				<h2 className="my-6 font-bold">Circle of Fifths</h2>
+				<h3>No Highlight</h3>
+				<TestColors
+					values={circleOfFifthsValues}
+					highlight={ToneHighlight.None}
+				/>
+				<h3>Soft Highlight</h3>
+				<TestColors
+					values={circleOfFifthsValues}
+					highlight={ToneHighlight.Soft}
+				/>
+				<h3>Strong Highlight</h3>
+				<TestColors
+					values={circleOfFifthsValues}
+					highlight={ToneHighlight.Strong}
+				/>
+			</div>
 		</div>
 	)
 }
