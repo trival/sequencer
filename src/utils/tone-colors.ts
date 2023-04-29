@@ -1,5 +1,40 @@
 export type ToneValue = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11
 
+const lightnessFactors = {
+	0: 1.3,
+	1: 1.1,
+	2: 0.85,
+	3: 0.79,
+	4: 0.9,
+	5: 0.8,
+	6: 0.7,
+	7: 0.92,
+	8: 1.5,
+	9: 1.4,
+	10: 1.1,
+	11: 1.2,
+}
+
+const saturationFactors = {
+	0: 0.9,
+	1: 1.1,
+	2: 1.333333,
+	3: 1.3,
+	6: 1.333333,
+	8: 0.7,
+} as Record<ToneValue, number>
+
+const hueTurns = {
+	1: -0.009,
+	2: -0.015,
+	3: -0.035,
+	4: 0.015,
+	5: 0.03,
+	6: 0.015,
+	7: -0.025,
+	8: -0.015,
+} as Record<ToneValue, number>
+
 export enum ToneHighlight {
 	None,
 	Soft,
@@ -108,21 +143,28 @@ export function mod(n: number, m: number) {
 
 export const midiToToneValue = (midi: number) => mod(midi, 12) as ToneValue
 
-export function toHSL(hue: number, highlight: ToneHighlight): string {
-	const saturation = Math.floor((100 * (highlight + 1)) / 3)
-	const lightness = Math.floor((4 - highlight) * 22)
+export function toHSL(color: ToneValue, highlight: ToneHighlight): string {
+	const lightnessFactor =
+		(lightnessFactors[color] - 1) * (highlight / 2) * (highlight / 2) + 1
+	const saturationFactor =
+		(saturationFactors[color] - 1) * (highlight / 2) * (highlight / 2) + 1 || 1
+	const hueTurn = hueTurns[color] || 0
+	const saturation = Math.floor(
+		(100 * (highlight + 2) * saturationFactor) / 4.5,
+	)
+	const lightness = Math.floor((3.6 - highlight) * 25 * lightnessFactor)
+	const hue = color / 12 + hueTurn
 	return `hsl(${hue}turn ${saturation}% ${lightness}%)`
 }
 
 export function chromaticBgColor(tone: ToneColor): string {
-	const hue = ((tone.value + 6) % 12) / 12
-	return toHSL(hue, tone.highlight)
+	const color = ((tone.value + 6) % 12) as ToneValue
+	return toHSL(color, tone.highlight)
 }
 
 export function circleOfFithsBgColor(tone: ToneColor): string {
-	const value = tone.value % 2 === 0 ? (tone.value + 6) % 12 : tone.value
-	const hue = value / 12
-	return toHSL(hue, tone.highlight)
+	const color = tone.value % 2 === 0 ? (tone.value + 6) % 12 : tone.value
+	return toHSL(color as ToneValue, tone.highlight)
 }
 
 export function getToneBgColor(

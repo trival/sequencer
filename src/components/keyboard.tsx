@@ -6,7 +6,8 @@ import {
 	midiToToneValue,
 	mod,
 } from '@/utils/tone-colors'
-import { useMemo } from 'react'
+import clsx from 'clsx'
+import { useMemo, useState } from 'react'
 import * as Tone from 'tone'
 
 type Mode = 'Record' | 'Play'
@@ -21,11 +22,9 @@ interface Props {
 	left?: number
 	right?: number
 	mode?: Mode
-	scaleHeighlight?: ScaleHighlight
-	toneColors?: ToneColorType
+	scaleHighlight?: ScaleHighlight
+	toneColorType?: ToneColorType
 }
-
-let pointerdown = false
 
 export const Keyboard: React.FC<Props> = ({
 	activeNotes = [],
@@ -35,11 +34,13 @@ export const Keyboard: React.FC<Props> = ({
 	left = 2,
 	right = 3,
 	mode = 'Record',
-	scaleHeighlight = ScaleHighlight.Major,
-	toneColors = ToneColorType.CircleOfFiths,
+	scaleHighlight = ScaleHighlight.Major,
+	toneColorType = ToneColorType.CircleOfFiths,
 	onNoteActivated = () => {},
 	onNoteDeactivated = () => {},
-}) => {
+}: Props) => {
+	const [pointerDown, setPointerDown] = useState(false)
+
 	const baseFrequency = useMemo(
 		() => Tone.Frequency(baseNote, 'midi'),
 		[baseNote],
@@ -53,12 +54,15 @@ export const Keyboard: React.FC<Props> = ({
 	}, [activeNotes])
 
 	const toneBg = (tone: ToneValue) =>
-		getToneBgColor(tone, midiToToneValue(baseNote), scaleHeighlight, toneColors)
-
-	const returnFalse = () => false
+		getToneBgColor(
+			tone,
+			midiToToneValue(baseNote),
+			scaleHighlight,
+			toneColorType,
+		)
 
 	const onPointerDown = (midi: number) => {
-		pointerdown = true
+		setPointerDown(true)
 		if (mode === 'Record') {
 			if (notes[midi]) {
 				onNoteDeactivated(midi)
@@ -71,14 +75,14 @@ export const Keyboard: React.FC<Props> = ({
 	}
 
 	const onPointerUp = (midi: number) => {
-		pointerdown = false
+		setPointerDown(false)
 		if (mode === 'Play') {
 			onNoteDeactivated(midi)
 		}
 	}
 
 	const onPointerEnter = (midi: number) => {
-		if (pointerdown) {
+		if (pointerDown) {
 			if (mode === 'Record') {
 				if (notes[midi]) {
 					onNoteDeactivated(midi)
@@ -92,11 +96,18 @@ export const Keyboard: React.FC<Props> = ({
 	}
 
 	const onPointerOut = (midi: number) => {
-		if (pointerdown) {
+		if (pointerDown) {
 			if (mode === 'Play') {
 				onNoteDeactivated(midi)
 			}
 		}
+	}
+
+	const stopPreventAnd = (fn: () => void) => (e: React.BaseSyntheticEvent) => {
+		e.preventDefault()
+		e.stopPropagation()
+		fn()
+		return false
 	}
 
 	// compute the keys
@@ -129,30 +140,31 @@ export const Keyboard: React.FC<Props> = ({
 		<div>
 			<div className="fixed z-10 h-full w-6 bg-gray-500 opacity-30 right-0"></div>
 			<div className="fixed z-10 w-full h-6 bg-gray-500 opacity-30 bottom-0"></div>
-			{/* <div
-			v-for="row in rows"
-			:key="row[0].toneColor"
-			className="touch-none whitespace-nowrap"
-		>
-			<button
-				:className="[
-					'm-[2px] w-16 h-16 rounded-md box-border select-none touch-none text-gray-800',
-					{ 'border-4 border-red-400': activeNotes[cell.midi] },
-				]"
-				:style="{
-					backgroundColor: toneBg(cell.toneColor),
-				}"
-				v-for="cell in row"
-				:key="cell.toneColor"
-				@pointerdown.prevent.stop="onPointerDown(cell.midi)"
-				@pointerup.prevent.stop="onPointerUp(cell.midi)"
-				@pointerenter.prevent.stop="onPointerEnter(cell.midi)"
-				@pointerout.prevent.stop="onPointerOut(cell.midi)"
-				@contextmenu.prevent.stop="returnFalse"
-			>
-				{{ cell.frequency.toNote() }}
-			</button>
-		</div> */}
+			{keys.map((row) => (
+				<div
+					v-for="row in rows"
+					key={row[0].toneColor}
+					className="touch-none whitespace-nowrap"
+				>
+					{row.map((cell) => (
+						<button
+							className={clsx(
+								'm-[2px] w-16 h-16 rounded-md box-border select-none touch-none text-gray-800',
+								{ 'border-4 border-red-400': activeNotes[cell.midi] },
+							)}
+							style={{ backgroundColor: toneBg(cell.toneColor) }}
+							key={cell.toneColor}
+							onPointerDown={stopPreventAnd(() => onPointerDown(cell.midi))}
+							onPointerUp={stopPreventAnd(() => onPointerUp(cell.midi))}
+							onPointerEnter={stopPreventAnd(() => onPointerEnter(cell.midi))}
+							onPointerOut={stopPreventAnd(() => onPointerOut(cell.midi))}
+							onContextMenu={stopPreventAnd(() => {})}
+						>
+							{cell.frequency.toNote()}
+						</button>
+					))}
+				</div>
+			))}
 		</div>
 	)
 }

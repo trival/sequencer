@@ -12,6 +12,7 @@ const TestColor = ({ color, value }: TestColorProps) => {
 			v-for="c in chromNoneColors"
 			key={value}
 			style={{ backgroundColor: color }}
+			title={color}
 		>
 			{value}
 		</div>
