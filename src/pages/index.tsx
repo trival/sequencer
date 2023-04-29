@@ -15,7 +15,7 @@ interface State {
 }
 
 export default function Home() {
-	const [{ activeNotes, started, synth }, setState] = useImmer<State>({
+	const [{ activeNotes, started, synth }, update] = useImmer<State>({
 		activeNotes: new Set(),
 		started: false,
 	})
@@ -23,7 +23,7 @@ export default function Home() {
 	function playNote(midi: number) {
 		if (synth && !activeNotes.has(midi)) {
 			synth.triggerAttack(Tone.Frequency(midi, 'midi').toFrequency())
-			setState((s) => {
+			update((s) => {
 				s.activeNotes.add(midi)
 			})
 		}
@@ -32,7 +32,7 @@ export default function Home() {
 	function onDeactivateNote(midi: number) {
 		if (synth && activeNotes.has(midi)) {
 			synth.triggerRelease(Tone.Frequency(midi, 'midi').toFrequency())
-			setState((s) => {
+			update((s) => {
 				s.activeNotes.delete(midi)
 			})
 		}
@@ -42,7 +42,7 @@ export default function Home() {
 		if (synth && !started) {
 			Tone.start().then(() => {
 				playNote(midi)
-				setState((s) => {
+				update((s) => {
 					s.started = true
 				})
 			})
@@ -52,10 +52,10 @@ export default function Home() {
 	}
 
 	useEffect(() => {
-		setState((s) => {
+		update((s) => {
 			s.synth = new Tone.PolySynth(Tone.Synth).toDestination()
 		})
-	}, [setState])
+	}, [update])
 
 	return (
 		<div>
