@@ -1,6 +1,6 @@
 import { Keyboard } from '@/components/keyboard'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import * as Tone from 'tone'
 import { useImmer } from 'use-immer'
 
@@ -20,36 +20,45 @@ export default function Home() {
 		started: false,
 	})
 
-	function playNote(midi: number) {
-		if (synth && !activeNotes.has(midi)) {
-			synth.triggerAttack(Tone.Frequency(midi, 'midi').toFrequency())
-			update((s) => {
-				s.activeNotes.add(midi)
-			})
-		}
-	}
-
-	function onDeactivateNote(midi: number) {
-		if (synth && activeNotes.has(midi)) {
-			synth.triggerRelease(Tone.Frequency(midi, 'midi').toFrequency())
-			update((s) => {
-				s.activeNotes.delete(midi)
-			})
-		}
-	}
-
-	function onActivateNote(midi: number) {
-		if (synth && !started) {
-			Tone.start().then(() => {
-				playNote(midi)
+	const playNote = useCallback(
+		(midi: number) => {
+			if (synth && !activeNotes.has(midi)) {
+				synth.triggerAttack(Tone.Frequency(midi, 'midi').toFrequency())
 				update((s) => {
-					s.started = true
+					s.activeNotes.add(midi)
 				})
-			})
-		} else {
-			playNote(midi)
-		}
-	}
+			}
+		},
+		[activeNotes, synth, update],
+	)
+
+	const onDeactivateNote = useCallback(
+		(midi: number) => {
+			if (synth && activeNotes.has(midi)) {
+				synth.triggerRelease(Tone.Frequency(midi, 'midi').toFrequency())
+				update((s) => {
+					s.activeNotes.delete(midi)
+				})
+			}
+		},
+		[activeNotes, synth, update],
+	)
+
+	const onActivateNote = useCallback(
+		(midi: number) => {
+			if (synth && !started) {
+				Tone.start().then(() => {
+					playNote(midi)
+					update((s) => {
+						s.started = true
+					})
+				})
+			} else {
+				playNote(midi)
+			}
+		},
+		[playNote, started, synth, update],
+	)
 
 	useEffect(() => {
 		update((s) => {
