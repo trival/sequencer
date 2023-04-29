@@ -5,9 +5,9 @@ const lightnessFactors = {
 	1: 1.1,
 	2: 0.85,
 	3: 0.79,
-	4: 0.9,
+	4: 0.87,
 	5: 0.8,
-	6: 0.7,
+	6: 0.75,
 	7: 0.92,
 	8: 1.5,
 	9: 1.4,
@@ -20,19 +20,21 @@ const saturationFactors = {
 	1: 1.1,
 	2: 1.333333,
 	3: 1.3,
+	5: 1.2,
 	6: 1.333333,
 	8: 0.7,
 } as Record<ToneValue, number>
 
 const hueTurns = {
 	1: -0.009,
-	2: -0.015,
-	3: -0.035,
+	2: -0.025,
+	3: -0.04,
 	4: 0.015,
-	5: 0.03,
+	5: 0.035,
 	6: 0.015,
 	7: -0.025,
 	8: -0.015,
+	10: -0.015,
 } as Record<ToneValue, number>
 
 export enum ToneHighlight {
@@ -153,7 +155,7 @@ export function toHSL(color: ToneValue, highlight: ToneHighlight): string {
 	const saturation = Math.floor(
 		(100 * (highlight + 2) * saturationFactor) / 4.5,
 	)
-	const lightness = Math.floor((3.4 - highlight) * 26 * lightnessFactor)
+	const lightness = Math.floor((3.1 - highlight) * 29.5 * lightnessFactor)
 	const hue = color / 12 + hueTurn
 
 	return `hsl(${hue}turn ${saturation}% ${lightness}%)`
