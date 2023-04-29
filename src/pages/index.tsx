@@ -6,7 +6,7 @@ import { Set } from 'immutable'
 
 // const Tone: typeof ToneImport = (ToneImport as any).default || ToneImport
 
-const baseNote = Tone.Frequency('C2').toMidi()
+const toMidi = (note: string) => Tone.Frequency(note).toMidi()
 
 export default function Home() {
 	const [activeNotes, setActiveNotes] = useState(Set<number>())
@@ -48,7 +48,7 @@ export default function Home() {
 				activeNotes={Array.from(activeNotes)}
 				onNoteActivated={onActivateNote}
 				onNoteDeactivated={onDeactivateNote}
-				baseNote={baseNote}
+				baseNote={toMidi('C2')}
 				top={10}
 				right={9}
 				scaleHighlight={ScaleHighlight.Major}

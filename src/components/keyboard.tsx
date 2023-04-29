@@ -150,7 +150,7 @@ export const Keyboard: React.FC<Props> = ({
 						<button
 							className={clsx(
 								'm-[2px] w-16 h-16 rounded-md box-border select-none touch-none text-gray-800',
-								{ 'border-4 border-red-400': activeNotes[cell.midi] },
+								{ 'border-4 border-red-400': notes[cell.midi] },
 							)}
 							style={{ backgroundColor: toneBg(cell.toneColor) }}
 							key={cell.toneColor}
@@ -160,7 +160,7 @@ export const Keyboard: React.FC<Props> = ({
 							onPointerOut={stopPreventAnd(() => onPointerOut(cell.midi))}
 							onContextMenu={stopPreventAnd(() => {})}
 						>
-							{cell.frequency.toNote()}
+							{notes[cell.midi] ? cell.frequency.toNote() : <span>&nbsp;</span>}
 						</button>
 					))}
 				</div>

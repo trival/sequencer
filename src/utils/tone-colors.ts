@@ -149,11 +149,13 @@ export function toHSL(color: ToneValue, highlight: ToneHighlight): string {
 	const saturationFactor =
 		(saturationFactors[color] - 1) * (highlight / 2) * (highlight / 2) + 1 || 1
 	const hueTurn = hueTurns[color] || 0
+
 	const saturation = Math.floor(
 		(100 * (highlight + 2) * saturationFactor) / 4.5,
 	)
-	const lightness = Math.floor((3.6 - highlight) * 25 * lightnessFactor)
+	const lightness = Math.floor((3.4 - highlight) * 26 * lightnessFactor)
 	const hue = color / 12 + hueTurn
+
 	return `hsl(${hue}turn ${saturation}% ${lightness}%)`
 }
 
