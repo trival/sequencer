@@ -2,28 +2,39 @@ import { Keyboard } from '@/components/keyboard'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { useEffect, useState } from 'react'
 import * as Tone from 'tone'
-import { Set } from 'immutable'
+import { useImmer } from 'use-immer'
 
 // const Tone: typeof ToneImport = (ToneImport as any).default || ToneImport
 
 const toMidi = (note: string) => Tone.Frequency(note).toMidi()
 
+interface State {
+	activeNotes: Set<number>
+	started: boolean
+	synth?: Tone.PolySynth
+}
+
 export default function Home() {
-	const [activeNotes, setActiveNotes] = useState(Set<number>())
-	const [synth, setSynth] = useState<Tone.PolySynth>()
-	const [started, setStarted] = useState(false)
+	const [{ activeNotes, started, synth }, setState] = useImmer<State>({
+		activeNotes: new Set(),
+		started: false,
+	})
 
 	function playNote(midi: number) {
 		if (synth && !activeNotes.has(midi)) {
 			synth.triggerAttack(Tone.Frequency(midi, 'midi').toFrequency())
-			setActiveNotes(activeNotes.add(midi))
+			setState((s) => {
+				s.activeNotes.add(midi)
+			})
 		}
 	}
 
 	function onDeactivateNote(midi: number) {
 		if (synth && activeNotes.has(midi)) {
 			synth.triggerRelease(Tone.Frequency(midi, 'midi').toFrequency())
-			setActiveNotes(activeNotes.delete(midi))
+			setState((s) => {
+				s.activeNotes.delete(midi)
+			})
 		}
 	}
 
@@ -31,7 +42,9 @@ export default function Home() {
 		if (synth && !started) {
 			Tone.start().then(() => {
 				playNote(midi)
-				setStarted(true)
+				setState((s) => {
+					s.started = true
+				})
 			})
 		} else {
 			playNote(midi)
@@ -39,8 +52,10 @@ export default function Home() {
 	}
 
 	useEffect(() => {
-		setSynth(new Tone.PolySynth(Tone.Synth).toDestination())
-	}, [])
+		setState((s) => {
+			s.synth = new Tone.PolySynth(Tone.Synth).toDestination()
+		})
+	}, [setState])
 
 	return (
 		<div>
