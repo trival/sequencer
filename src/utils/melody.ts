@@ -16,10 +16,12 @@ export interface ProcessedNote {
 export interface ProcessedMelody {
 	notes: ProcessedNote[]
 	duration: Time
+	durationSec: number
+	measureSec: number
 }
 
 export function emptyMelody(): ProcessedMelody {
-	return { duration: 0, notes: [] }
+	return { duration: 0, durationSec: 0, notes: [], measureSec: 0 }
 }
 
 export function processMelody(melody: MelodyNote[]): ProcessedMelody {
@@ -40,9 +42,13 @@ export function processMelody(melody: MelodyNote[]): ProcessedMelody {
 			: subdivisions.push(note.duration)
 	}
 
+	const duration = collectDurations(subdivisions)
+
 	return {
 		notes,
-		duration: collectDurations(subdivisions),
+		duration,
+		durationSec: Tone.Time(duration).toSeconds(),
+		measureSec: Tone.Time('1m').toSeconds(),
 	}
 }
 
