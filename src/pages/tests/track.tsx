@@ -19,10 +19,26 @@ export const EditorPage = () => {
 	useEffect(() => {
 		setMelody(processMelody(initialMelody))
 	}, [])
+
+	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
+
+	const onNoteClicked = (idx: number) => {
+		console.log('onNoteClicked', idx)
+		if (activeNoteIdx === idx) {
+			setActiveNoteIdx(null)
+		} else {
+			setActiveNoteIdx(idx)
+		}
+	}
+
 	return (
 		<div className="p-10">
 			<h1>Track test</h1>
-			<Track melody={melody}></Track>
+			<Track
+				melody={melody}
+				onNoteClicked={onNoteClicked}
+				activeNoteIdx={activeNoteIdx}
+			></Track>
 		</div>
 	)
 }
