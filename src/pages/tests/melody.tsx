@@ -1,6 +1,12 @@
-import { MelodyNote, PartNote, toPartValues } from '@/utils/melody'
+import {
+	MelodyNote,
+	ProcessedNote,
+	ProcessedMelody,
+	processMelody,
+} from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
+import { useEffect } from 'react'
 import * as Tone from 'tone'
 
 const melody: MelodyNote[] = [
@@ -26,23 +32,29 @@ const melody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C5')], duration: '8n' },
 ]
 
-const partVals = toPartValues(melody)
+let melodyData: ProcessedMelody | null = null
 
 export default function SequenceTest() {
 	const synth = useSynth()
+
+	useEffect(() => {
+		Tone.Transport.start()
+		Tone.Transport.bpm.value = 160
+		melodyData = processMelody(melody)
+	}, [])
+
 	const onClick = async () => {
 		await Tone.start()
 
-		Tone.Transport.start()
-		Tone.Transport.bpm.value = 160
+		if (melodyData) {
+			const seq = new Tone.Part((time, note: ProcessedNote) => {
+				synth.play(note.midiNotes, note.duration, time)
+			}, melodyData.partNotes)
 
-		const seq = new Tone.Part((time, note: PartNote) => {
-			synth.play(note.midiNotes, note.duration, time)
-		}, partVals.partNotes)
-
-		seq.loop = 2
-		seq.loopEnd = partVals.duration
-		seq.start()
+			seq.loop = 2
+			seq.loopEnd = melodyData.duration
+			seq.start()
+		}
 	}
 
 	return (

@@ -6,17 +6,17 @@ import { fromMidi } from './utils'
 
 interface State {
 	playingNotes: Set<number>
-	started: boolean
 	synth?: Tone.PolySynth
 }
 
+let started = false
+
 export const useSynth = (Synth = Tone.Synth) => {
-	const [{ playingNotes, started, synth }, update] = useImmer<State>({
+	const [{ playingNotes, synth }, update] = useImmer<State>({
 		playingNotes: new Set(),
-		started: false,
 	})
 
-	const playNote = useCallback(
+	const playNotes = useCallback(
 		(notes: number[], duration?: Time, time?: number) => {
 			if (synth) {
 				if (duration) {
@@ -45,17 +45,15 @@ export const useSynth = (Synth = Tone.Synth) => {
 			if (synth) {
 				if (!started) {
 					Tone.start().then(() => {
-						playNote(notes, duration, time)
-						update((s) => {
-							s.started = true
-						})
+						playNotes(notes, duration, time)
+						started = true
 					})
 				} else {
-					playNote(notes, duration, time)
+					playNotes(notes, duration, time)
 				}
 			}
 		},
-		[playNote, started, synth, update],
+		[playNotes, synth],
 	)
 
 	const stop = useCallback(

@@ -6,36 +6,38 @@ export interface MelodyNote {
 	duration: Subdivision | Subdivision[]
 }
 
-export interface PartNote {
+export interface ProcessedNote {
 	midiNotes: number[]
 	time: Time
 	duration: Time
+	durationSec: number
 }
 
-export function toPartValues(melody: MelodyNote[]): {
-	partNotes: PartNote[]
+export interface ProcessedMelody {
+	partNotes: ProcessedNote[]
 	duration: Time
-} {
-	const result: PartNote[] = []
+}
+
+export function processMelody(melody: MelodyNote[]): ProcessedMelody {
+	const notes: ProcessedNote[] = []
 	const subdivisions: Subdivision[] = []
 
 	for (const note of melody) {
-		if (note.midiNotes.length) {
-			result.push({
-				midiNotes: note.midiNotes,
-				duration: collectDurations(note.duration),
-				time: Tone.Time(collectDurations(subdivisions)).toBarsBeatsSixteenths(),
-			})
-		}
+		const duration = collectDurations(note.duration)
+		notes.push({
+			midiNotes: note.midiNotes,
+			duration,
+			durationSec: Tone.Time(duration).toSeconds(),
+			time: Tone.Time(collectDurations(subdivisions)).toBarsBeatsSixteenths(),
+		})
 
 		Array.isArray(note.duration)
 			? subdivisions.push(...note.duration)
 			: subdivisions.push(note.duration)
 	}
 
-	console.log(result)
 	return {
-		partNotes: result,
+		partNotes: notes,
 		duration: collectDurations(subdivisions),
 	}
 }
