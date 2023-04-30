@@ -3,6 +3,7 @@ import {
 	ProcessedNote,
 	ProcessedMelody,
 	processMelody,
+	emptyMelody,
 } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
@@ -32,7 +33,7 @@ const melody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C5')], duration: '8n' },
 ]
 
-let melodyData: ProcessedMelody | null = null
+let melodyData = emptyMelody()
 
 export default function SequenceTest() {
 	const synth = useSynth()
@@ -46,15 +47,13 @@ export default function SequenceTest() {
 	const onClick = async () => {
 		await Tone.start()
 
-		if (melodyData) {
-			const seq = new Tone.Part((time, note: ProcessedNote) => {
-				synth.play(note.midiNotes, note.duration, time)
-			}, melodyData.partNotes)
+		const seq = new Tone.Part((time, note: ProcessedNote) => {
+			synth.play(note.midiNotes, note.duration, time)
+		}, melodyData.notes)
 
-			seq.loop = 2
-			seq.loopEnd = melodyData.duration
-			seq.start()
-		}
+		seq.loop = 2
+		seq.loopEnd = melodyData.duration
+		seq.start()
 	}
 
 	return (

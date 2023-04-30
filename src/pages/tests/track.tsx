@@ -1,5 +1,8 @@
-import { MelodyNote } from '@/utils/melody'
+import { Track } from '@/components/track'
+import { MelodyNote, emptyMelody, processMelody } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
+import { useEffect, useState } from 'react'
+import * as Tone from 'tone'
 
 const initialMelody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -13,9 +16,14 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export const EditorPage = () => {
+	const [melody, setMelody] = useState(emptyMelody())
+	useEffect(() => {
+		setMelody(processMelody(initialMelody))
+	}, [])
 	return (
 		<div>
-			<h1>Editor</h1>
+			<h1>Track test</h1>
+			<Track melody={melody}></Track>
 		</div>
 	)
 }

@@ -14,8 +14,12 @@ export interface ProcessedNote {
 }
 
 export interface ProcessedMelody {
-	partNotes: ProcessedNote[]
+	notes: ProcessedNote[]
 	duration: Time
+}
+
+export function emptyMelody(): ProcessedMelody {
+	return { duration: 0, notes: [] }
 }
 
 export function processMelody(melody: MelodyNote[]): ProcessedMelody {
@@ -37,7 +41,7 @@ export function processMelody(melody: MelodyNote[]): ProcessedMelody {
 	}
 
 	return {
-		partNotes: notes,
+		notes,
 		duration: collectDurations(subdivisions),
 	}
 }
