@@ -3,19 +3,29 @@ import clsx from 'clsx'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Popover } from '@headlessui/react'
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
+import { AddButton, DeleteButton } from '@/components/buttons'
 
-const secondWidthFactor = 50
+const secondWidthFactor = 60
 
 interface NoteProps {
 	durationSec: number
 	isActive?: boolean
 	onSelected?: () => void
+	onRemove?: () => void
 }
 
-export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
+export const Note = ({
+	durationSec,
+	isActive,
+	onSelected,
+	onRemove = () => {},
+}: NoteProps) => {
 	return (
 		<div
-			style={{ width: durationSec * secondWidthFactor + 'px' }}
+			style={{
+				width: durationSec * secondWidthFactor + 'px',
+				minWidth: durationSec * secondWidthFactor + 'px',
+			}}
 			className={clsx('relative px-[3px] h-8')}
 		>
 			<button
@@ -28,12 +38,14 @@ export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
 
 			{isActive && (
 				<Popover className="relative">
-					<Popover.Button>
-						<EllipsisHorizontalIcon></EllipsisHorizontalIcon>
+					<Popover.Button className="w-full min-w-fit flex justify-center">
+						<EllipsisHorizontalIcon className="w-8 h-8" />
 					</Popover.Button>
 
-					<Popover.Panel className="absolute z-10">
-						<div className="">huhu</div>
+					<Popover.Panel className="absolute z-10 flex top-0 -translate-y-full bg-gray-100/70 rounded shadow-md">
+						<AddButton />
+						<DeleteButton onConfirm={onRemove} />
+						<AddButton />
 					</Popover.Panel>
 				</Popover>
 			)}
@@ -50,12 +62,17 @@ interface TrackProps {
 	onRemove?: (idx: number) => void
 }
 
-export const Track = ({ melody, activeNoteIdx, onNoteClicked }: TrackProps) => {
+export const Track = ({
+	melody,
+	activeNoteIdx,
+	onNoteClicked,
+	onRemove,
+}: TrackProps) => {
 	const countMeasures = melody.measureSec
 		? Math.floor(melody.durationSec / melody.measureSec) + 1
 		: 0
 	return (
-		<div className="relative">
+		<div className="relative px-2 min-w-fit">
 			<div className="absolute h-full">
 				{[...Array(countMeasures)].map((_, i) => (
 					<span
@@ -74,6 +91,9 @@ export const Track = ({ melody, activeNoteIdx, onNoteClicked }: TrackProps) => {
 							isActive={activeNoteIdx === i}
 							onSelected={() => {
 								onNoteClicked?.(i)
+							}}
+							onRemove={() => {
+								onRemove?.(i)
 							}}
 						></Note>
 					)

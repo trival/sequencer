@@ -36,8 +36,11 @@ export const EditorPage = () => {
 			<h1>Track test</h1>
 			<Track
 				melody={melody}
-				onNoteClicked={onNoteClicked}
 				activeNoteIdx={activeNoteIdx}
+				onNoteClicked={onNoteClicked}
+				onRemove={(i) => {
+					console.log('removing note ' + i)
+				}}
 			></Track>
 		</div>
 	)
