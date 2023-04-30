@@ -1,5 +1,6 @@
 import { MelodyNote, PartNote, toPartValues } from '@/utils/melody'
-import { fromMidi, toMidi } from '@/utils/utils'
+import { useSynth } from '@/utils/synth'
+import { toMidi } from '@/utils/utils'
 import * as Tone from 'tone'
 
 const melody: MelodyNote[] = [
@@ -25,19 +26,20 @@ const melody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C5')], duration: '8n' },
 ]
 
+const partVals = toPartValues(melody)
+
 export default function SequenceTest() {
+	const synth = useSynth()
 	const onClick = async () => {
-		const synth = new Tone.PolySynth(Tone.Synth).toDestination()
-		const partVals = toPartValues(melody)
-		const seq = new Tone.Part((time, note: PartNote) => {
-			synth.triggerAttackRelease(
-				note.midiNotes.map((midi) => fromMidi(midi).toFrequency()),
-				note.duration,
-				time,
-			)
-		}, partVals.partNotes)
+		await Tone.start()
+
 		Tone.Transport.start()
 		Tone.Transport.bpm.value = 160
+
+		const seq = new Tone.Part((time, note: PartNote) => {
+			synth.play(note.midiNotes, note.duration, time)
+		}, partVals.partNotes)
+
 		seq.loop = 2
 		seq.loopEnd = partVals.duration
 		seq.start()
