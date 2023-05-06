@@ -1,3 +1,5 @@
+'use client'
+
 import { Track } from '@/components/track'
 import { MelodyNote, emptyMelody, processMelody } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'

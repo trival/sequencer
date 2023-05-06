@@ -3,6 +3,9 @@ import * as Tone from 'tone'
 import { Time } from 'tone/build/esm/core/type/Units'
 import { useImmer } from 'use-immer'
 import { fromMidi } from './utils'
+import { enableMapSet } from 'immer'
+
+enableMapSet()
 
 interface State {
 	playingNotes: Set<number>

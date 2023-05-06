@@ -1,3 +1,5 @@
+'use client'
+
 import { Keyboard } from '@/components/keyboard'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
@@ -15,18 +17,16 @@ export default function Home() {
 	}
 
 	return (
-		<div>
-			<Keyboard
-				activeNotes={synth.getPlayingNotes()}
-				onNoteActivated={onActivateNote}
-				onNoteDeactivated={onDeactivateNote}
-				baseNote={toMidi('B2')}
-				top={10}
-				right={9}
-				scaleHighlight={ScaleHighlight.Major}
-				toneColorType={ToneColorType.CircleOfFiths}
-				mode="Play"
-			/>
-		</div>
+		<Keyboard
+			activeNotes={synth.getPlayingNotes()}
+			onNoteActivated={onActivateNote}
+			onNoteDeactivated={onDeactivateNote}
+			baseNote={toMidi('C3')}
+			top={10}
+			right={9}
+			scaleHighlight={ScaleHighlight.Major}
+			toneColorType={ToneColorType.CircleOfFiths}
+			mode="Play"
+		/>
 	)
 }

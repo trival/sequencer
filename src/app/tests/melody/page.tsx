@@ -1,7 +1,8 @@
+'use client'
+
 import {
 	MelodyNote,
 	ProcessedNote,
-	ProcessedMelody,
 	processMelody,
 	emptyMelody,
 } from '@/utils/melody'
