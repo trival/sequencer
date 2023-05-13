@@ -58,7 +58,7 @@ export default function SequenceTest() {
 	}
 
 	return (
-		<button className="py-2 px-4 m-8 bg-slate-400" onClick={onClick}>
+		<button className="m-8 bg-slate-400 px-4 py-2" onClick={onClick}>
 			Play
 		</button>
 	)

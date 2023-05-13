@@ -8,7 +8,7 @@ interface TestColorProps {
 const TestColor = ({ color, value }: TestColorProps) => {
 	return (
 		<div
-			className="w-20 h-20 m-1 py-3 px-4 rounded-md box-border select-none touch-none text-gray-800"
+			className="m-1 box-border h-20 w-20 touch-none select-none rounded-md px-4 py-3 text-gray-800"
 			v-for="c in chromNoneColors"
 			key={value}
 			style={{ backgroundColor: color }}
@@ -59,7 +59,7 @@ const ColorTestPage = () => {
 	]
 
 	return (
-		<div className="flex justify-center items-center">
+		<div className="flex items-center justify-center">
 			<div>
 				<h2 className="my-6 font-bold">Chromatic Scale</h2>
 				<h3>No Highlight</h3>

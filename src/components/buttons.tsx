@@ -9,11 +9,11 @@ interface DeleteButtonProps {
 export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	return (
 		<Popover className="relative">
-			<Popover.Button className="rounded-full bg-rose-600 p-2 m-2 text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+			<Popover.Button className="m-2 rounded-full bg-rose-600 p-2 text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
 				<TrashIcon className="h-6 w-6" aria-hidden="true" />
 			</Popover.Button>
 
-			<Popover.Panel className="absolute z-10 bg-gray-100/70 rounded shadow-md mt-2 p-4">
+			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
 				{({ close }) => (
 					<button
 						type="button"
@@ -36,11 +36,11 @@ export const AddButton = () => {
 		<Popover className="relative">
 			<Popover.Button
 				type="button"
-				className="rounded-full bg-indigo-600 p-2 m-2 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+				className="m-2 rounded-full bg-indigo-600 p-2 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
 			>
 				<PlusIcon className="h-6 w-6" aria-hidden="true" />
 			</Popover.Button>
-			<Popover.Panel className="absolute z-10 bg-gray-100/70 rounded shadow-md mt-2 p-4">
+			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
 				<p>Selet length</p>
 			</Popover.Panel>
 		</Popover>

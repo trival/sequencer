@@ -26,11 +26,11 @@ export const Note = ({
 				width: durationSec * secondWidthFactor + 'px',
 				minWidth: durationSec * secondWidthFactor + 'px',
 			}}
-			className={clsx('relative px-[3px] h-8')}
+			className={clsx('relative h-8 px-[3px]')}
 		>
 			<button
 				className={clsx(
-					'w-full h-full',
+					'h-full w-full',
 					isActive ? 'bg-cyan-300' : 'bg-slate-300',
 				)}
 				onClick={onSelected}
@@ -38,11 +38,11 @@ export const Note = ({
 
 			{isActive && (
 				<Popover className="relative">
-					<Popover.Button className="w-full min-w-fit flex justify-center">
-						<EllipsisHorizontalIcon className="w-8 h-8" />
+					<Popover.Button className="flex w-full min-w-fit justify-center">
+						<EllipsisHorizontalIcon className="h-8 w-8" />
 					</Popover.Button>
 
-					<Popover.Panel className="absolute z-10 flex top-0 -translate-y-full bg-gray-100/70 rounded shadow-md">
+					<Popover.Panel className="absolute top-0 z-10 flex -translate-y-full rounded bg-gray-100/70 shadow-md">
 						<AddButton />
 						<DeleteButton onConfirm={onRemove} />
 						<AddButton />
@@ -72,17 +72,17 @@ export const Track = ({
 		? Math.floor(melody.durationSec / melody.measureSec) + 1
 		: 0
 	return (
-		<div className="relative px-2 min-w-fit">
+		<div className="relative min-w-fit px-2">
 			<div className="absolute h-full">
 				{[...Array(countMeasures)].map((_, i) => (
 					<span
 						key={i}
-						className="absolute w-[1px] h-full bg-cyan-300"
+						className="absolute h-full w-[1px] bg-cyan-300"
 						style={{ left: melody.measureSec * i * secondWidthFactor }}
 					></span>
 				))}
 			</div>
-			<div className="flex items-center h-12">
+			<div className="flex h-12 items-center">
 				{melody.notes.map((note, i) => {
 					return (
 						<Note

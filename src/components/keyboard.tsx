@@ -138,8 +138,8 @@ export const Keyboard: React.FC<Props> = ({
 
 	return (
 		<div>
-			<div className="fixed z-10 h-full w-6 bg-gray-500 opacity-30 right-0"></div>
-			<div className="fixed z-10 w-full h-6 bg-gray-500 opacity-30 bottom-0"></div>
+			<div className="fixed right-0 z-10 h-full w-6 bg-gray-500 opacity-30"></div>
+			<div className="fixed bottom-0 z-10 h-6 w-full bg-gray-500 opacity-30"></div>
 			{keys.map((row) => (
 				<div
 					v-for="row in rows"
@@ -149,7 +149,7 @@ export const Keyboard: React.FC<Props> = ({
 					{row.map((cell) => (
 						<button
 							className={clsx(
-								'm-[2px] w-16 h-16 rounded-md box-border select-none touch-none text-gray-800',
+								'm-[2px] box-border h-16 w-16 touch-none select-none rounded-md text-gray-800',
 								{ 'border-4 border-red-400': notes[cell.midi] },
 							)}
 							style={{ backgroundColor: toneBg(cell.toneColor) }}
