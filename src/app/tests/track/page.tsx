@@ -4,6 +4,7 @@ import { Track } from '@/components/track'
 import { MelodyNote, emptyMelody, processMelody } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
 import { useEffect, useState } from 'react'
+import { useImmer } from 'use-immer'
 
 const initialMelody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -17,10 +18,10 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export const EditorPage = () => {
-	const [melody, setMelody] = useState(emptyMelody())
+	const [melody, setMelody] = useImmer(emptyMelody())
 	useEffect(() => {
 		setMelody(processMelody(initialMelody))
-	}, [])
+	}, [setMelody])
 
 	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
 
@@ -33,6 +34,16 @@ export const EditorPage = () => {
 		}
 	}
 
+	const onNoteAddedBefore = (idx: number, dur: string) => {
+		setMelody((melody) => {})
+	}
+
+	const onNoteRemoved = (idx: number) => {
+		setMelody((melody) => {
+			melody.notes = melody.notes.filter((_, i) => i !== idx)
+		})
+	}
+
 	return (
 		<div className="p-10">
 			<h1>Track test</h1>
@@ -40,8 +51,12 @@ export const EditorPage = () => {
 				melody={melody}
 				activeNoteIdx={activeNoteIdx}
 				onNoteClicked={onNoteClicked}
-				onRemove={(i) => {
-					console.log('removing note ' + i)
+				onRemove={onNoteRemoved}
+				onAddAfter={(i, dur) => {
+					console.log('onAddAfter', i, dur)
+				}}
+				onAddBefore={(i, dur) => {
+					console.log('onAddBefore', i, dur)
 				}}
 			></Track>
 		</div>

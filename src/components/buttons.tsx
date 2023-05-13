@@ -1,6 +1,7 @@
 import { Popover } from '@headlessui/react'
 import { PlusIcon } from '@heroicons/react/20/solid'
 import { TrashIcon } from '@heroicons/react/24/outline'
+import { PropsWithChildren, ReactNode } from 'react'
 
 interface DeleteButtonProps {
 	onConfirm: () => void
@@ -31,7 +32,11 @@ export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	)
 }
 
-export const AddButton = () => {
+export const AddButton = ({
+	children,
+}: {
+	children: (opts: { close: () => void }) => ReactNode
+}) => {
 	return (
 		<Popover className="relative">
 			<Popover.Button
@@ -41,7 +46,7 @@ export const AddButton = () => {
 				<PlusIcon className="h-6 w-6" aria-hidden="true" />
 			</Popover.Button>
 			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
-				<p>Selet length</p>
+				{(opts) => children(opts) as any}
 			</Popover.Panel>
 		</Popover>
 	)

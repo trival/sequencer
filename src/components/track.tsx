@@ -4,6 +4,8 @@ import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Popover } from '@headlessui/react'
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { AddButton, DeleteButton } from '@/components/buttons'
+import Select, { SelectOption } from './Select'
+import { subdivisions } from '@/utils/utils'
 
 const secondWidthFactor = 60
 
@@ -12,13 +14,24 @@ interface NoteProps {
 	isActive?: boolean
 	onSelected?: () => void
 	onRemove?: () => void
+	onAddAfter?: (duration: Subdivision | Subdivision[]) => void
+	onAddBefore?: (duration: Subdivision | Subdivision[]) => void
+	preSelectedAddDuration?: Subdivision
 }
+
+const durationOptions = subdivisions.map((s) => ({
+	id: s,
+	label: s,
+}))
 
 export const Note = ({
 	durationSec,
 	isActive,
 	onSelected,
-	onRemove = () => {},
+	onRemove,
+	onAddAfter,
+	onAddBefore,
+	preSelectedAddDuration = '4n',
 }: NoteProps) => {
 	return (
 		<div
@@ -43,9 +56,39 @@ export const Note = ({
 					</Popover.Button>
 
 					<Popover.Panel className="absolute top-0 z-10 flex -translate-y-full rounded bg-gray-100/70 shadow-md">
-						<AddButton />
-						<DeleteButton onConfirm={onRemove} />
-						<AddButton />
+						{({ close: closeNote }) => (
+							<>
+								{onAddBefore && (
+									<AddButton>
+										{({ close }) => (
+											<Select
+												selectedOptionId={preSelectedAddDuration}
+												onSelect={(duration) => {
+													onAddBefore(duration as Subdivision)
+													closeNote()
+												}}
+												options={durationOptions}
+											/>
+										)}
+									</AddButton>
+								)}
+								{onRemove && <DeleteButton onConfirm={onRemove} />}
+								{onAddAfter && (
+									<AddButton>
+										{({ close }) => (
+											<Select
+												selectedOptionId={preSelectedAddDuration}
+												onSelect={(duration) => {
+													onAddAfter(duration as Subdivision)
+													closeNote()
+												}}
+												options={durationOptions}
+											/>
+										)}
+									</AddButton>
+								)}
+							</>
+						)}
 					</Popover.Panel>
 				</Popover>
 			)}
@@ -67,6 +110,8 @@ export const Track = ({
 	activeNoteIdx,
 	onNoteClicked,
 	onRemove,
+	onAddBefore,
+	onAddAfter,
 }: TrackProps) => {
 	const countMeasures = melody.measureSec
 		? Math.floor(melody.durationSec / melody.measureSec) + 1
@@ -89,12 +134,10 @@ export const Track = ({
 							key={i}
 							durationSec={note.durationSec}
 							isActive={activeNoteIdx === i}
-							onSelected={() => {
-								onNoteClicked?.(i)
-							}}
-							onRemove={() => {
-								onRemove?.(i)
-							}}
+							onSelected={onNoteClicked && (() => onNoteClicked(i))}
+							onRemove={onRemove && (() => onRemove(i))}
+							onAddBefore={onAddBefore && ((dur) => onAddBefore(i, dur))}
+							onAddAfter={onAddAfter && ((dur) => onAddAfter(i, dur))}
 						></Note>
 					)
 				})}
