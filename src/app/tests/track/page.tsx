@@ -1,7 +1,12 @@
 'use client'
 
 import { Track } from '@/components/track'
-import { MelodyNote, emptyMelody, processMelody } from '@/utils/melody'
+import {
+	MelodyNote,
+	emptyMelody,
+	processMelody,
+	useMelody,
+} from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
 import { useEffect, useState } from 'react'
 import { useImmer } from 'use-immer'
@@ -18,10 +23,7 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export const EditorPage = () => {
-	const [melody, setMelody] = useImmer(emptyMelody())
-	useEffect(() => {
-		setMelody(processMelody(initialMelody))
-	}, [setMelody])
+	const { melody } = useMelody(initialMelody)
 
 	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
 
@@ -34,15 +36,9 @@ export const EditorPage = () => {
 		}
 	}
 
-	const onNoteAddedBefore = (idx: number, dur: string) => {
-		setMelody((melody) => {})
-	}
+	const onNoteAddedBefore = (idx: number, dur: string) => {}
 
-	const onNoteRemoved = (idx: number) => {
-		setMelody((melody) => {
-			melody.notes = melody.notes.filter((_, i) => i !== idx)
-		})
-	}
+	const onNoteRemoved = (idx: number) => {}
 
 	return (
 		<div className="p-10">

@@ -1,5 +1,7 @@
+import { useEffect } from 'react'
 import * as Tone from 'tone'
-import { Subdivision, Time } from 'tone/build/esm/core/type/Units'
+import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
+import { useImmer } from 'use-immer'
 
 export interface MelodyNote {
 	midiNotes: number[]
@@ -9,19 +11,19 @@ export interface MelodyNote {
 export interface ProcessedNote {
 	midiNotes: number[]
 	time: Time
-	duration: Time
+	duration: TimeObject
 	durationSec: number
 }
 
 export interface ProcessedMelody {
 	notes: ProcessedNote[]
-	duration: Time
+	duration: TimeObject
 	durationSec: number
 	measureSec: number
 }
 
 export function emptyMelody(): ProcessedMelody {
-	return { duration: 0, durationSec: 0, notes: [], measureSec: 0 }
+	return { duration: {}, durationSec: 0, notes: [], measureSec: 0 }
 }
 
 export function processMelody(melody: MelodyNote[]): ProcessedMelody {
@@ -52,21 +54,52 @@ export function processMelody(melody: MelodyNote[]): ProcessedMelody {
 	}
 }
 
-function collectDurations(duration: Subdivision | Subdivision[]): Time {
+function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
 	if (!Array.isArray(duration)) {
-		return duration
-	} else if (duration.length === 0) {
-		return 0
-	} else if (duration.length === 1) {
-		return duration[0]
-	} else {
-		return duration.reduce((acc, val) => {
+		duration = [duration]
+	}
+	return duration.reduce((acc, val) => {
+		if (val) {
 			if (acc[val]) {
 				acc[val]++
 			} else {
 				acc[val] = 1
 			}
-			return acc
-		}, {} as Record<Subdivision, number>)
+		}
+		return acc
+	}, {} as Record<Subdivision, number>)
+}
+
+function addDurations(d1: TimeObject, d2: TimeObject): TimeObject {
+	const result = { ...d1 }
+	for (const key in d2) {
+		const k = key as Subdivision
+		if (result[k]) {
+			result[k]! += d2[k] || 0
+		} else {
+			result[k] = d2[k]
+		}
+	}
+	return result
+}
+
+export const useMelody = (melodyNotes: MelodyNote[] = []) => {
+	const [melody, updateMelody] = useImmer(emptyMelody())
+	useEffect(() => {
+		updateMelody(processMelody(melodyNotes))
+	}, [melodyNotes, updateMelody])
+
+	const removeNote = (idx: number) => {
+		updateMelody((melody) => {
+			const note = melody.notes[idx]
+			melody.notes = melody.notes.filter((_, i) => i !== idx)
+			melody.durationSec -= note.durationSec
+		})
+	}
+
+	return {
+		melody,
+		updateMelody,
+		removeNote,
 	}
 }
