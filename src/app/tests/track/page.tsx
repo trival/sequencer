@@ -1,15 +1,10 @@
 'use client'
 
 import { Track } from '@/components/track'
-import {
-	MelodyNote,
-	emptyMelody,
-	processMelody,
-	useMelody,
-} from '@/utils/melody'
+import { MelodyNote, useMelody } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
-import { useEffect, useState } from 'react'
-import { useImmer } from 'use-immer'
+import { useState } from 'react'
+import { Subdivision } from 'tone/build/esm/core/type/Units'
 
 const initialMelody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -23,7 +18,7 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export const EditorPage = () => {
-	const { melody } = useMelody(initialMelody)
+	const { melody, addNote, removeNote } = useMelody(initialMelody)
 
 	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
 
@@ -36,9 +31,27 @@ export const EditorPage = () => {
 		}
 	}
 
-	const onNoteAddedBefore = (idx: number, dur: string) => {}
+	const onNoteAddedBefore = (
+		idx: number,
+		duration: Subdivision | Subdivision[],
+	) => {
+		console.log('onNoteAddedBefore', idx)
+		addNote(idx, { duration, midiNotes: [] })
+	}
 
-	const onNoteRemoved = (idx: number) => {}
+	const onNoteAddedAfter = (
+		idx: number,
+		duration: Subdivision | Subdivision[],
+	) => {
+		console.log('onNoteAddedAfter', idx)
+		addNote(idx + 1, { duration, midiNotes: [] })
+		onNoteClicked(idx + 1)
+	}
+
+	const onNoteRemoved = (idx: number) => {
+		console.log('onNoteRemoved', idx)
+		removeNote(idx)
+	}
 
 	return (
 		<div className="p-10">
@@ -48,12 +61,8 @@ export const EditorPage = () => {
 				activeNoteIdx={activeNoteIdx}
 				onNoteClicked={onNoteClicked}
 				onRemove={onNoteRemoved}
-				onAddAfter={(i, dur) => {
-					console.log('onAddAfter', i, dur)
-				}}
-				onAddBefore={(i, dur) => {
-					console.log('onAddBefore', i, dur)
-				}}
+				onAddBefore={onNoteAddedBefore}
+				onAddAfter={onNoteAddedAfter}
 			></Track>
 		</div>
 	)

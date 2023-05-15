@@ -32,11 +32,7 @@ export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	)
 }
 
-export const AddButton = ({
-	children,
-}: {
-	children: (opts: { close: () => void }) => ReactNode
-}) => {
+export const AddButton = ({ children }: PropsWithChildren) => {
 	return (
 		<Popover className="relative">
 			<Popover.Button
@@ -46,7 +42,7 @@ export const AddButton = ({
 				<PlusIcon className="h-6 w-6" aria-hidden="true" />
 			</Popover.Button>
 			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
-				{(opts) => children(opts) as any}
+				{children}
 			</Popover.Panel>
 		</Popover>
 	)

@@ -4,8 +4,9 @@ import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Popover } from '@headlessui/react'
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { AddButton, DeleteButton } from '@/components/buttons'
-import Select, { SelectOption } from './Select'
+import Select from './Select'
 import { subdivisions } from '@/utils/utils'
+import { useImmer } from 'use-immer'
 
 const secondWidthFactor = 60
 
@@ -60,31 +61,26 @@ export const Note = ({
 							<>
 								{onAddBefore && (
 									<AddButton>
-										{({ close }) => (
-											<Select
-												selectedOptionId={preSelectedAddDuration}
-												onSelect={(duration) => {
-													onAddBefore(duration as Subdivision)
-													closeNote()
-												}}
-												options={durationOptions}
-											/>
-										)}
+										<DurationSelector
+											preSelectedAddDuration={preSelectedAddDuration}
+											onSelect={(durations) => {
+												closeNote()
+												onAddBefore(durations)
+											}}
+										/>
 									</AddButton>
 								)}
 								{onRemove && <DeleteButton onConfirm={onRemove} />}
 								{onAddAfter && (
 									<AddButton>
-										{({ close }) => (
-											<Select
-												selectedOptionId={preSelectedAddDuration}
-												onSelect={(duration) => {
-													onAddAfter(duration as Subdivision)
-													closeNote()
-												}}
-												options={durationOptions}
-											/>
-										)}
+										<Select
+											selectedOptionId={preSelectedAddDuration}
+											onSelect={(duration) => {
+												closeNote()
+												onAddAfter(duration as Subdivision)
+											}}
+											options={durationOptions}
+										/>
 									</AddButton>
 								)}
 							</>
@@ -142,6 +138,49 @@ export const Track = ({
 					)
 				})}
 			</div>
+		</div>
+	)
+}
+
+interface DurationSelectorProps {
+	preSelectedAddDuration: Subdivision
+	onSelect: (duration: Subdivision[]) => void
+	value?: Subdivision[]
+}
+
+function DurationSelector({
+	preSelectedAddDuration,
+	onSelect,
+	value = [],
+}: DurationSelectorProps) {
+	const initialDurations = value.length ? value : [preSelectedAddDuration]
+	const [durations, updateDuration] = useImmer(initialDurations)
+
+	return (
+		<div>
+			{durations.map((dur, i) => {
+				return (
+					<span key={i}>
+						<Select
+							className="my-1 w-20"
+							selectedOptionId={dur}
+							onSelect={(duration) => {
+								updateDuration((durs) => (durs[i] = duration as Subdivision))
+							}}
+							options={durationOptions}
+						/>
+					</span>
+				)
+			})}
+			<button
+				type="button"
+				className="rounded-md bg-teal-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
+				onClick={() => {
+					onSelect(durations)
+				}}
+			>
+				Confirm
+			</button>
 		</div>
 	)
 }
