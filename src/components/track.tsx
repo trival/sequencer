@@ -7,6 +7,8 @@ import { AddButton, DeleteButton } from '@/components/buttons'
 import Select from './Select'
 import { subdivisions } from '@/utils/utils'
 import { useImmer } from 'use-immer'
+import { PlusIcon } from '@heroicons/react/20/solid'
+import { MinusIcon } from '@heroicons/react/20/solid'
 
 const secondWidthFactor = 60
 
@@ -17,7 +19,7 @@ interface NoteProps {
 	onRemove?: () => void
 	onAddAfter?: (duration: Subdivision | Subdivision[]) => void
 	onAddBefore?: (duration: Subdivision | Subdivision[]) => void
-	preSelectedAddDuration?: Subdivision
+	defaultDuration?: Subdivision
 }
 
 const durationOptions = subdivisions.map((s) => ({
@@ -32,7 +34,7 @@ export const Note = ({
 	onRemove,
 	onAddAfter,
 	onAddBefore,
-	preSelectedAddDuration = '4n',
+	defaultDuration: preSelectedAddDuration = '4n',
 }: NoteProps) => {
 	return (
 		<div
@@ -62,7 +64,7 @@ export const Note = ({
 								{onAddBefore && (
 									<AddButton>
 										<DurationSelector
-											preSelectedAddDuration={preSelectedAddDuration}
+											defaultDuration={preSelectedAddDuration}
 											onSelect={(durations) => {
 												closeNote()
 												onAddBefore(durations)
@@ -73,13 +75,12 @@ export const Note = ({
 								{onRemove && <DeleteButton onConfirm={onRemove} />}
 								{onAddAfter && (
 									<AddButton>
-										<Select
-											selectedOptionId={preSelectedAddDuration}
-											onSelect={(duration) => {
+										<DurationSelector
+											defaultDuration={preSelectedAddDuration}
+											onSelect={(durations) => {
 												closeNote()
-												onAddAfter(duration as Subdivision)
+												onAddAfter(durations)
 											}}
-											options={durationOptions}
 										/>
 									</AddButton>
 								)}
@@ -143,13 +144,13 @@ export const Track = ({
 }
 
 interface DurationSelectorProps {
-	preSelectedAddDuration: Subdivision
+	defaultDuration: Subdivision
 	onSelect: (duration: Subdivision[]) => void
 	value?: Subdivision[]
 }
 
 function DurationSelector({
-	preSelectedAddDuration,
+	defaultDuration: preSelectedAddDuration,
 	onSelect,
 	value = [],
 }: DurationSelectorProps) {
@@ -160,27 +161,43 @@ function DurationSelector({
 		<div>
 			{durations.map((dur, i) => {
 				return (
-					<span key={i}>
+					<span key={i} className="mb-2 flex items-center justify-center">
 						<Select
-							className="my-1 w-20"
+							className="mr-3 w-20"
 							selectedOptionId={dur}
 							onSelect={(duration) => {
-								updateDuration((durs) => (durs[i] = duration as Subdivision))
+								updateDuration((durs) => {
+									durs[i] = duration as Subdivision
+								})
 							}}
 							options={durationOptions}
 						/>
+						<button
+							type="button"
+							className="rounded-full border border-slate-300 p-0 text-slate-400 shadow-sm shadow-slate-300 hover:border-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+						>
+							<MinusIcon className="h-6 w-6" aria-hidden="true" />
+						</button>
 					</span>
 				)
 			})}
-			<button
-				type="button"
-				className="rounded-md bg-teal-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
-				onClick={() => {
-					onSelect(durations)
-				}}
-			>
-				Confirm
-			</button>
+			<span className="mt-3 flex items-center justify-center">
+				<button
+					type="button"
+					className=" mr-3 w-full rounded-md bg-teal-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+					onClick={() => {
+						onSelect(durations.length ? durations : [preSelectedAddDuration])
+					}}
+				>
+					Ok
+				</button>
+				<button
+					type="button"
+					className="rounded-full border border-slate-300 p-0 text-slate-400 shadow-sm shadow-slate-300 hover:border-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
+				>
+					<PlusIcon className="h-6 w-6" aria-hidden="true" />
+				</button>
+			</span>
 		</div>
 	)
 }

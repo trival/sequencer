@@ -1,7 +1,7 @@
 import { Popover } from '@headlessui/react'
 import { PlusIcon } from '@heroicons/react/20/solid'
 import { TrashIcon } from '@heroicons/react/24/outline'
-import { PropsWithChildren, ReactNode } from 'react'
+import { PropsWithChildren } from 'react'
 
 interface DeleteButtonProps {
 	onConfirm: () => void
