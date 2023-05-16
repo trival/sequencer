@@ -78,6 +78,17 @@ function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
 	}, {} as Record<Subdivision, number>)
 }
 
+export function toDurations(duration: TimeObject): Subdivision[] {
+	const result: Subdivision[] = []
+	for (const key in duration) {
+		const k = key as Subdivision
+		for (let i = 0; i < duration[k]!; i++) {
+			result.push(k)
+		}
+	}
+	return result
+}
+
 function addDurations(d1: TimeObject, d2: TimeObject): TimeObject {
 	const result = { ...d1 }
 	for (const key in d2) {
@@ -124,6 +135,40 @@ export const useMelody = (melodyNotes: MelodyNote[] = []) => {
 		[updateMelody],
 	)
 
+	const changeDuration = useCallback(
+		(idx: number, duration: Subdivision | Subdivision[]) => {
+			updateMelody((melody) => {
+				if (idx < 0 || idx >= melody.notes.length) {
+					return
+				}
+
+				const [before, [note, ...after]] = divideAt(melody.notes, idx)
+
+				let allDurations = before.reduce(
+					(acc, val) => addDurations(acc, val.duration),
+					{} as TimeObject,
+				)
+
+				const newDuration = collectDurations(duration)
+
+				note.duration = newDuration
+				note.durationSec = Tone.Time(newDuration).toSeconds()
+
+				allDurations = addDurations(allDurations, note.duration)
+
+				after.forEach((n) => {
+					n.time = Tone.Time(allDurations).toBarsBeatsSixteenths()
+					allDurations = addDurations(allDurations, n.duration)
+				})
+
+				melody.notes = [...before, note, ...after]
+				melody.duration = allDurations
+				melody.durationSec = Tone.Time(allDurations).toSeconds()
+			})
+		},
+		[updateMelody],
+	)
+
 	const addNote = useCallback(
 		(idx: number, noteData: MelodyNote) => {
 			updateMelody((melody) => {
@@ -133,23 +178,23 @@ export const useMelody = (melodyNotes: MelodyNote[] = []) => {
 
 				const [before, after] = divideAt(melody.notes, idx)
 
-				let beforeDuration = before.reduce(
+				let allDuration = before.reduce(
 					(acc, val) => addDurations(acc, val.duration),
 					{} as TimeObject,
 				)
 
 				const note = processNote(noteData)
-				note.time = Tone.Time(beforeDuration).toBarsBeatsSixteenths()
+				note.time = Tone.Time(allDuration).toBarsBeatsSixteenths()
 
-				beforeDuration = addDurations(beforeDuration, note.duration)
+				allDuration = addDurations(allDuration, note.duration)
 
 				after.forEach((n) => {
-					n.time = Tone.Time(beforeDuration).toBarsBeatsSixteenths()
-					beforeDuration = addDurations(beforeDuration, n.duration)
+					n.time = Tone.Time(allDuration).toBarsBeatsSixteenths()
+					allDuration = addDurations(allDuration, n.duration)
 				})
 
 				melody.notes = [...before, note, ...after]
-				melody.duration = beforeDuration
+				melody.duration = allDuration
 				melody.durationSec = melody.durationSec + note.durationSec
 			})
 		},
@@ -162,7 +207,8 @@ export const useMelody = (melodyNotes: MelodyNote[] = []) => {
 			updateMelody,
 			removeNote,
 			addNote,
+			changeDuration,
 		}),
-		[melody, updateMelody, removeNote, addNote],
+		[melody, updateMelody, removeNote, addNote, changeDuration],
 	)
 }

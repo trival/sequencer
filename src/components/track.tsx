@@ -1,9 +1,15 @@
-import { ProcessedMelody } from '@/utils/melody'
+import { ProcessedMelody, toDurations } from '@/utils/melody'
 import clsx from 'clsx'
-import { Subdivision } from 'tone/build/esm/core/type/Units'
+import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
 import { Popover } from '@headlessui/react'
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
-import { AddButton, DeleteButton } from '@/components/buttons'
+import {
+	AddButton,
+	Button,
+	DeleteButton,
+	EditButton,
+	IconButton,
+} from '@/components/buttons'
 import Select from './Select'
 import { subdivisions } from '@/utils/utils'
 import { useImmer } from 'use-immer'
@@ -14,11 +20,13 @@ const secondWidthFactor = 60
 
 interface NoteProps {
 	durationSec: number
+	duration: TimeObject
 	isActive?: boolean
 	onSelected?: () => void
 	onRemove?: () => void
 	onAddAfter?: (duration: Subdivision | Subdivision[]) => void
 	onAddBefore?: (duration: Subdivision | Subdivision[]) => void
+	onDurationChanged?: (duration: Subdivision | Subdivision[]) => void
 	defaultDuration?: Subdivision
 }
 
@@ -29,12 +37,14 @@ const durationOptions = subdivisions.map((s) => ({
 
 export const Note = ({
 	durationSec,
+	duration,
 	isActive,
 	onSelected,
 	onRemove,
 	onAddAfter,
 	onAddBefore,
-	defaultDuration: preSelectedAddDuration = '4n',
+	onDurationChanged,
+	defaultDuration = '4n',
 }: NoteProps) => {
 	return (
 		<div
@@ -42,7 +52,7 @@ export const Note = ({
 				width: durationSec * secondWidthFactor + 'px',
 				minWidth: durationSec * secondWidthFactor + 'px',
 			}}
-			className={clsx('relative h-8 px-[3px]')}
+			className={clsx('relative h-8 px-[2px]')}
 		>
 			<button
 				className={clsx(
@@ -64,7 +74,7 @@ export const Note = ({
 								{onAddBefore && (
 									<AddButton>
 										<DurationSelector
-											defaultDuration={preSelectedAddDuration}
+											defaultDuration={defaultDuration}
 											onSelect={(durations) => {
 												closeNote()
 												onAddBefore(durations)
@@ -72,11 +82,23 @@ export const Note = ({
 										/>
 									</AddButton>
 								)}
+								{onDurationChanged && (
+									<EditButton>
+										<DurationSelector
+											value={toDurations(duration)}
+											defaultDuration={defaultDuration}
+											onSelect={(durations) => {
+												closeNote()
+												onDurationChanged(durations)
+											}}
+										/>
+									</EditButton>
+								)}
 								{onRemove && <DeleteButton onConfirm={onRemove} />}
 								{onAddAfter && (
 									<AddButton>
 										<DurationSelector
-											defaultDuration={preSelectedAddDuration}
+											defaultDuration={defaultDuration}
 											onSelect={(durations) => {
 												closeNote()
 												onAddAfter(durations)
@@ -100,6 +122,10 @@ interface TrackProps {
 	onAddAfter?: (idx: number, duration: Subdivision | Subdivision[]) => void
 	onAddBefore?: (idx: number, duration: Subdivision | Subdivision[]) => void
 	onRemove?: (idx: number) => void
+	onDurationChanged?: (
+		idx: number,
+		duration: Subdivision | Subdivision[],
+	) => void
 }
 
 export const Track = ({
@@ -109,10 +135,12 @@ export const Track = ({
 	onRemove,
 	onAddBefore,
 	onAddAfter,
+	onDurationChanged,
 }: TrackProps) => {
 	const countMeasures = melody.measureSec
 		? Math.floor(melody.durationSec / melody.measureSec) + 1
 		: 0
+
 	return (
 		<div className="relative min-w-fit px-2">
 			<div className="absolute h-full">
@@ -129,12 +157,16 @@ export const Track = ({
 					return (
 						<Note
 							key={i}
+							duration={note.duration}
 							durationSec={note.durationSec}
 							isActive={activeNoteIdx === i}
 							onSelected={onNoteClicked && (() => onNoteClicked(i))}
 							onRemove={onRemove && (() => onRemove(i))}
 							onAddBefore={onAddBefore && ((dur) => onAddBefore(i, dur))}
 							onAddAfter={onAddAfter && ((dur) => onAddAfter(i, dur))}
+							onDurationChanged={
+								onDurationChanged && ((dur) => onDurationChanged(i, dur))
+							}
 						></Note>
 					)
 				})}
@@ -172,31 +204,25 @@ function DurationSelector({
 							}}
 							options={durationOptions}
 						/>
-						<button
-							type="button"
-							className="rounded-full border border-slate-300 p-0 text-slate-400 shadow-sm shadow-slate-300 hover:border-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
-						>
-							<MinusIcon className="h-6 w-6" aria-hidden="true" />
-						</button>
+						{i > 0 && (
+							<IconButton>
+								<MinusIcon className="h-6 w-6" aria-hidden="true" />
+							</IconButton>
+						)}
 					</span>
 				)
 			})}
 			<span className="mt-3 flex items-center justify-center">
-				<button
-					type="button"
-					className=" mr-3 w-full rounded-md bg-teal-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
+				<Button
 					onClick={() => {
 						onSelect(durations.length ? durations : [preSelectedAddDuration])
 					}}
 				>
 					Ok
-				</button>
-				<button
-					type="button"
-					className="rounded-full border border-slate-300 p-0 text-slate-400 shadow-sm shadow-slate-300 hover:border-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400"
-				>
+				</Button>
+				<IconButton>
 					<PlusIcon className="h-6 w-6" aria-hidden="true" />
-				</button>
+				</IconButton>
 			</span>
 		</div>
 	)

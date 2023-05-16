@@ -18,7 +18,8 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export const EditorPage = () => {
-	const { melody, addNote, removeNote } = useMelody(initialMelody)
+	const { melody, addNote, removeNote, changeDuration } =
+		useMelody(initialMelody)
 
 	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
 
@@ -53,6 +54,14 @@ export const EditorPage = () => {
 		removeNote(idx)
 	}
 
+	const onDurationChanged = (
+		idx: number,
+		duration: Subdivision | Subdivision[],
+	) => {
+		console.log('onDurationChanged', idx)
+		changeDuration(idx, duration)
+	}
+
 	return (
 		<div className="p-10">
 			<h1>Track test</h1>
@@ -63,6 +72,7 @@ export const EditorPage = () => {
 				onRemove={onNoteRemoved}
 				onAddBefore={onNoteAddedBefore}
 				onAddAfter={onNoteAddedAfter}
+				onDurationChanged={onDurationChanged}
 			></Track>
 		</div>
 	)
