@@ -1,24 +1,13 @@
 import { useCallback, useEffect, useMemo } from 'react'
 import * as Tone from 'tone'
 import { Time } from 'tone/build/esm/core/type/Units'
-import { useImmer } from 'use-immer'
 import { fromMidi } from './utils'
-import { enableMapSet } from 'immer'
-
-enableMapSet()
-
-interface State {
-	playingNotes: Set<number>
-	synth?: Tone.PolySynth
-}
 
 let started = false
+let synth: Tone.PolySynth | undefined
+const playingNotes: Set<number> = new Set()
 
 export const useSynth = (Synth = Tone.Synth) => {
-	const [{ playingNotes, synth }, update] = useImmer<State>({
-		playingNotes: new Set(),
-	})
-
 	const playNotes = useCallback(
 		(notes: number[], duration?: Time, time?: number) => {
 			if (synth) {
@@ -33,14 +22,12 @@ export const useSynth = (Synth = Tone.Synth) => {
 					if (newNotes.length) {
 						synth.triggerAttack(newNotes.map((n) => fromMidi(n).toFrequency()))
 
-						update((s) => {
-							newNotes.forEach((note) => s.playingNotes.add(note))
-						})
+						newNotes.forEach((note) => playingNotes.add(note))
 					}
 				}
 			}
 		},
-		[playingNotes, synth, update],
+		[],
 	)
 
 	const play = useCallback(
@@ -56,36 +43,29 @@ export const useSynth = (Synth = Tone.Synth) => {
 				}
 			}
 		},
-		[playNotes, synth],
+		[playNotes],
 	)
 
-	const stop = useCallback(
-		(notes: number[]) => {
-			if (synth) {
-				synth.triggerRelease(notes.map((n) => fromMidi(n).toFrequency()))
+	const stop = useCallback((notes: number[]) => {
+		if (synth) {
+			synth.triggerRelease(notes.map((n) => fromMidi(n).toFrequency()))
 
-				update((s) => {
-					notes.forEach((note) => s.playingNotes.delete(note))
-				})
-			}
-		},
-		[synth, update],
-	)
+			notes.forEach((note) => playingNotes.delete(note))
+		}
+	}, [])
 
-	const getPlayingNotes = useCallback(
-		() => Array.from(playingNotes),
-		[playingNotes],
-	)
+	const getPlayingNotes = useCallback(() => Array.from(playingNotes), [])
 
 	useEffect(() => {
-		update((s) => {
-			s.synth = new Tone.PolySynth(Synth).toDestination()
-		})
-	}, [Synth, update])
+		synth = new Tone.PolySynth(Synth).toDestination()
+	}, [Synth])
 
-	return {
-		play,
-		stop,
-		getPlayingNotes,
-	}
+	return useMemo(
+		() => ({
+			play,
+			stop,
+			getPlayingNotes,
+		}),
+		[getPlayingNotes, play, stop],
+	)
 }

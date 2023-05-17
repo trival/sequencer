@@ -7,8 +7,9 @@ import {
 	mod,
 } from '@/utils/tone-colors'
 import clsx from 'clsx'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import * as Tone from 'tone'
+import 'perfect-scrollbar/css/perfect-scrollbar.css'
 
 type Mode = 'Record' | 'Play'
 
@@ -24,6 +25,7 @@ interface Props {
 	mode?: Mode
 	scaleHighlight?: ScaleHighlight
 	toneColorType?: ToneColorType
+	className?: string
 }
 
 export const Keyboard: React.FC<Props> = ({
@@ -38,6 +40,7 @@ export const Keyboard: React.FC<Props> = ({
 	toneColorType = ToneColorType.CircleOfFiths,
 	onNoteActivated = () => {},
 	onNoteDeactivated = () => {},
+	className,
 }: Props) => {
 	const [pointerDown, setPointerDown] = useState(false)
 
@@ -137,7 +140,7 @@ export const Keyboard: React.FC<Props> = ({
 	}
 
 	return (
-		<div className="relative h-full w-full">
+		<div className={clsx('w-fit', className)}>
 			{keys.map((row) => (
 				<div
 					v-for="row in rows"

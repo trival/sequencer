@@ -17,7 +17,7 @@ export default function Home() {
 	}
 
 	return (
-		<div className="h-screen w-screen">
+		<div className="max-h-screen max-w-full overflow-auto">
 			<Keyboard
 				activeNotes={synth.getPlayingNotes()}
 				onNoteActivated={onActivateNote}
