@@ -17,7 +17,7 @@ const initialMelody: MelodyNote[] = [
 	{ midiNotes: [toMidi('G3')], duration: '2n' },
 ]
 
-export const EditorPage = () => {
+export default function EditorPage() {
 	const { melody, addNote, removeNote, changeDuration } =
 		useMelody(initialMelody)
 
@@ -77,5 +77,3 @@ export const EditorPage = () => {
 		</div>
 	)
 }
-
-export default EditorPage
