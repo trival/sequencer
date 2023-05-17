@@ -1,13 +1,15 @@
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import * as Tone from 'tone'
 import { Time } from 'tone/build/esm/core/type/Units'
 import { fromMidi } from './utils'
 
 let started = false
 let synth: Tone.PolySynth | undefined
-const playingNotes: Set<number> = new Set()
+const activeNotes: Set<number> = new Set()
 
 export const useSynth = (Synth = Tone.Synth) => {
+	const [playingNotes, setPlayingNotes] = useState(Array.from(activeNotes))
+
 	const playNotes = useCallback(
 		(notes: number[], duration?: Time, time?: number) => {
 			if (synth) {
@@ -18,11 +20,12 @@ export const useSynth = (Synth = Tone.Synth) => {
 						time,
 					)
 				} else {
-					const newNotes = notes.filter((n) => !playingNotes.has(n))
+					const newNotes = notes.filter((n) => !activeNotes.has(n))
 					if (newNotes.length) {
 						synth.triggerAttack(newNotes.map((n) => fromMidi(n).toFrequency()))
 
-						newNotes.forEach((note) => playingNotes.add(note))
+						newNotes.forEach((note) => activeNotes.add(note))
+						setPlayingNotes(Array.from(activeNotes))
 					}
 				}
 			}
@@ -50,11 +53,10 @@ export const useSynth = (Synth = Tone.Synth) => {
 		if (synth) {
 			synth.triggerRelease(notes.map((n) => fromMidi(n).toFrequency()))
 
-			notes.forEach((note) => playingNotes.delete(note))
+			notes.forEach((note) => activeNotes.delete(note))
+			setPlayingNotes(Array.from(activeNotes))
 		}
 	}, [])
-
-	const getPlayingNotes = useCallback(() => Array.from(playingNotes), [])
 
 	useEffect(() => {
 		synth = new Tone.PolySynth(Synth).toDestination()
@@ -64,8 +66,8 @@ export const useSynth = (Synth = Tone.Synth) => {
 		() => ({
 			play,
 			stop,
-			getPlayingNotes,
+			playingNotes,
 		}),
-		[getPlayingNotes, play, stop],
+		[play, playingNotes, stop],
 	)
 }

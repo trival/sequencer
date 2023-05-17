@@ -19,13 +19,13 @@ export default function Home() {
 	return (
 		<div className="max-h-screen max-w-full overflow-auto">
 			<Keyboard
-				activeNotes={synth.getPlayingNotes()}
+				activeNotes={synth.playingNotes}
 				onNoteActivated={onActivateNote}
 				onNoteDeactivated={onDeactivateNote}
 				baseNote={toMidi('C3')}
 				top={10}
 				right={9}
-				scaleHighlight={ScaleHighlight.Major}
+				scaleHighlight={ScaleHighlight.MinorPentatonic}
 				toneColorType={ToneColorType.CircleOfFiths}
 				mode="Play"
 			/>
