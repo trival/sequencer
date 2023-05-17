@@ -117,7 +117,9 @@ const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 	return [xs.slice(0, idx), xs.slice(idx)]
 }
 
-export const useMelody = (melodyNotes: MelodyNote[] = []) => {
+export const useMelody = (
+	melodyNotes: MelodyNote[] = [{ duration: '4n', midiNotes: [] }],
+) => {
 	const [melody, updateMelody] = useImmer(emptyMelody())
 	useEffect(() => {
 		updateMelody(processMelody(melodyNotes))

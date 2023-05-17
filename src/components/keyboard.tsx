@@ -7,8 +7,10 @@ import {
 	mod,
 } from '@/utils/tone-colors'
 import clsx from 'clsx'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
+import 'perfect-scrollbar/css/perfect-scrollbar.css'
+import PerfectScrollbar from 'perfect-scrollbar'
 
 type Mode = 'Record' | 'Play'
 
@@ -39,6 +41,15 @@ export const Keyboard: React.FC<Props> = ({
 	onNoteActivated = () => {},
 	onNoteDeactivated = () => {},
 }: Props) => {
+	const containerRef = useRef<HTMLDivElement>(null)
+	useEffect(() => {
+		if (containerRef.current) {
+			const ps = new PerfectScrollbar(containerRef.current, {})
+			return () => {
+				ps.destroy()
+			}
+		}
+	}, [containerRef])
 	const [pointerDown, setPointerDown] = useState(false)
 
 	const baseFrequency = useMemo(
@@ -137,9 +148,7 @@ export const Keyboard: React.FC<Props> = ({
 	}
 
 	return (
-		<div>
-			<div className="fixed right-0 z-10 h-full w-6 bg-gray-500 opacity-30"></div>
-			<div className="fixed bottom-0 z-10 h-6 w-full bg-gray-500 opacity-30"></div>
+		<div className="relative h-full w-full" ref={containerRef}>
 			{keys.map((row) => (
 				<div
 					v-for="row in rows"

@@ -17,16 +17,18 @@ export default function Home() {
 	}
 
 	return (
-		<Keyboard
-			activeNotes={synth.getPlayingNotes()}
-			onNoteActivated={onActivateNote}
-			onNoteDeactivated={onDeactivateNote}
-			baseNote={toMidi('C3')}
-			top={10}
-			right={9}
-			scaleHighlight={ScaleHighlight.Major}
-			toneColorType={ToneColorType.CircleOfFiths}
-			mode="Play"
-		/>
+		<div className="h-screen w-screen">
+			<Keyboard
+				activeNotes={synth.getPlayingNotes()}
+				onNoteActivated={onActivateNote}
+				onNoteDeactivated={onDeactivateNote}
+				baseNote={toMidi('C3')}
+				top={10}
+				right={9}
+				scaleHighlight={ScaleHighlight.Major}
+				toneColorType={ToneColorType.CircleOfFiths}
+				mode="Play"
+			/>
+		</div>
 	)
 }
