@@ -17,17 +17,18 @@ export default function Home() {
 	}
 
 	return (
-		<div className="max-h-screen max-w-full overflow-auto">
+		<div className="relative h-fit max-h-screen max-w-full">
 			<Keyboard
 				activeNotes={synth.playingNotes}
 				onNoteActivated={onActivateNote}
 				onNoteDeactivated={onDeactivateNote}
 				baseNote={toMidi('C3')}
-				top={10}
-				right={9}
-				scaleHighlight={ScaleHighlight.MinorPentatonic}
+				maxRows={12}
+				maxCols={12}
+				scaleHighlight={ScaleHighlight.Major}
 				toneColorType={ToneColorType.CircleOfFiths}
 				mode="Play"
+				className=""
 			/>
 		</div>
 	)

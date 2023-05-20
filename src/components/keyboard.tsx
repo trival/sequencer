@@ -7,42 +7,52 @@ import {
 	mod,
 } from '@/utils/tone-colors'
 import clsx from 'clsx'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
 import 'perfect-scrollbar/css/perfect-scrollbar.css'
 
 type Mode = 'Record' | 'Play'
 
-interface Props {
+export interface KeyboardSettings {
 	activeNotes?: number[]
-	onNoteActivated?: (midi: number) => void
-	onNoteDeactivated?: (midi: number) => void
 	baseNote?: number
-	top?: number
-	bottom?: number
-	left?: number
-	right?: number
 	mode?: Mode
+	offsetX?: number
+	offsetY?: number
+	maxRows?: number
+	maxCols?: number
+	keyLength?: number
 	scaleHighlight?: ScaleHighlight
 	toneColorType?: ToneColorType
 	className?: string
 }
 
-export const Keyboard: React.FC<Props> = ({
+interface KeyboardProps extends KeyboardSettings {
+	onNoteActivated?: (midi: number) => void
+	onNoteDeactivated?: (midi: number) => void
+}
+
+const keyMargin = 2
+
+export const Keyboard: React.FC<KeyboardProps> = ({
 	activeNotes = [],
 	baseNote = 48, // 'C3 midi number'
-	top = 3,
-	bottom = 1,
-	left = 2,
-	right = 3,
+	offsetX = 0,
+	offsetY = 0,
+	maxCols = 7,
+	maxRows = 7,
+	keyLength = 60,
 	mode = 'Record',
 	scaleHighlight = ScaleHighlight.Major,
 	toneColorType = ToneColorType.CircleOfFiths,
 	onNoteActivated = () => {},
 	onNoteDeactivated = () => {},
 	className,
-}: Props) => {
+}: KeyboardProps) => {
+	const keySize = keyLength + 2 * keyMargin
+
 	const [pointerDown, setPointerDown] = useState(false)
+	const wrapperRef = useRef<HTMLDivElement>(null)
 
 	const baseFrequency = useMemo(
 		() => Tone.Frequency(baseNote, 'midi'),
@@ -114,10 +124,34 @@ export const Keyboard: React.FC<Props> = ({
 	}
 
 	// compute the keys
-	const width = right + left + 1
-	const height = top + bottom + 1
 
-	const base = baseFrequency.transpose(-left + top * 5)
+	const [width, setWidth] = useState(maxCols)
+	const [height, setHeight] = useState(maxRows)
+
+	useEffect(() => {
+		function rescale() {
+			if (wrapperRef.current) {
+				const { width: boxWidth, height: boxHeight } =
+					wrapperRef.current.getBoundingClientRect()
+				console.log(
+					boxHeight,
+					wrapperRef.current.clientHeight,
+					wrapperRef.current.offsetHeight,
+				)
+				const cols = Math.min(Math.floor(boxWidth / keySize), maxCols)
+				const rows = Math.min(Math.floor(boxHeight / keySize), maxRows)
+				setWidth(cols)
+				setHeight(rows)
+			}
+		}
+
+		rescale()
+
+		window.addEventListener('resize', rescale)
+		return () => window.removeEventListener('resize', rescale)
+	}, [keySize, maxCols, maxRows])
+
+	const base = baseFrequency.transpose(-2 + offsetX + (-2 + offsetY) * 5)
 	const keys = []
 	let rowStart = 0
 
@@ -136,36 +170,48 @@ export const Keyboard: React.FC<Props> = ({
 		}
 
 		keys.push(row)
-		rowStart -= 5
+		rowStart += 5
 	}
 
+	keys.reverse()
+
 	return (
-		<div className={clsx('w-fit', className)}>
-			{keys.map((row) => (
-				<div
-					v-for="row in rows"
-					key={row[0].toneColor}
-					className="touch-none whitespace-nowrap"
-				>
-					{row.map((cell) => (
-						<button
-							className={clsx(
-								'm-[2px] box-border h-16 w-16 touch-none select-none rounded-md text-gray-700',
-								{ 'border-4 border-red-400': notes[cell.midi] },
-							)}
-							style={{ backgroundColor: toneBg(cell.toneColor) }}
-							key={cell.toneColor}
-							onPointerDown={stopPreventAnd(() => onPointerDown(cell.midi))}
-							onPointerUp={stopPreventAnd(() => onPointerUp(cell.midi))}
-							onPointerEnter={stopPreventAnd(() => onPointerEnter(cell.midi))}
-							onPointerOut={stopPreventAnd(() => onPointerOut(cell.midi))}
-							onContextMenu={stopPreventAnd(() => {})}
-						>
-							{cell.frequency.toNote()}
-						</button>
-					))}
-				</div>
-			))}
+		<div
+			ref={wrapperRef}
+			className={clsx(className, 'relative h-full w-full overflow-hidden')}
+		>
+			<div className="m-auto w-fit">
+				{keys.map((row) => (
+					<div
+						v-for="row in rows"
+						key={row[0].toneColor}
+						className="touch-none whitespace-nowrap"
+					>
+						{row.map((cell) => (
+							<button
+								className={clsx(
+									'box-border touch-none select-none rounded-md text-gray-700',
+									{ 'border-4 border-red-400': notes[cell.midi] },
+								)}
+								style={{
+									backgroundColor: toneBg(cell.toneColor),
+									width: `${keyLength}px`,
+									height: `${keyLength}px`,
+									margin: `${keyMargin}px`,
+								}}
+								key={cell.toneColor}
+								onPointerDown={stopPreventAnd(() => onPointerDown(cell.midi))}
+								onPointerUp={stopPreventAnd(() => onPointerUp(cell.midi))}
+								onPointerEnter={stopPreventAnd(() => onPointerEnter(cell.midi))}
+								onPointerOut={stopPreventAnd(() => onPointerOut(cell.midi))}
+								onContextMenu={stopPreventAnd(() => {})}
+							>
+								{cell.frequency.toNote()}
+							</button>
+						))}
+					</div>
+				))}
+			</div>
 		</div>
 	)
 }
