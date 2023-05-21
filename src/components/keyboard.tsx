@@ -203,7 +203,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 						{row.map((cell) => (
 							<button
 								className={clsx(
-									'box-border touch-none select-none rounded-md text-gray-700',
+									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm shadow-gray-400',
 									{ 'border-4 border-red-400': notes[cell.midi] },
 								)}
 								style={{

@@ -1,19 +1,46 @@
-import { Popover } from '@headlessui/react'
+import { tw } from '@/styles/tw-utils'
+import { Popover, PopoverPanelProps } from '@headlessui/react'
 import { PlusIcon } from '@heroicons/react/20/solid'
 import { TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
-import { PropsWithChildren } from 'react'
+import {
+	ElementType,
+	PropsWithChildren,
+	ReactElement,
+	ReactNode,
+	useState,
+} from 'react'
+import { usePopper } from 'react-popper'
 
 interface ButtonProps extends PropsWithChildren {
 	onClick?: () => void
 	className?: string
+	color?: keyof typeof btnColors
+	type?: 'button' | 'submit' | 'reset'
 }
 
-export const IconButton = ({ children, onClick, className }: ButtonProps) => (
+const btnColors = {
+	indigo: tw`bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white`,
+	rose: tw`bg-rose-600 hover:bg-rose-500 focus-visible:outline-rose-600 text-white`,
+	teal: tw`bg-teal-600 hover:bg-teal-500 focus-visible:outline-teal-600 text-white`,
+	transparent: tw`border border-slate-300 text-slate-500 shadow-slate-300 hover:border-indigo-400 focus-visible:outline-indigo-400`,
+}
+
+const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
+
+export const IconButton = ({
+	children,
+	onClick,
+	className,
+	color = 'transparent',
+	type = 'button',
+}: ButtonProps) => (
 	<button
-		type="button"
+		type={type}
 		className={clsx(
-			'rounded-full border border-slate-300 p-0 text-slate-400 shadow-sm shadow-slate-300 hover:border-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400',
+			'rounded-full shadow-sm',
+			btnColors[color],
+			btnFocus,
 			className,
 		)}
 		onClick={onClick}
@@ -22,11 +49,19 @@ export const IconButton = ({ children, onClick, className }: ButtonProps) => (
 	</button>
 )
 
-export const Button = ({ children, onClick, className }: ButtonProps) => (
+export const Button = ({
+	children,
+	onClick,
+	className,
+	color = 'transparent',
+	type = 'button',
+}: ButtonProps) => (
 	<button
-		type="button"
+		type={type}
 		className={clsx(
-			'mr-3 w-full rounded-md bg-teal-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600',
+			'rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm',
+			btnColors[color],
+			btnFocus,
 			className,
 		)}
 		onClick={onClick}
@@ -34,6 +69,47 @@ export const Button = ({ children, onClick, className }: ButtonProps) => (
 		{children}
 	</button>
 )
+
+export const IconButtonPopover = ({
+	children,
+	buttonChildren,
+	className,
+	color = 'transparent',
+}: Omit<ButtonProps, 'children'> & {
+	buttonChildren: ReactNode
+	children: PopoverPanelProps<ElementType>['children']
+}) => {
+	const [referenceElement, setReferenceElement] =
+		useState<HTMLButtonElement | null>(null)
+	const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
+		null,
+	)
+	const { styles, attributes } = usePopper(referenceElement, popperElement)
+	return (
+		<Popover className="relative">
+			<Popover.Button
+				ref={setReferenceElement}
+				type="button"
+				className={clsx(
+					'm-2 rounded-full p-2 shadow-sm',
+					btnColors[color],
+					btnFocus,
+					className,
+				)}
+			>
+				{buttonChildren}
+			</Popover.Button>
+			<Popover.Panel
+				ref={setPopperElement}
+				className="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
+				style={styles.popper}
+				{...attributes.popper}
+			>
+				{children}
+			</Popover.Panel>
+		</Popover>
+	)
+}
 
 interface DeleteButtonProps {
 	onConfirm: () => void
@@ -41,57 +117,45 @@ interface DeleteButtonProps {
 
 export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	return (
-		<Popover className="relative">
-			<Popover.Button className="m-2 rounded-full bg-rose-600 p-2 text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
-				<TrashIcon className="h-6 w-6" aria-hidden="true" />
-			</Popover.Button>
-
-			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
-				{({ close }) => (
-					<button
-						type="button"
-						className="rounded-md bg-rose-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-rose-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600"
-						onClick={() => {
-							close()
-							onConfirm()
-						}}
-					>
-						Confirm
-					</button>
-				)}
-			</Popover.Panel>
-		</Popover>
+		<IconButtonPopover
+			color="rose"
+			buttonChildren={<TrashIcon className="h-6 w-6" aria-hidden="true" />}
+		>
+			{({ close }) => (
+				<Button
+					color="rose"
+					onClick={() => {
+						close()
+						onConfirm()
+					}}
+				>
+					Confirm
+				</Button>
+			)}
+		</IconButtonPopover>
 	)
 }
 
 export const AddButton = ({ children }: PropsWithChildren) => {
 	return (
-		<Popover className="relative">
-			<Popover.Button
-				type="button"
-				className="m-2 rounded-full bg-indigo-600 p-2 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-			>
-				<PlusIcon className="h-6 w-6" aria-hidden="true" />
-			</Popover.Button>
-			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
-				{children}
-			</Popover.Panel>
-		</Popover>
+		<IconButtonPopover
+			color="indigo"
+			buttonChildren={<PlusIcon className="h-6 w-6" aria-hidden="true" />}
+		>
+			{children}
+		</IconButtonPopover>
 	)
 }
 
 export const EditButton = ({ children }: PropsWithChildren) => {
 	return (
-		<Popover className="relative">
-			<Popover.Button
-				type="button"
-				className="m-2 rounded-full bg-teal-600 p-2 text-white shadow-sm hover:bg-teal-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"
-			>
+		<IconButtonPopover
+			color="teal"
+			buttonChildren={
 				<PencilSquareIcon className="h-6 w-6" aria-hidden="true" />
-			</Popover.Button>
-			<Popover.Panel className="absolute z-10 mt-2 rounded bg-gray-100/70 p-4 shadow-md">
-				{children}
-			</Popover.Panel>
-		</Popover>
+			}
+		>
+			{children}
+		</IconButtonPopover>
 	)
 }

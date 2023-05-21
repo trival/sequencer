@@ -1,8 +1,6 @@
 import { ProcessedMelody, toDurations } from '@/utils/melody'
 import clsx from 'clsx'
-import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
-import { Popover } from '@headlessui/react'
-import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
+import { Subdivision } from 'tone/build/esm/core/type/Units'
 import {
 	AddButton,
 	Button,
@@ -20,14 +18,8 @@ const secondWidthFactor = 60
 
 interface NoteProps {
 	durationSec: number
-	duration: TimeObject
 	isActive?: boolean
 	onSelected?: () => void
-	onRemove?: () => void
-	onAddAfter?: (duration: Subdivision | Subdivision[]) => void
-	onAddBefore?: (duration: Subdivision | Subdivision[]) => void
-	onDurationChanged?: (duration: Subdivision | Subdivision[]) => void
-	defaultDuration?: Subdivision
 }
 
 const durationOptions = subdivisions.map((s) => ({
@@ -35,17 +27,7 @@ const durationOptions = subdivisions.map((s) => ({
 	label: s,
 }))
 
-export const Note = ({
-	durationSec,
-	duration,
-	isActive,
-	onSelected,
-	onRemove,
-	onAddAfter,
-	onAddBefore,
-	onDurationChanged,
-	defaultDuration = '4n',
-}: NoteProps) => {
+export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
 	return (
 		<div
 			style={{
@@ -61,56 +43,6 @@ export const Note = ({
 				)}
 				onClick={onSelected}
 			></button>
-
-			{isActive && (
-				<Popover className="relative">
-					<Popover.Button className="flex w-full min-w-fit justify-center">
-						<EllipsisHorizontalIcon className="h-8 w-8" />
-					</Popover.Button>
-
-					<Popover.Panel className="absolute top-0 z-10 flex -translate-y-full rounded bg-gray-100/70 shadow-md">
-						{({ close: closeNote }) => (
-							<>
-								{onAddBefore && (
-									<AddButton>
-										<DurationSelector
-											defaultDuration={defaultDuration}
-											onSelect={(durations) => {
-												closeNote()
-												onAddBefore(durations)
-											}}
-										/>
-									</AddButton>
-								)}
-								{onDurationChanged && (
-									<EditButton>
-										<DurationSelector
-											value={toDurations(duration)}
-											defaultDuration={defaultDuration}
-											onSelect={(durations) => {
-												closeNote()
-												onDurationChanged(durations)
-											}}
-										/>
-									</EditButton>
-								)}
-								{onRemove && <DeleteButton onConfirm={onRemove} />}
-								{onAddAfter && (
-									<AddButton>
-										<DurationSelector
-											defaultDuration={defaultDuration}
-											onSelect={(durations) => {
-												closeNote()
-												onAddAfter(durations)
-											}}
-										/>
-									</AddButton>
-								)}
-							</>
-						)}
-					</Popover.Panel>
-				</Popover>
-			)}
 		</div>
 	)
 }
@@ -126,6 +58,7 @@ interface TrackProps {
 		idx: number,
 		duration: Subdivision | Subdivision[],
 	) => void
+	defaultDuration?: Subdivision
 }
 
 export const Track = ({
@@ -136,40 +69,78 @@ export const Track = ({
 	onAddBefore,
 	onAddAfter,
 	onDurationChanged,
+	defaultDuration = '4n',
 }: TrackProps) => {
 	const countMeasures = melody.measureSec
 		? Math.floor(melody.durationSec / melody.measureSec) + 1
 		: 0
 
+	const activeNote = activeNoteIdx != null ? melody.notes[activeNoteIdx] : null
+
 	return (
-		<div className="relative min-w-fit px-2">
-			<div className="absolute h-full">
-				{[...Array(countMeasures)].map((_, i) => (
-					<span
-						key={i}
-						className="absolute h-full w-[1px] bg-cyan-300"
-						style={{ left: melody.measureSec * i * secondWidthFactor }}
-					></span>
-				))}
+		<div className="relative w-full">
+			<div className="relative w-full overflow-x-auto pb-2">
+				<div className="relative w-fit px-2">
+					<div className="absolute h-full">
+						{[...Array(countMeasures)].map((_, i) => (
+							<span
+								key={i}
+								className="absolute h-full w-[1px] bg-cyan-300"
+								style={{ left: melody.measureSec * i * secondWidthFactor }}
+							></span>
+						))}
+					</div>
+					<div className="flex h-12 items-center">
+						{melody.notes.map((note, i) => {
+							return (
+								<Note
+									key={i}
+									durationSec={note.durationSec}
+									isActive={activeNoteIdx === i}
+									onSelected={onNoteClicked && (() => onNoteClicked(i))}
+								></Note>
+							)
+						})}
+					</div>
+				</div>
 			</div>
-			<div className="flex h-12 items-center">
-				{melody.notes.map((note, i) => {
-					return (
-						<Note
-							key={i}
-							duration={note.duration}
-							durationSec={note.durationSec}
-							isActive={activeNoteIdx === i}
-							onSelected={onNoteClicked && (() => onNoteClicked(i))}
-							onRemove={onRemove && (() => onRemove(i))}
-							onAddBefore={onAddBefore && ((dur) => onAddBefore(i, dur))}
-							onAddAfter={onAddAfter && ((dur) => onAddAfter(i, dur))}
-							onDurationChanged={
-								onDurationChanged && ((dur) => onDurationChanged(i, dur))
-							}
-						></Note>
-					)
-				})}
+			<div className="relative w-full pb-2">
+				<div className="relative flex w-fit">
+					{onAddBefore && activeNoteIdx != null && (
+						<AddButton>
+							<DurationSelector
+								defaultDuration={defaultDuration}
+								onSelect={(durations) => {
+									onAddBefore(activeNoteIdx, durations)
+								}}
+							/>
+						</AddButton>
+					)}
+					{onDurationChanged && activeNoteIdx != null && activeNote && (
+						<EditButton>
+							<DurationSelector
+								value={toDurations(activeNote.duration)}
+								defaultDuration={defaultDuration}
+								onSelect={(durations) => {
+									onDurationChanged(activeNoteIdx, durations)
+								}}
+							/>
+						</EditButton>
+					)}
+					{onRemove && activeNoteIdx != null && (
+						<DeleteButton onConfirm={() => onRemove(activeNoteIdx)} />
+					)}
+					{onAddAfter && activeNoteIdx != null && (
+						<AddButton>
+							<DurationSelector
+								defaultDuration={defaultDuration}
+								onSelect={(durations) => {
+									onAddAfter(activeNoteIdx, durations)
+								}}
+							/>
+						</AddButton>
+					)}
+				</div>
 			</div>
 		</div>
 	)
@@ -182,18 +153,18 @@ interface DurationSelectorProps {
 }
 
 function DurationSelector({
-	defaultDuration: preSelectedAddDuration,
+	defaultDuration,
 	onSelect,
 	value = [],
 }: DurationSelectorProps) {
-	const initialDurations = value.length ? value : [preSelectedAddDuration]
+	const initialDurations = value.length ? value : [defaultDuration]
 	const [durations, updateDuration] = useImmer(initialDurations)
 
 	return (
 		<div>
 			{durations.map((dur, i) => {
 				return (
-					<span key={i} className="mb-2 flex items-center justify-center">
+					<span key={i} className="mb-2 flex items-center justify-start">
 						<Select
 							className="mr-3 w-20"
 							selectedOptionId={dur}
@@ -205,7 +176,11 @@ function DurationSelector({
 							options={durationOptions}
 						/>
 						{i > 0 && (
-							<IconButton>
+							<IconButton
+								onClick={() =>
+									updateDuration((ds) => ds.filter((_, j) => j !== i))
+								}
+							>
 								<MinusIcon className="h-6 w-6" aria-hidden="true" />
 							</IconButton>
 						)}
@@ -214,13 +189,21 @@ function DurationSelector({
 			})}
 			<span className="mt-3 flex items-center justify-center">
 				<Button
+					color="teal"
+					className="mr-3 w-20"
 					onClick={() => {
-						onSelect(durations.length ? durations : [preSelectedAddDuration])
+						onSelect(durations.length ? durations : [defaultDuration])
 					}}
 				>
 					Ok
 				</Button>
-				<IconButton>
+				<IconButton
+					onClick={() =>
+						updateDuration((ds) => {
+							ds.push(defaultDuration)
+						})
+					}
+				>
 					<PlusIcon className="h-6 w-6" aria-hidden="true" />
 				</IconButton>
 			</span>
