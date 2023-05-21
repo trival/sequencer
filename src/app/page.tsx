@@ -23,12 +23,9 @@ export default function Home() {
 				onNoteActivated={onActivateNote}
 				onNoteDeactivated={onDeactivateNote}
 				baseNote={toMidi('C3')}
-				maxRows={12}
-				maxCols={12}
 				scaleHighlight={ScaleHighlight.Major}
 				toneColorType={ToneColorType.CircleOfFiths}
 				mode="Play"
-				className=""
 			/>
 		</div>
 	)

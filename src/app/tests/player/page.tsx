@@ -82,8 +82,6 @@ export default function PlayerTest() {
 						scaleHighlight={ScaleHighlight.Major}
 						toneColorType={ToneColorType.CircleOfFiths}
 						mode="Play"
-						maxCols={10}
-						maxRows={10}
 					/>
 				</div>
 			</div>

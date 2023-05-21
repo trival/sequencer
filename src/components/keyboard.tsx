@@ -39,8 +39,8 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 	baseNote = 48, // 'C3 midi number'
 	offsetX = 0,
 	offsetY = 0,
-	maxCols = 8,
-	maxRows = 8,
+	maxCols = 13,
+	maxRows = 13,
 	keyLength = 60,
 	mode = 'Record',
 	scaleHighlight = ScaleHighlight.Major,
@@ -194,16 +194,15 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 			}}
 		>
 			<div className="flex h-full w-full flex-col justify-evenly">
-				{keys.map((row) => (
+				{keys.map((row, i) => (
 					<div
-						v-for="row in rows"
-						key={row[0].toneColor}
+						key={i}
 						className="flex w-full touch-none justify-evenly whitespace-nowrap"
 					>
-						{row.map((cell) => (
+						{row.map((cell, j) => (
 							<button
 								className={clsx(
-									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm shadow-gray-400',
+									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm',
 									{ 'border-4 border-red-400': notes[cell.midi] },
 								)}
 								style={{
@@ -212,7 +211,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 									height: `${keyLength}px`,
 									margin: `${keyMargin}px`,
 								}}
-								key={cell.toneColor}
+								key={j}
 								onPointerDown={stopPreventAnd(() => onPointerDown(cell.midi))}
 								onPointerUp={stopPreventAnd(() => onPointerUp(cell.midi))}
 								onPointerEnter={stopPreventAnd(() => onPointerEnter(cell.midi))}

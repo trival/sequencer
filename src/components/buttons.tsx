@@ -3,13 +3,7 @@ import { Popover, PopoverPanelProps } from '@headlessui/react'
 import { PlusIcon } from '@heroicons/react/20/solid'
 import { TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
-import {
-	ElementType,
-	PropsWithChildren,
-	ReactElement,
-	ReactNode,
-	useState,
-} from 'react'
+import { ElementType, PropsWithChildren, ReactNode, useState } from 'react'
 import { usePopper } from 'react-popper'
 
 interface ButtonProps extends PropsWithChildren {
