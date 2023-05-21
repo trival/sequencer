@@ -72,18 +72,18 @@ export default function PlayerTest() {
 
 	return (
 		<div>
-			<div className="relative m-2 h-[600px] w-[600px] max-w-full shadow-md shadow-gray-300">
+			<div className="relative m-2 h-[620px] w-[620px] max-w-full shadow-md shadow-gray-300">
 				<div className="absolute bottom-2 left-2 right-2 top-2 overflow-scroll">
 					<Keyboard
 						activeNotes={synth.playingNotes}
 						onNoteActivated={onActivateNote}
 						onNoteDeactivated={onDeactivateNote}
 						baseNote={toMidi('C3')}
-						top={10}
-						right={9}
 						scaleHighlight={ScaleHighlight.Major}
 						toneColorType={ToneColorType.CircleOfFiths}
 						mode="Play"
+						maxCols={10}
+						maxRows={10}
 					/>
 				</div>
 			</div>
