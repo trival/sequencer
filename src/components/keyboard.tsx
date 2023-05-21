@@ -32,7 +32,7 @@ interface KeyboardProps extends KeyboardSettings {
 	onNoteDeactivated?: (midi: number) => void
 }
 
-const keyMargin = 2
+const keyMargin = 3
 
 export const Keyboard: React.FC<KeyboardProps> = ({
 	activeNotes = [],
@@ -138,8 +138,14 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 					wrapperRef.current.clientHeight,
 					wrapperRef.current.offsetHeight,
 				)
-				const cols = Math.min(Math.floor(boxWidth / keySize), maxCols)
-				const rows = Math.min(Math.floor(boxHeight / keySize), maxRows)
+				const cols = Math.min(
+					Math.floor((boxWidth - 2 * keyMargin) / keySize),
+					maxCols,
+				)
+				const rows = Math.min(
+					Math.floor((boxHeight - 2 * keyMargin) / keySize),
+					maxRows,
+				)
 				setWidth(cols)
 				setHeight(rows)
 			}
@@ -178,14 +184,21 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 	return (
 		<div
 			ref={wrapperRef}
-			className={clsx(className, 'relative h-full w-full overflow-hidden')}
+			className={clsx(
+				className,
+				'flex max-h-full max-w-full items-center justify-evenly overflow-hidden',
+			)}
+			style={{
+				height: `${maxRows * keySize + 2 * keyMargin}px`,
+				width: `${maxCols * keySize + 2 * keyMargin}px`,
+			}}
 		>
-			<div className="m-auto w-fit">
+			<div className="flex h-full w-full flex-col justify-evenly">
 				{keys.map((row) => (
 					<div
 						v-for="row in rows"
 						key={row[0].toneColor}
-						className="touch-none whitespace-nowrap"
+						className="flex w-full touch-none justify-evenly whitespace-nowrap"
 					>
 						{row.map((cell) => (
 							<button
