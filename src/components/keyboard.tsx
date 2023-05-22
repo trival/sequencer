@@ -10,45 +10,74 @@ import clsx from 'clsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
 import 'perfect-scrollbar/css/perfect-scrollbar.css'
+import { Popover } from '@headlessui/react'
+import { ChartBarIcon } from '@heroicons/react/20/solid'
+import {
+	ArrowSmallDownIcon,
+	ArrowSmallLeftIcon,
+	ArrowSmallRightIcon,
+	ArrowSmallUpIcon,
+} from '@heroicons/react/24/outline'
+import { IconButton } from './buttons'
 
 type Mode = 'Record' | 'Play'
 
 export interface KeyboardSettings {
-	activeNotes?: number[]
-	baseNote?: number
-	mode?: Mode
-	offsetX?: number
-	offsetY?: number
-	maxRows?: number
-	maxCols?: number
-	keyLength?: number
-	scaleHighlight?: ScaleHighlight
-	toneColorType?: ToneColorType
-	className?: string
+	baseNote: number
+	mode: Mode
+	offsetX: number
+	offsetY: number
+	maxRows: number
+	maxCols: number
+	keyLength: number
+	scaleHighlight: ScaleHighlight
+	toneColorType: ToneColorType
 }
 
-interface KeyboardProps extends KeyboardSettings {
+interface KeyboardProps {
+	activeNotes?: number[]
+	settings: Partial<KeyboardSettings>
 	onNoteActivated?: (midi: number) => void
 	onNoteDeactivated?: (midi: number) => void
+	onSettingsChanged?: (updatedSettings: KeyboardSettings) => void
+	className?: string
 }
 
 const keyMargin = 3
 
+const defaultSettings: KeyboardSettings = {
+	baseNote: 48, // 'C3 midi number'
+	offsetX: 0,
+	offsetY: 0,
+	maxCols: 13,
+	maxRows: 13,
+	keyLength: 60,
+	mode: 'Record',
+	scaleHighlight: ScaleHighlight.Major,
+	toneColorType: ToneColorType.CircleOfFiths,
+} as const
+
 export const Keyboard: React.FC<KeyboardProps> = ({
 	activeNotes = [],
-	baseNote = 48, // 'C3 midi number'
-	offsetX = 0,
-	offsetY = 0,
-	maxCols = 13,
-	maxRows = 13,
-	keyLength = 60,
-	mode = 'Record',
-	scaleHighlight = ScaleHighlight.Major,
-	toneColorType = ToneColorType.CircleOfFiths,
 	onNoteActivated = () => {},
 	onNoteDeactivated = () => {},
+	onSettingsChanged,
 	className,
+	settings,
 }: KeyboardProps) => {
+	const currentSettings: KeyboardSettings = { ...defaultSettings, ...settings }
+	const {
+		keyLength,
+		baseNote,
+		maxCols,
+		maxRows,
+		mode,
+		offsetX,
+		offsetY,
+		scaleHighlight,
+		toneColorType,
+	} = currentSettings
+
 	const keySize = keyLength + 2 * keyMargin
 
 	const [pointerDown, setPointerDown] = useState(false)
@@ -123,6 +152,11 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 		return false
 	}
 
+	const preventAnd = (fn: () => void) => (e: React.BaseSyntheticEvent) => {
+		e.preventDefault()
+		fn()
+	}
+
 	// compute the keys
 
 	const [width, setWidth] = useState(maxCols)
@@ -186,13 +220,69 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 			ref={wrapperRef}
 			className={clsx(
 				className,
-				'flex max-h-full max-w-full items-center justify-evenly overflow-hidden',
+				'relative flex max-h-full max-w-full items-center justify-evenly overflow-hidden',
 			)}
 			style={{
 				height: `${maxRows * keySize + 2 * keyMargin}px`,
 				width: `${maxCols * keySize + 2 * keyMargin}px`,
 			}}
 		>
+			{onSettingsChanged && (
+				<Popover className="absolute right-0 top-0">
+					<Popover.Button type="button" className="m-0">
+						<ChartBarIcon className="h-6 w-6 -rotate-90" />
+					</Popover.Button>
+					<Popover.Panel className="absolute right-8 top-1 rounded bg-gray-100/90 shadow-lg shadow-gray-400">
+						<div className="flex">
+							<IconButton
+								className="m-3 p-1"
+								onClick={() => {
+									onSettingsChanged({
+										...currentSettings,
+										offsetX: offsetX - 1,
+									})
+								}}
+							>
+								<ArrowSmallLeftIcon className="h-6 w-6" />
+							</IconButton>
+							<IconButton
+								className="m-3 p-1"
+								onClick={() => {
+									onSettingsChanged({
+										...currentSettings,
+										offsetY: offsetY + 1,
+									})
+								}}
+							>
+								<ArrowSmallUpIcon className="h-6 w-6" />
+							</IconButton>
+							<IconButton
+								className="m-3 p-1"
+								onClick={() => {
+									onSettingsChanged({
+										...currentSettings,
+										offsetY: offsetY - 1,
+									})
+								}}
+							>
+								<ArrowSmallDownIcon className="h-6 w-6" />
+							</IconButton>
+							<IconButton
+								className="m-3 p-1"
+								onClick={() => {
+									onSettingsChanged({
+										...currentSettings,
+										offsetX: offsetX + 1,
+									})
+								}}
+							>
+								<ArrowSmallRightIcon className="h-6 w-6" />
+							</IconButton>
+						</div>
+					</Popover.Panel>
+				</Popover>
+			)}
+
 			<div className="flex h-full w-full flex-col justify-evenly">
 				{keys.map((row, i) => (
 					<div
@@ -212,10 +302,10 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 									margin: `${keyMargin}px`,
 								}}
 								key={j}
-								onPointerDown={stopPreventAnd(() => onPointerDown(cell.midi))}
-								onPointerUp={stopPreventAnd(() => onPointerUp(cell.midi))}
-								onPointerEnter={stopPreventAnd(() => onPointerEnter(cell.midi))}
-								onPointerOut={stopPreventAnd(() => onPointerOut(cell.midi))}
+								onPointerDown={preventAnd(() => onPointerDown(cell.midi))}
+								onPointerUp={preventAnd(() => onPointerUp(cell.midi))}
+								onPointerEnter={preventAnd(() => onPointerEnter(cell.midi))}
+								onPointerOut={preventAnd(() => onPointerOut(cell.midi))}
 								onContextMenu={stopPreventAnd(() => {})}
 							>
 								{cell.frequency.toNote()}

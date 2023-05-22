@@ -1,6 +1,6 @@
 'use client'
 
-import { Keyboard } from '@/components/keyboard'
+import { Keyboard, KeyboardSettings } from '@/components/keyboard'
 import { Track } from '@/components/track'
 import { MelodyNote, useMelody } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
@@ -70,6 +70,13 @@ export default function PlayerTest() {
 		changeDuration(idx, duration)
 	}
 
+	const [settings, setSettings] = useState<Partial<KeyboardSettings>>({
+		baseNote: toMidi('C3'),
+		scaleHighlight: ScaleHighlight.Major,
+		toneColorType: ToneColorType.CircleOfFiths,
+		mode: 'Play',
+	})
+
 	return (
 		<div>
 			<div className="relative h-[620px] w-[620px] max-w-full shadow-md">
@@ -78,10 +85,8 @@ export default function PlayerTest() {
 						activeNotes={synth.playingNotes}
 						onNoteActivated={onActivateNote}
 						onNoteDeactivated={onDeactivateNote}
-						baseNote={toMidi('C3')}
-						scaleHighlight={ScaleHighlight.Major}
-						toneColorType={ToneColorType.CircleOfFiths}
-						mode="Play"
+						onSettingsChanged={setSettings}
+						settings={settings}
 					/>
 				</div>
 			</div>

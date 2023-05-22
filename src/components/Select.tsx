@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Combobox } from '@headlessui/react'
 import clsx from 'clsx'
@@ -16,7 +16,7 @@ export interface SelectProps {
 	className?: string
 }
 
-export default function Select({
+export function Select({
 	options,
 	selectedOptionId,
 	onSelect,
@@ -102,5 +102,41 @@ export default function Select({
 				)}
 			</div>
 		</Combobox>
+	)
+}
+
+export function SimpleSelect({
+	options,
+	selectedOptionId,
+	onSelect,
+	label,
+	className,
+}: SelectProps) {
+	const id = useMemo(() => Math.random().toString(36).substr(2, 9), [])
+	return (
+		<div className={className}>
+			{label && (
+				<label
+					htmlFor={id}
+					className="bb-2 block text-sm font-medium leading-6 text-gray-900"
+				>
+					{label}
+				</label>
+			)}
+			<select
+				id={id}
+				value={selectedOptionId}
+				onChange={(event) => onSelect(event.target.value)}
+				className={clsx(
+					'block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6',
+				)}
+			>
+				{options.map((opt) => (
+					<option key={opt.id} value={opt.id}>
+						{opt.label}
+					</option>
+				))}
+			</select>
+		</div>
 	)
 }

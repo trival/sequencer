@@ -8,7 +8,7 @@ import {
 	EditButton,
 	IconButton,
 } from '@/components/buttons'
-import Select from './Select'
+import { SimpleSelect } from './Select'
 import { subdivisions } from '@/utils/utils'
 import { useImmer } from 'use-immer'
 import { PlusIcon } from '@heroicons/react/20/solid'
@@ -165,7 +165,7 @@ function DurationSelector({
 			{durations.map((dur, i) => {
 				return (
 					<span key={i} className="mb-2 flex items-center justify-start">
-						<Select
+						<SimpleSelect
 							className="mr-3 w-20"
 							selectedOptionId={dur}
 							onSelect={(duration) => {
