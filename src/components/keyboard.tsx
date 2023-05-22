@@ -9,7 +9,6 @@ import {
 import clsx from 'clsx'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
-import 'perfect-scrollbar/css/perfect-scrollbar.css'
 import { Popover } from '@headlessui/react'
 import { ChartBarIcon } from '@heroicons/react/20/solid'
 import {

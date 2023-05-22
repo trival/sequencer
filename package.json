@@ -12,29 +12,28 @@
   "dependencies": {
     "@headlessui/react": "^1.7.14",
     "@heroicons/react": "^2.0.17",
-    "@tailwindcss/forms": "^0.5.3",
-    "@types/node": "18.16.2",
-    "autoprefixer": "10.4.14",
     "clsx": "^1.2.1",
     "immer": "^10.0.1",
     "next": "^13.4.1",
-    "perfect-scrollbar": "^1.5.5",
-    "postcss": "8.4.23",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-popper": "^2.3.0",
-    "tailwindcss": "3.3.2",
     "tone": "^14.7.77",
-    "typescript": "5.0.4",
     "use-immer": "^0.9.0"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.3",
+    "@types/node": "18.16.2",
     "@types/react": "^18.2.6",
     "@types/react-dom": "^18.2.4",
+    "autoprefixer": "10.4.14",
     "eslint": "^8.40.0",
     "eslint-config-next": "^13.4.1",
+    "postcss": "8.4.23",
     "prettier": "^2.8.8",
-    "prettier-plugin-tailwindcss": "^0.2.8"
+    "prettier-plugin-tailwindcss": "^0.3.0",
+    "tailwindcss": "^3.3.2",
+    "typescript": "5.0.4"
   },
   "engines": {
     "node": "18.*"
