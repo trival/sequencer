@@ -64,6 +64,10 @@ export const Button = ({
 	</button>
 )
 
+interface PopoverChildren {
+	children: PopoverPanelProps<ElementType>['children']
+}
+
 export const IconButtonPopover = ({
 	children,
 	buttonChildren,
@@ -71,8 +75,7 @@ export const IconButtonPopover = ({
 	color = 'transparent',
 }: Omit<ButtonProps, 'children'> & {
 	buttonChildren: ReactNode
-	children: PopoverPanelProps<ElementType>['children']
-}) => {
+} & PopoverChildren) => {
 	const [referenceElement, setReferenceElement] =
 		useState<HTMLButtonElement | null>(null)
 	const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
@@ -130,7 +133,7 @@ export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	)
 }
 
-export const AddButton = ({ children }: PropsWithChildren) => {
+export const AddButton = ({ children }: PopoverChildren) => {
 	return (
 		<IconButtonPopover
 			color="indigo"
@@ -141,7 +144,7 @@ export const AddButton = ({ children }: PropsWithChildren) => {
 	)
 }
 
-export const EditButton = ({ children }: PropsWithChildren) => {
+export const EditButton = ({ children }: PopoverChildren) => {
 	return (
 		<IconButtonPopover
 			color="teal"

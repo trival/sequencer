@@ -108,23 +108,29 @@ export const Track = ({
 				<div className="relative flex w-fit">
 					{onAddBefore && activeNoteIdx != null && (
 						<AddButton>
-							<DurationSelector
-								defaultDuration={defaultDuration}
-								onSelect={(durations) => {
-									onAddBefore(activeNoteIdx, durations)
-								}}
-							/>
+							{({ close }) => (
+								<DurationSelector
+									defaultDuration={defaultDuration}
+									onSelect={(durations) => {
+										close()
+										onAddBefore(activeNoteIdx, durations)
+									}}
+								/>
+							)}
 						</AddButton>
 					)}
 					{onDurationChanged && activeNoteIdx != null && activeNote && (
 						<EditButton>
-							<DurationSelector
-								value={toDurations(activeNote.duration)}
-								defaultDuration={defaultDuration}
-								onSelect={(durations) => {
-									onDurationChanged(activeNoteIdx, durations)
-								}}
-							/>
+							{({ close }) => (
+								<DurationSelector
+									value={toDurations(activeNote.duration)}
+									defaultDuration={defaultDuration}
+									onSelect={(durations) => {
+										close()
+										onDurationChanged(activeNoteIdx, durations)
+									}}
+								/>
+							)}
 						</EditButton>
 					)}
 					{onRemove && activeNoteIdx != null && (
@@ -132,12 +138,15 @@ export const Track = ({
 					)}
 					{onAddAfter && activeNoteIdx != null && (
 						<AddButton>
-							<DurationSelector
-								defaultDuration={defaultDuration}
-								onSelect={(durations) => {
-									onAddAfter(activeNoteIdx, durations)
-								}}
-							/>
+							{({ close }) => (
+								<DurationSelector
+									defaultDuration={defaultDuration}
+									onSelect={(durations) => {
+										close()
+										onAddAfter(activeNoteIdx, durations)
+									}}
+								/>
+							)}
 						</AddButton>
 					)}
 				</div>
