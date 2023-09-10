@@ -2,23 +2,24 @@ import { useMemo, useState } from 'react'
 import { CheckIcon, ChevronUpDownIcon } from '@heroicons/react/20/solid'
 import { Combobox } from '@headlessui/react'
 import clsx from 'clsx'
+import { type } from 'os'
 
 export interface SelectOption {
-	id: string
+	value: string | number
 	label: string
 }
 
 export interface SelectProps {
 	options: SelectOption[]
-	selectedOptionId?: string
-	onSelect: (id: string) => void
+	value?: string | number
+	onSelect: (id: string | number) => void
 	label?: string
 	className?: string
 }
 
-export function Select({
+export function ComboSelect({
 	options,
-	selectedOptionId,
+	value,
 	onSelect,
 	label,
 	className,
@@ -32,15 +33,13 @@ export function Select({
 					return option.label.toLowerCase().includes(query.toLowerCase())
 			  })
 
-	const selectedOption = options.find(
-		(option) => option.id === selectedOptionId,
-	)
+	const selectedOption = options.find((option) => option.value === value)
 
 	return (
 		<Combobox
 			as="div"
 			value={selectedOption}
-			onChange={(opt) => onSelect(opt.id)}
+			onChange={(opt) => onSelect(opt.value)}
 		>
 			{label && (
 				<Combobox.Label className="mb-2 block text-sm font-medium leading-6 text-gray-900">
@@ -64,7 +63,7 @@ export function Select({
 					<Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
 						{filteredOptions.map((option) => (
 							<Combobox.Option
-								key={option.id}
+								key={option.value}
 								value={option}
 								className={({ active }) =>
 									clsx(
@@ -105,9 +104,9 @@ export function Select({
 	)
 }
 
-export function SimpleSelect({
+export function Select({
 	options,
-	selectedOptionId,
+	value,
 	onSelect,
 	label,
 	className,
@@ -125,18 +124,44 @@ export function SimpleSelect({
 			)}
 			<select
 				id={id}
-				value={selectedOptionId}
+				value={value}
 				onChange={(event) => onSelect(event.target.value)}
 				className={clsx(
 					'block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6',
 				)}
 			>
 				{options.map((opt) => (
-					<option key={opt.id} value={opt.id}>
+					<option key={opt.value} value={opt.value}>
 						{opt.label}
 					</option>
 				))}
 			</select>
 		</div>
+	)
+}
+
+interface InputProps {
+	value?: string | number
+	onChange: (value: string | number) => void
+	type?: 'text' | 'email' | 'password' | 'number'
+	className?: string
+}
+
+export const Input = ({
+	value,
+	onChange,
+	type = 'text',
+	className,
+}: InputProps) => {
+	return (
+		<input
+			type={type}
+			value={value}
+			onChange={(event) => onChange(event.target.value)}
+			className={clsx(
+				'rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6',
+				className,
+			)}
+		/>
 	)
 }

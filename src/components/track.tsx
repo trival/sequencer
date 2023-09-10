@@ -8,7 +8,7 @@ import {
 	EditButton,
 	IconButton,
 } from '@/components/buttons'
-import { SimpleSelect } from './Select'
+import { Select } from './Select'
 import { subdivisions } from '@/utils/utils'
 import { useImmer } from 'use-immer'
 import { PlusIcon } from '@heroicons/react/20/solid'
@@ -23,7 +23,7 @@ interface NoteProps {
 }
 
 const durationOptions = subdivisions.map((s) => ({
-	id: s,
+	value: s,
 	label: s,
 }))
 
@@ -174,9 +174,9 @@ function DurationSelector({
 			{durations.map((dur, i) => {
 				return (
 					<span key={i} className="mb-2 flex items-center justify-start">
-						<SimpleSelect
+						<Select
 							className="mr-3 w-20"
-							selectedOptionId={dur}
+							value={dur}
 							onSelect={(duration) => {
 								updateDuration((durs) => {
 									durs[i] = duration as Subdivision

@@ -17,7 +17,7 @@ const btnColors = {
 	indigo: tw`bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white`,
 	rose: tw`bg-rose-600 hover:bg-rose-500 focus-visible:outline-rose-600 text-white`,
 	teal: tw`bg-teal-600 hover:bg-teal-500 focus-visible:outline-teal-600 text-white`,
-	transparent: tw`border border-slate-300 text-slate-500 shadow-slate-300 hover:border-indigo-400 focus-visible:outline-indigo-400`,
+	white: tw`bg-white border border-slate-400 text-slate-500 shadow-slate-400 hover:border-indigo-500 focus-visible:outline-indigo-500`,
 }
 
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
@@ -26,7 +26,7 @@ export const IconButton = ({
 	children,
 	onClick,
 	className,
-	color = 'transparent',
+	color = 'white',
 	type = 'button',
 }: ButtonProps) => (
 	<button
@@ -47,7 +47,7 @@ export const Button = ({
 	children,
 	onClick,
 	className,
-	color = 'transparent',
+	color = 'white',
 	type = 'button',
 }: ButtonProps) => (
 	<button
@@ -72,7 +72,7 @@ export const IconButtonPopover = ({
 	children,
 	buttonChildren,
 	className,
-	color = 'transparent',
+	color = 'white',
 }: Omit<ButtonProps, 'children'> & {
 	buttonChildren: ReactNode
 } & PopoverChildren) => {

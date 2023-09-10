@@ -18,6 +18,7 @@ import {
 	ArrowSmallUpIcon,
 } from '@heroicons/react/24/outline'
 import { IconButton } from './buttons'
+import { Input, Select } from './Select'
 
 type Mode = 'Record' | 'Play'
 
@@ -232,52 +233,10 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 						<ChartBarIcon className="h-6 w-6 -rotate-90" />
 					</Popover.Button>
 					<Popover.Panel className="absolute right-8 top-1 rounded bg-gray-100/90 shadow-lg shadow-gray-400">
-						<div className="flex">
-							<IconButton
-								className="m-3 p-1"
-								onClick={() => {
-									onSettingsChanged({
-										...currentSettings,
-										offsetX: offsetX - 1,
-									})
-								}}
-							>
-								<ArrowSmallLeftIcon className="h-6 w-6" />
-							</IconButton>
-							<IconButton
-								className="m-3 p-1"
-								onClick={() => {
-									onSettingsChanged({
-										...currentSettings,
-										offsetY: offsetY + 1,
-									})
-								}}
-							>
-								<ArrowSmallUpIcon className="h-6 w-6" />
-							</IconButton>
-							<IconButton
-								className="m-3 p-1"
-								onClick={() => {
-									onSettingsChanged({
-										...currentSettings,
-										offsetY: offsetY - 1,
-									})
-								}}
-							>
-								<ArrowSmallDownIcon className="h-6 w-6" />
-							</IconButton>
-							<IconButton
-								className="m-3 p-1"
-								onClick={() => {
-									onSettingsChanged({
-										...currentSettings,
-										offsetX: offsetX + 1,
-									})
-								}}
-							>
-								<ArrowSmallRightIcon className="h-6 w-6" />
-							</IconButton>
-						</div>
+						<KeyboardSettings
+							onSettingsChanged={onSettingsChanged}
+							currentSettings={currentSettings}
+						/>
 					</Popover.Panel>
 				</Popover>
 			)}
@@ -312,6 +271,109 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 						))}
 					</div>
 				))}
+			</div>
+		</div>
+	)
+}
+
+type KeyboardSettingsProps = {
+	onSettingsChanged: (updatedSettings: KeyboardSettings) => void
+	currentSettings: KeyboardSettings
+}
+
+function KeyboardSettings({
+	onSettingsChanged,
+	currentSettings,
+}: KeyboardSettingsProps) {
+	const { offsetX, offsetY } = currentSettings
+
+	const changeSetting = (setting: Partial<KeyboardSettings>) => () =>
+		onSettingsChanged({ ...currentSettings, ...setting })
+
+	return (
+		<div>
+			<div className="flex justify-center">
+				<IconButton
+					className="m-3 p-1"
+					onClick={changeSetting({ offsetX: offsetX + 1 })}
+				>
+					<ArrowSmallLeftIcon className="h-6 w-6" />
+				</IconButton>
+				<IconButton
+					className="m-3 p-1"
+					onClick={changeSetting({ offsetY: offsetY - 1 })}
+				>
+					<ArrowSmallUpIcon className="h-6 w-6" />
+				</IconButton>
+				<IconButton
+					className="m-3 p-1"
+					onClick={changeSetting({ offsetY: offsetY + 1 })}
+				>
+					<ArrowSmallDownIcon className="h-6 w-6" />
+				</IconButton>
+				<IconButton
+					className="m-3 p-1"
+					onClick={changeSetting({ offsetX: offsetX - 1 })}
+				>
+					<ArrowSmallRightIcon className="h-6 w-6" />
+				</IconButton>
+			</div>
+			<div className="mx-2 mb-2 flex justify-center">
+				<Select
+					value={currentSettings.scaleHighlight}
+					onSelect={(value) =>
+						onSettingsChanged({
+							...currentSettings,
+							scaleHighlight: value as ScaleHighlight,
+						})
+					}
+					options={Object.entries(ScaleHighlight)
+						.filter(([name]) => String(name).trim().length > 1)
+						.map(([label, value]) => ({ value, label }))}
+				/>
+				<Select
+					className="ml-2"
+					value={currentSettings.baseNote}
+					onSelect={(value) =>
+						onSettingsChanged({
+							...currentSettings,
+							baseNote: value as number,
+						})
+					}
+					options={[...Array(12).keys()].map((i) => {
+						let start = currentSettings.baseNote - 4
+						const note = start + i
+						return {
+							value: note,
+							label: Tone.Frequency(note, 'midi').toNote(),
+						}
+					})}
+				/>
+			</div>
+			<div className="mx-2 mb-2 flex justify-center">
+				<Select
+					value={currentSettings.toneColorType}
+					onSelect={(id) =>
+						onSettingsChanged({
+							...currentSettings,
+							toneColorType: id as ToneColorType,
+						})
+					}
+					options={Object.entries(ToneColorType)
+						.filter(([name]) => String(name).trim().length > 1)
+						.map(([label, value]) => ({ value, label }))}
+				/>
+				<Input
+					type="number"
+					className="ml-2 w-20 px-2"
+					value={currentSettings.keyLength}
+					onChange={(value) =>
+						onSettingsChanged({
+							...currentSettings,
+							keyLength: parseInt(value as string),
+						})
+					}
+				/>
 			</div>
 		</div>
 	)
