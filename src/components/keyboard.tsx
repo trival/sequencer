@@ -51,8 +51,8 @@ const defaultSettings: KeyboardSettings = {
 	baseNote: 48, // 'C3 midi number'
 	offsetX: 0,
 	offsetY: 0,
-	maxCols: 13,
-	maxRows: 13,
+	maxCols: 12,
+	maxRows: 12,
 	keyLength: 58,
 	mode: 'Record',
 	scaleHighlight: ScaleHighlight.Major,
@@ -261,8 +261,8 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 						{row.map((cell, j) => (
 							<button
 								className={clsx(
-									'box-border touch-none select-none rounded-md shadow-sm',
-									{ 'border-4 border-red-400': notes[cell.midi] },
+									'box-border touch-none select-none rounded-md shadow-sm transition-all',
+									{ 'scale-110 border-4 border-red-400': notes[cell.midi] },
 								)}
 								style={{
 									backgroundColor: toneBg(cell.toneColor),
