@@ -1,7 +1,9 @@
 import {
 	ScaleHighlight,
 	ToneColorType,
+	ToneHighlight,
 	ToneValue,
+	getScaleToneColor,
 	getToneBgColor,
 	midiToToneValue,
 	mod,
@@ -102,6 +104,15 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 			scaleHighlight,
 			toneColorType,
 		)
+
+	const isToneBgDark = (tone: ToneValue) => {
+		let color = getScaleToneColor(
+			tone,
+			midiToToneValue(baseNote),
+			scaleHighlight,
+		)
+		return color.highlight === ToneHighlight.Strong
+	}
 
 	const onPointerDown = (midi: number) => {
 		setPointerDown(true)
@@ -250,7 +261,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 						{row.map((cell, j) => (
 							<button
 								className={clsx(
-									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm',
+									'box-border touch-none select-none rounded-md shadow-sm',
 									{ 'border-4 border-red-400': notes[cell.midi] },
 								)}
 								style={{
@@ -258,6 +269,9 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 									width: `${keyLength}px`,
 									height: `${keyLength}px`,
 									margin: `${keyMargin}px`,
+									color: isToneBgDark(cell.toneColor)
+										? 'black'
+										: 'text-gray-700',
 								}}
 								key={j}
 								onPointerDown={preventAnd(() => onPointerDown(cell.midi))}
@@ -266,7 +280,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 								onPointerOut={preventAnd(() => onPointerOut(cell.midi))}
 								onContextMenu={stopPreventAnd(() => {})}
 							>
-								{cell.frequency.toNote()}
+								{cell.frequency.toNote().replaceAll('#', '♯')}
 							</button>
 						))}
 					</div>
@@ -320,11 +334,12 @@ function KeyboardSettings({
 			</div>
 			<div className="mx-2 mb-2 flex justify-center">
 				<Select
+					className="w-48"
 					value={currentSettings.scaleHighlight}
 					onSelect={(value) =>
 						onSettingsChanged({
 							...currentSettings,
-							scaleHighlight: value as ScaleHighlight,
+							scaleHighlight: parseInt(value as string) as ScaleHighlight,
 						})
 					}
 					options={Object.entries(ScaleHighlight)
@@ -332,7 +347,7 @@ function KeyboardSettings({
 						.map(([label, value]) => ({ value, label }))}
 				/>
 				<Select
-					className="ml-2"
+					className="ml-2 w-20"
 					value={currentSettings.baseNote}
 					onSelect={(value) =>
 						onSettingsChanged({
@@ -345,18 +360,22 @@ function KeyboardSettings({
 						const note = start + i
 						return {
 							value: note,
-							label: Tone.Frequency(note, 'midi').toNote(),
+							label: Tone.Frequency(note, 'midi')
+								.toNote()
+								.replaceAll('#', '♯')
+								.replaceAll(/\d/g, ''),
 						}
 					})}
 				/>
 			</div>
 			<div className="mx-2 mb-2 flex justify-center">
 				<Select
+					className="w-48"
 					value={currentSettings.toneColorType}
-					onSelect={(id) =>
+					onSelect={(value) =>
 						onSettingsChanged({
 							...currentSettings,
-							toneColorType: id as ToneColorType,
+							toneColorType: parseInt(value as string) as ToneColorType,
 						})
 					}
 					options={Object.entries(ToneColorType)
