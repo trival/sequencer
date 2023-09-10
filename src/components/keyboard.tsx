@@ -261,7 +261,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 						{row.map((cell, j) => (
 							<button
 								className={clsx(
-									'box-border touch-none select-none rounded-md shadow-sm transition-all',
+									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm transition-all',
 									{ 'scale-110 border-4 border-red-400': notes[cell.midi] },
 								)}
 								style={{
@@ -269,9 +269,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 									width: `${keyLength}px`,
 									height: `${keyLength}px`,
 									margin: `${keyMargin}px`,
-									color: isToneBgDark(cell.toneColor)
-										? 'black'
-										: 'text-gray-700',
+									color: isToneBgDark(cell.toneColor) ? 'black' : undefined,
 								}}
 								key={j}
 								onPointerDown={preventAnd(() => onPointerDown(cell.midi))}
@@ -334,7 +332,7 @@ function KeyboardSettings({
 			</div>
 			<div className="mx-2 mb-2 flex justify-center">
 				<Select
-					className="w-48"
+					className="w-40"
 					value={currentSettings.scaleHighlight}
 					onSelect={(value) =>
 						onSettingsChanged({
@@ -370,7 +368,7 @@ function KeyboardSettings({
 			</div>
 			<div className="mx-2 mb-2 flex justify-center">
 				<Select
-					className="w-48"
+					className="w-40"
 					value={currentSettings.toneColorType}
 					onSelect={(value) =>
 						onSettingsChanged({

@@ -1,6 +1,6 @@
 'use client'
 
-import { Track } from '@/components/track'
+import { Track, TrackMode } from '@/components/track'
 import { MelodyNote, useMelody } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
 import { useState } from 'react'
@@ -66,6 +66,7 @@ export default function EditorPage() {
 		<div className="p-10">
 			<h1>Track test</h1>
 			<Track
+				mode={TrackMode.Edit}
 				melody={melody}
 				activeNoteIdx={activeNoteIdx}
 				onNoteClicked={onNoteClicked}

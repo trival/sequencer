@@ -203,6 +203,16 @@ export const useMelody = (
 		[updateMelody],
 	)
 
+	const updateNoteTones = useCallback(
+		(idx: number, midiNotes: number[]) => {
+			updateMelody((melody) => {
+				const note = melody.notes[idx]
+				note.midiNotes = midiNotes
+			})
+		},
+		[updateMelody],
+	)
+
 	return useMemo(
 		() => ({
 			melody,
@@ -210,7 +220,15 @@ export const useMelody = (
 			removeNote,
 			addNote,
 			changeDuration,
+			updateNoteTones,
 		}),
-		[melody, updateMelody, removeNote, addNote, changeDuration],
+		[
+			melody,
+			updateMelody,
+			removeNote,
+			addNote,
+			changeDuration,
+			updateNoteTones,
+		],
 	)
 }

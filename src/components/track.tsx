@@ -22,6 +22,11 @@ interface NoteProps {
 	onSelected?: () => void
 }
 
+export enum TrackMode {
+	Edit,
+	Play,
+}
+
 const durationOptions = subdivisions.map((s) => ({
 	value: s,
 	label: s,
@@ -49,6 +54,7 @@ export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
 
 interface TrackProps {
 	melody: ProcessedMelody
+	mode: TrackMode
 	activeNoteIdx?: number | null
 	onNoteClicked?: (idx: number) => void
 	onAddAfter?: (idx: number, duration: Subdivision | Subdivision[]) => void
@@ -63,6 +69,7 @@ interface TrackProps {
 
 export const Track = ({
 	melody,
+	mode,
 	activeNoteIdx,
 	onNoteClicked,
 	onRemove,
@@ -105,51 +112,55 @@ export const Track = ({
 				</div>
 			</div>
 			<div className="relative w-full pb-2">
-				<div className="relative flex w-fit">
-					{onAddBefore && activeNoteIdx != null && (
-						<AddButton>
-							{({ close }) => (
-								<DurationSelector
-									defaultDuration={defaultDuration}
-									onSelect={(durations) => {
-										close()
-										onAddBefore(activeNoteIdx, durations)
-									}}
-								/>
-							)}
-						</AddButton>
-					)}
-					{onDurationChanged && activeNoteIdx != null && activeNote && (
-						<EditButton>
-							{({ close }) => (
-								<DurationSelector
-									value={toDurations(activeNote.duration)}
-									defaultDuration={defaultDuration}
-									onSelect={(durations) => {
-										close()
-										onDurationChanged(activeNoteIdx, durations)
-									}}
-								/>
-							)}
-						</EditButton>
-					)}
-					{onRemove && activeNoteIdx != null && (
-						<DeleteButton onConfirm={() => onRemove(activeNoteIdx)} />
-					)}
-					{onAddAfter && activeNoteIdx != null && (
-						<AddButton>
-							{({ close }) => (
-								<DurationSelector
-									defaultDuration={defaultDuration}
-									onSelect={(durations) => {
-										close()
-										onAddAfter(activeNoteIdx, durations)
-									}}
-								/>
-							)}
-						</AddButton>
-					)}
-				</div>
+				{activeNoteIdx != null && mode === TrackMode.Edit ? (
+					<div className="relative flex w-fit">
+						{onAddBefore && (
+							<AddButton>
+								{({ close }) => (
+									<DurationSelector
+										defaultDuration={defaultDuration}
+										onSelect={(durations) => {
+											close()
+											onAddBefore(activeNoteIdx, durations)
+										}}
+									/>
+								)}
+							</AddButton>
+						)}
+						{onDurationChanged && activeNote && (
+							<EditButton>
+								{({ close }) => (
+									<DurationSelector
+										value={toDurations(activeNote.duration)}
+										defaultDuration={defaultDuration}
+										onSelect={(durations) => {
+											close()
+											onDurationChanged(activeNoteIdx, durations)
+										}}
+									/>
+								)}
+							</EditButton>
+						)}
+						{onRemove && (
+							<DeleteButton onConfirm={() => onRemove(activeNoteIdx)} />
+						)}
+						{onAddAfter && (
+							<AddButton>
+								{({ close }) => (
+									<DurationSelector
+										defaultDuration={defaultDuration}
+										onSelect={(durations) => {
+											close()
+											onAddAfter(activeNoteIdx, durations)
+										}}
+									/>
+								)}
+							</AddButton>
+						)}
+					</div>
+				) : (
+					<div></div>
+				)}
 			</div>
 		</div>
 	)
