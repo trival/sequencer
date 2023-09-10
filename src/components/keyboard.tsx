@@ -51,7 +51,7 @@ const defaultSettings: KeyboardSettings = {
 	offsetY: 0,
 	maxCols: 13,
 	maxRows: 13,
-	keyLength: 60,
+	keyLength: 58,
 	mode: 'Record',
 	scaleHighlight: ScaleHighlight.Major,
 	toneColorType: ToneColorType.CircleOfFiths,
