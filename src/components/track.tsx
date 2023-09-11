@@ -11,8 +11,8 @@ import {
 } from '@/components/buttons'
 import { Select } from './Select'
 import { subdivisions } from '@/utils/utils'
-import { useImmer } from 'use-immer'
-import { PlusIcon, MinusIcon } from '@heroicons/react/20/solid'
+import { plus, minus } from 'solid-heroicons/solid'
+import { mergeProps } from 'solid-js'
 
 const secondWidthFactor = 60
 
@@ -46,7 +46,7 @@ export const Note = (props: NoteProps) => {
 						? 'bg-slate-200'
 						: 'bg-slate-300',
 				)}
-				onClick={props.onSelected}
+				onClick={() => props.onSelected()}
 			/>
 		</div>
 	)
@@ -79,22 +79,27 @@ interface TrackProps {
 
 export const Track = (_props: TrackProps) => {
 	const props = mergeProps({ defaultDuration: '4n' }, _props)
-	const trackCountMeasures = props.song.map((track) =>
-		track.measureSec ? Math.floor(track.durationSec / track.measureSec) + 1 : 0,
-	)
-	const countMeasures = trackCountMeasures.reduce((a, b) => Math.max(a, b), 0)
-	let measureSec = props.song[0]?.measureSec ?? 0
+	const trackCountMeasures = () =>
+		props.song.map((track) =>
+			track.measureSec
+				? Math.floor(track.durationSec / track.measureSec) + 1
+				: 0,
+		)
+	const countMeasures = () =>
+		trackCountMeasures().reduce((a, b) => Math.max(a, b), 0)
+	const measureSec = () => props.song[0]?.measureSec ?? 0
 
-	const activeNote = props.activeNoteIdx
-		? props.song[props.activeNoteIdx[0]]?.notes[props.activeNoteIdx[1]]
-		: null
+	const activeNote = () =>
+		props.activeNoteIdx
+			? props.song[props.activeNoteIdx[0]]?.notes[props.activeNoteIdx[1]]
+			: null
 
 	return (
 		<div class="relative w-full">
 			<div class="relative w-full overflow-x-auto pb-2">
 				<div class="relative w-fit px-2">
 					<div class="absolute h-full">
-						{[...Array(countMeasures)].map((_, i) => (
+						{[...Array(countMeasures())].map((_, i) => (
 							<span
 								class="absolute h-full w-[1px] bg-cyan-300"
 								style={{ left: measureSec * i * secondWidthFactor }}

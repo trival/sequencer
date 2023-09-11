@@ -1,9 +1,9 @@
 import { tw } from '@/styles/tw-utils'
 import { Icon } from 'solid-heroicons'
-import { plus, play, pause, stop } from 'solid-heroicons/solid'
+import { plus, play, pause } from 'solid-heroicons/solid'
 import { trash, pencilSquare } from 'solid-heroicons/outline'
 import clsx from 'clsx'
-import { JSX, ParentProps, createSignal, mergeProps, onMount } from 'solid-js'
+import { JSX, ParentProps, mergeProps, onMount } from 'solid-js'
 import { createPopper } from '@popperjs/core'
 
 interface ButtonProps {
@@ -108,7 +108,7 @@ export const DeleteButton = (props: DeleteButtonProps) => {
 	return (
 		<IconButtonPopover
 			color="rose"
-			buttonChildren={<TrashIcon class="h-6 w-6" aria-hidden="true" />}
+			buttonElement={<Icon path={trash} class="h-6 w-6" aria-hidden="true" />}
 		>
 			{({ close }) => (
 				<Button
@@ -125,22 +125,24 @@ export const DeleteButton = (props: DeleteButtonProps) => {
 	)
 }
 
-export const AddButton = (props: PopoverChildren) => {
+export const AddButton = (props: ParentProps) => {
 	return (
 		<IconButtonPopover
 			color="indigo"
-			buttonChildren={<PlusIcon class="h-6 w-6" aria-hidden="true" />}
+			buttonElement={<Icon path={plus} class="h-6 w-6" aria-hidden="true" />}
 		>
 			{props.children}
 		</IconButtonPopover>
 	)
 }
 
-export const EditButton = (props: PopoverChildren) => {
+export const EditButton = (props: ParentProps) => {
 	return (
 		<IconButtonPopover
 			color="teal"
-			buttonChildren={<PencilSquareIcon class="h-6 w-6" aria-hidden="true" />}
+			buttonElement={
+				<Icon path={pencilSquare} class="h-6 w-6" aria-hidden="true" />
+			}
 		>
 			{props.children}
 		</IconButtonPopover>
@@ -156,7 +158,7 @@ export const PlayButton = (props: PlayButtonProps) => {
 	return (
 		<button
 			type="button"
-			onClick={props.onClick}
+			onClick={() => props.onClick()}
 			class={clsx(
 				'm-2 rounded p-2 shadow-sm',
 				btnColors.white,
@@ -165,9 +167,9 @@ export const PlayButton = (props: PlayButtonProps) => {
 			)}
 		>
 			{props.isPlaying ? (
-				<PauseIcon class="h-6 w-6" />
+				<Icon path={pause} class="h-6 w-6" />
 			) : (
-				<PlayIcon class="h-6 w-6" />
+				<Icon path={play} class="h-6 w-6" />
 			)}
 		</button>
 	)
