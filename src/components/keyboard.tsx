@@ -42,7 +42,7 @@ interface KeyboardProps {
 	onNoteActivated?: (midi: number) => void
 	onNoteDeactivated?: (midi: number) => void
 	onSettingsChanged?: (updatedSettings: KeyboardSettings) => void
-	className?: string
+	class?: string
 }
 
 const keyMargin = 3
@@ -64,7 +64,7 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 	onNoteActivated = () => {},
 	onNoteDeactivated = () => {},
 	onSettingsChanged,
-	className,
+	class,
 	settings,
 }: KeyboardProps) => {
 	const currentSettings: KeyboardSettings = { ...defaultSettings, ...settings }
@@ -229,8 +229,8 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 	return (
 		<div
 			ref={wrapperRef}
-			className={clsx(
-				className,
+			class={clsx(
+				class,
 				'relative flex max-h-full max-w-full items-center justify-evenly overflow-hidden',
 			)}
 			style={{
@@ -239,11 +239,11 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 			}}
 		>
 			{onSettingsChanged && (
-				<Popover className="absolute right-0 top-0">
-					<Popover.Button type="button" className="m-0">
-						<ChartBarIcon className="h-6 w-6 -rotate-90" />
+				<Popover class="absolute right-0 top-0">
+					<Popover.Button type="button" class="m-0">
+						<ChartBarIcon class="h-6 w-6 -rotate-90" />
 					</Popover.Button>
-					<Popover.Panel className="absolute right-8 top-1 rounded bg-gray-100/90 shadow-lg shadow-gray-400">
+					<Popover.Panel class="absolute right-8 top-1 rounded bg-gray-100/90 shadow-lg shadow-gray-400">
 						<KeyboardSettings
 							onSettingsChanged={onSettingsChanged}
 							currentSettings={currentSettings}
@@ -252,15 +252,15 @@ export const Keyboard: React.FC<KeyboardProps> = ({
 				</Popover>
 			)}
 
-			<div className="flex h-full w-full flex-col justify-evenly">
+			<div class="flex h-full w-full flex-col justify-evenly">
 				{keys.map((row, i) => (
 					<div
 						key={i}
-						className="flex w-full touch-none justify-evenly whitespace-nowrap"
+						class="flex w-full touch-none justify-evenly whitespace-nowrap"
 					>
 						{row.map((cell, j) => (
 							<button
-								className={clsx(
+								class={clsx(
 									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm transition-all',
 									{ 'scale-110 border-4 border-red-400': notes[cell.midi] },
 								)}
@@ -304,35 +304,35 @@ function KeyboardSettings({
 
 	return (
 		<div>
-			<div className="flex justify-center">
+			<div class="flex justify-center">
 				<IconButton
-					className="m-3 p-1"
+					class="m-3 p-1"
 					onClick={changeSetting({ offsetX: offsetX + 1 })}
 				>
-					<ArrowSmallLeftIcon className="h-6 w-6" />
+					<ArrowSmallLeftIcon class="h-6 w-6" />
 				</IconButton>
 				<IconButton
-					className="m-3 p-1"
+					class="m-3 p-1"
 					onClick={changeSetting({ offsetY: offsetY - 1 })}
 				>
-					<ArrowSmallUpIcon className="h-6 w-6" />
+					<ArrowSmallUpIcon class="h-6 w-6" />
 				</IconButton>
 				<IconButton
-					className="m-3 p-1"
+					class="m-3 p-1"
 					onClick={changeSetting({ offsetY: offsetY + 1 })}
 				>
-					<ArrowSmallDownIcon className="h-6 w-6" />
+					<ArrowSmallDownIcon class="h-6 w-6" />
 				</IconButton>
 				<IconButton
-					className="m-3 p-1"
+					class="m-3 p-1"
 					onClick={changeSetting({ offsetX: offsetX - 1 })}
 				>
-					<ArrowSmallRightIcon className="h-6 w-6" />
+					<ArrowSmallRightIcon class="h-6 w-6" />
 				</IconButton>
 			</div>
-			<div className="mx-2 mb-2 flex justify-center">
+			<div class="mx-2 mb-2 flex justify-center">
 				<Select
-					className="w-40"
+					class="w-40"
 					value={currentSettings.scaleHighlight}
 					onSelect={(value) =>
 						onSettingsChanged({
@@ -345,7 +345,7 @@ function KeyboardSettings({
 						.map(([label, value]) => ({ value, label }))}
 				/>
 				<Select
-					className="ml-2 w-20"
+					class="ml-2 w-20"
 					value={currentSettings.baseNote}
 					onSelect={(value) =>
 						onSettingsChanged({
@@ -366,9 +366,9 @@ function KeyboardSettings({
 					})}
 				/>
 			</div>
-			<div className="mx-2 mb-2 flex justify-center">
+			<div class="mx-2 mb-2 flex justify-center">
 				<Select
-					className="w-40"
+					class="w-40"
 					value={currentSettings.toneColorType}
 					onSelect={(value) =>
 						onSettingsChanged({
@@ -382,7 +382,7 @@ function KeyboardSettings({
 				/>
 				<Input
 					type="number"
-					className="ml-2 w-20 px-2"
+					class="ml-2 w-20 px-2"
 					value={currentSettings.keyLength}
 					onChange={(value) =>
 						onSettingsChanged({

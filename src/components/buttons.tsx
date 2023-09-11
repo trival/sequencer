@@ -13,7 +13,7 @@ import { usePopper } from 'react-popper'
 
 interface ButtonProps extends PropsWithChildren {
 	onClick?: () => void
-	className?: string
+	class?: string
 	color?: keyof typeof btnColors
 	type?: 'button' | 'submit' | 'reset'
 }
@@ -30,17 +30,17 @@ const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:
 export const IconButton = ({
 	children,
 	onClick,
-	className,
+	class,
 	color = 'white',
 	type = 'button',
 }: ButtonProps) => (
 	<button
 		type={type}
-		className={clsx(
+		class={clsx(
 			'rounded-full shadow-sm shadow-slate-400',
 			btnColors[color],
 			btnFocus,
-			className,
+			class,
 		)}
 		onClick={onClick}
 	>
@@ -51,17 +51,17 @@ export const IconButton = ({
 export const Button = ({
 	children,
 	onClick,
-	className,
+	class,
 	color = 'white',
 	type = 'button',
 }: ButtonProps) => (
 	<button
 		type={type}
-		className={clsx(
+		class={clsx(
 			'rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm',
 			btnColors[color],
 			btnFocus,
-			className,
+			class,
 		)}
 		onClick={onClick}
 	>
@@ -76,7 +76,7 @@ interface PopoverChildren {
 export const IconButtonPopover = ({
 	children,
 	buttonChildren,
-	className,
+	class,
 	color = 'white',
 }: Omit<ButtonProps, 'children'> & {
 	buttonChildren: ReactNode
@@ -88,22 +88,22 @@ export const IconButtonPopover = ({
 	)
 	const { styles, attributes } = usePopper(referenceElement, popperElement)
 	return (
-		<Popover className="relative">
+		<Popover class="relative">
 			<Popover.Button
 				ref={setReferenceElement}
 				type="button"
-				className={clsx(
+				class={clsx(
 					'm-2 rounded-full p-2 shadow-sm shadow-slate-400',
 					btnColors[color],
 					btnFocus,
-					className,
+					class,
 				)}
 			>
 				{buttonChildren}
 			</Popover.Button>
 			<Popover.Panel
 				ref={setPopperElement}
-				className="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
+				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
 				style={styles.popper}
 				{...attributes.popper}
 			>
@@ -121,7 +121,7 @@ export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	return (
 		<IconButtonPopover
 			color="rose"
-			buttonChildren={<TrashIcon className="h-6 w-6" aria-hidden="true" />}
+			buttonChildren={<TrashIcon class="h-6 w-6" aria-hidden="true" />}
 		>
 			{({ close }) => (
 				<Button
@@ -142,7 +142,7 @@ export const AddButton = ({ children }: PopoverChildren) => {
 	return (
 		<IconButtonPopover
 			color="indigo"
-			buttonChildren={<PlusIcon className="h-6 w-6" aria-hidden="true" />}
+			buttonChildren={<PlusIcon class="h-6 w-6" aria-hidden="true" />}
 		>
 			{children}
 		</IconButtonPopover>
@@ -154,7 +154,7 @@ export const EditButton = ({ children }: PopoverChildren) => {
 		<IconButtonPopover
 			color="teal"
 			buttonChildren={
-				<PencilSquareIcon className="h-6 w-6" aria-hidden="true" />
+				<PencilSquareIcon class="h-6 w-6" aria-hidden="true" />
 			}
 		>
 			{children}
@@ -165,28 +165,28 @@ export const EditButton = ({ children }: PopoverChildren) => {
 interface PlayButtonProps {
 	isPlaying?: boolean
 	onClick: () => void
-	className?: string
+	class?: string
 }
 export const PlayButton = ({
 	isPlaying,
 	onClick,
-	className,
+	class,
 }: PlayButtonProps) => {
 	return (
 		<button
 			type="button"
 			onClick={onClick}
-			className={clsx(
+			class={clsx(
 				'm-2 rounded p-2 shadow-sm',
 				btnColors.white,
 				btnFocus,
-				className,
+				class,
 			)}
 		>
 			{isPlaying ? (
-				<PauseIcon className="h-6 w-6" />
+				<PauseIcon class="h-6 w-6" />
 			) : (
-				<PlayIcon className="h-6 w-6" />
+				<PlayIcon class="h-6 w-6" />
 			)}
 		</button>
 	)

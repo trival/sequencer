@@ -169,8 +169,8 @@ export default function PlayerTest() {
 
 	return (
 		<div>
-			<div className="relative h-[620px] w-[620px] max-w-full shadow-md">
-				<div className="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
+			<div class="relative h-[620px] w-[620px] max-w-full shadow-md">
+				<div class="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
 					<Keyboard
 						activeNotes={activeNote ? activeNote.midiNotes : synth.playingNotes}
 						onNoteActivated={onActivateNote}
@@ -183,7 +183,7 @@ export default function PlayerTest() {
 					/>
 				</div>
 			</div>
-			<div className="mt-2">
+			<div class="mt-2">
 				<Track
 					song={song}
 					isPlaying={isPlaying}
@@ -194,7 +194,7 @@ export default function PlayerTest() {
 					onAddBefore={onNoteAddedBefore}
 					onAddAfter={onNoteAddedAfter}
 					onDurationChanged={onDurationChanged}
-				></Track>
+				/>
 			</div>
 		</div>
 	)

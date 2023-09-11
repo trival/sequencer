@@ -3,7 +3,6 @@
 import { Track } from '@/components/track'
 import { TrackNote, useSong } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
-import { useState } from 'react'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 
 const initialMelody: TrackNote[] = [
@@ -75,7 +74,7 @@ export default function EditorPage() {
 	}
 
 	return (
-		<div className="p-10">
+		<div class="p-10">
 			<h1>Track test</h1>
 			<Track
 				song={song}
@@ -87,7 +86,7 @@ export default function EditorPage() {
 				onAddBefore={onNoteAddedBefore}
 				onAddAfter={onNoteAddedAfter}
 				onDurationChanged={onDurationChanged}
-			></Track>
+			/>
 		</div>
 	)
 }

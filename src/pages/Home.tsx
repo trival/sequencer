@@ -4,7 +4,6 @@ import { Keyboard, KeyboardSettings } from '@/components/keyboard'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { useState } from 'react'
 
 export default function Home() {
 	const synth = useSynth()
@@ -25,7 +24,7 @@ export default function Home() {
 	})
 
 	return (
-		<div className="relative h-screen max-w-full">
+		<div class="relative h-screen max-w-full">
 			<Keyboard
 				activeNotes={synth.playingNotes}
 				onNoteActivated={onActivateNote}

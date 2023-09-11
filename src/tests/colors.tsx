@@ -1,3 +1,4 @@
+import { For } from 'solid-js'
 import { ToneHighlight, ToneValue, chromaticBgColor } from '@/utils/tone-colors'
 
 interface TestColorProps {
@@ -5,52 +6,45 @@ interface TestColorProps {
 	value: ToneValue
 }
 
-const TestColor = ({ color, value }: TestColorProps) => {
+const TestColor = (props: TestColorProps) => {
 	return (
 		<div
-			className="m-1 box-border h-20 w-20 touch-none select-none rounded-md px-4 py-3 text-gray-800"
-			v-for="c in chromNoneColors"
-			key={value}
-			style={{ backgroundColor: color }}
-			title={color}
+			class="m-1 box-border h-20 w-20 touch-none select-none rounded-md px-4 py-3 text-gray-800"
+			style={{ 'background-color': props.color }}
+			title={props.color}
 		>
-			{value}
+			{props.value}
 		</div>
 	)
 }
 
-const TestColors = ({
-	values,
-	highlight,
-}: {
+const TestColors = (props: {
 	values: ToneValue[]
 	highlight: ToneHighlight
-}) => {
-	return (
-		<>
-			<div className="flex">
-				{values.map((value) => (
+}) => (
+	<>
+		<div class="flex">
+			<For each={props.values}>
+				{(value) => (
 					<TestColor
-						key={value}
-						color={chromaticBgColor({ value, highlight })}
+						color={chromaticBgColor({ value, highlight: props.highlight })}
 						value={value}
 					/>
-				))}
-			</div>
-			<div className="flex">
-				{values
-					.map((val) => ((val + 6) % 12) as ToneValue)
-					.map((value) => (
-						<TestColor
-							key={value}
-							color={chromaticBgColor({ value, highlight })}
-							value={value}
-						/>
-					))}
-			</div>
-		</>
-	)
-}
+				)}
+			</For>
+		</div>
+		<div class="flex">
+			<For each={props.values.map((val) => ((val + 6) % 12) as ToneValue)}>
+				{(value) => (
+					<TestColor
+						color={chromaticBgColor({ value, highlight: props.highlight })}
+						value={value}
+					/>
+				)}
+			</For>
+		</div>
+	</>
+)
 
 const ColorTestPage = () => {
 	const chromaticValues: ToneValue[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
@@ -59,9 +53,9 @@ const ColorTestPage = () => {
 	]
 
 	return (
-		<div className="flex items-center justify-center">
+		<div class="flex items-center justify-center">
 			<div>
-				<h2 className="my-6 font-bold">Chromatic Scale</h2>
+				<h2 class="my-6 font-bold">Chromatic Scale</h2>
 				<h3>No Highlight</h3>
 				<TestColors values={chromaticValues} highlight={ToneHighlight.None} />
 				<h3>Soft Highlight</h3>
@@ -69,7 +63,7 @@ const ColorTestPage = () => {
 				<h3>Strong Highlight</h3>
 				<TestColors values={chromaticValues} highlight={ToneHighlight.Strong} />
 
-				<h2 className="my-6 font-bold">Circle of Fifths</h2>
+				<h2 class="my-6 font-bold">Circle of Fifths</h2>
 				<h3>No Highlight</h3>
 				<TestColors
 					values={circleOfFifthsValues}

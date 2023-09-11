@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useMemo } from 'react'
 import * as Tone from 'tone'
 import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
-import { useImmer } from 'use-immer'
 
 export interface TrackNote {
 	midiNotes: number[]
@@ -119,14 +117,14 @@ export const useSong = (data: SongData) => {
 				}
 			})
 		},
-		[updateSong],
+		[updateSong]
 	)
 
 	const changeDuration = useCallback(
 		(
 			trackIdx: number,
 			noteIdx: number,
-			duration: Subdivision | Subdivision[],
+			duration: Subdivision | Subdivision[]
 		) => {
 			updateSong((song) => {
 				const track = song[trackIdx]
@@ -139,7 +137,7 @@ export const useSong = (data: SongData) => {
 				}
 			})
 		},
-		[updateSong],
+		[updateSong]
 	)
 
 	const addNote = useCallback(
@@ -165,7 +163,7 @@ export const useSong = (data: SongData) => {
 				}
 			})
 		},
-		[updateSong],
+		[updateSong]
 	)
 
 	const updateNoteTones = useCallback(
@@ -178,7 +176,7 @@ export const useSong = (data: SongData) => {
 				note.midiNotes = midiNotes
 			})
 		},
-		[updateSong],
+		[updateSong]
 	)
 
 	return useMemo(
@@ -190,6 +188,6 @@ export const useSong = (data: SongData) => {
 			changeDuration,
 			updateNoteTones,
 		}),
-		[song, updateSong, removeNote, addNote, changeDuration, updateNoteTones],
+		[song, updateSong, removeNote, addNote, changeDuration, updateNoteTones]
 	)
 }

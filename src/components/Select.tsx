@@ -14,7 +14,7 @@ export interface SelectProps {
 	value?: string | number
 	onSelect: (id: string | number) => void
 	label?: string
-	className?: string
+	class?: string
 }
 
 export function ComboSelect({
@@ -22,7 +22,7 @@ export function ComboSelect({
 	value,
 	onSelect,
 	label,
-	className,
+	class,
 }: SelectProps) {
 	const [query, setQuery] = useState('')
 
@@ -42,30 +42,30 @@ export function ComboSelect({
 			onChange={(opt) => onSelect(opt.value)}
 		>
 			{label && (
-				<Combobox.Label className="mb-2 block text-sm font-medium leading-6 text-gray-900">
+				<Combobox.Label class="mb-2 block text-sm font-medium leading-6 text-gray-900">
 					{label}
 				</Combobox.Label>
 			)}
-			<div className={clsx('relative', className)}>
+			<div class={clsx('relative', class)}>
 				<Combobox.Input
-					className="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+					class="w-full rounded-md border-0 bg-white py-1.5 pl-3 pr-10 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
 					onChange={(event) => setQuery(event.target.value)}
 					displayValue={(option: SelectOption) => option.label}
 				/>
-				<Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+				<Combobox.Button class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
 					<ChevronUpDownIcon
-						className="h-5 w-5 text-gray-400"
+						class="h-5 w-5 text-gray-400"
 						aria-hidden="true"
 					/>
 				</Combobox.Button>
 
 				{filteredOptions.length > 0 && (
-					<Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+					<Combobox.Options class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
 						{filteredOptions.map((option) => (
 							<Combobox.Option
 								key={option.value}
 								value={option}
-								className={({ active }) =>
+								class={({ active }) =>
 									clsx(
 										'relative cursor-default select-none py-2 pl-3 pr-9',
 										active ? 'bg-indigo-600 text-white' : 'text-gray-900',
@@ -75,7 +75,7 @@ export function ComboSelect({
 								{({ active, selected }) => (
 									<>
 										<span
-											className={clsx(
+											class={clsx(
 												'block truncate',
 												selected && 'font-semibold',
 											)}
@@ -85,12 +85,12 @@ export function ComboSelect({
 
 										{selected && (
 											<span
-												className={clsx(
+												class={clsx(
 													'absolute inset-y-0 right-0 flex items-center pr-4',
 													active ? 'text-white' : 'text-indigo-600',
 												)}
 											>
-												<CheckIcon className="h-5 w-5" aria-hidden="true" />
+												<CheckIcon class="h-5 w-5" aria-hidden="true" />
 											</span>
 										)}
 									</>
@@ -109,15 +109,15 @@ export function Select({
 	value,
 	onSelect,
 	label,
-	className,
+	class,
 }: SelectProps) {
 	const id = useMemo(() => Math.random().toString(36).substr(2, 9), [])
 	return (
-		<div className={className}>
+		<div class={class}>
 			{label && (
 				<label
 					htmlFor={id}
-					className="bb-2 block text-sm font-medium leading-6 text-gray-900"
+					class="bb-2 block text-sm font-medium leading-6 text-gray-900"
 				>
 					{label}
 				</label>
@@ -126,7 +126,7 @@ export function Select({
 				id={id}
 				value={value}
 				onChange={(event) => onSelect(event.target.value)}
-				className={clsx(
+				class={clsx(
 					'block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6',
 				)}
 			>
@@ -144,23 +144,23 @@ interface InputProps {
 	value?: string | number
 	onChange: (value: string | number) => void
 	type?: 'text' | 'email' | 'password' | 'number'
-	className?: string
+	class?: string
 }
 
 export const Input = ({
 	value,
 	onChange,
 	type = 'text',
-	className,
+	class,
 }: InputProps) => {
 	return (
 		<input
 			type={type}
 			value={value}
 			onChange={(event) => onChange(event.target.value)}
-			className={clsx(
+			class={clsx(
 				'rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6',
-				className,
+				class,
 			)}
 		/>
 	)
