@@ -3,6 +3,7 @@
 import { Track } from '@/components/track'
 import { TrackNote, useSong } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
+import { createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 
 const initialMelody: TrackNote[] = [
@@ -22,10 +23,10 @@ export default function EditorPage() {
 		tracks: [initialMelody],
 	})
 
-	const [activeNoteIdx, setActiveNoteIdx] = useState<[number, number] | null>(
-		null,
-	)
-	const [isPlaying, setIsPlaying] = useState(false)
+	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
+		[number, number] | null
+	>(null)
+	const [isPlaying, setIsPlaying] = createSignal(false)
 
 	const onNoteClicked = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteClicked', trackIdx, noteIdx)
@@ -77,10 +78,10 @@ export default function EditorPage() {
 		<div class="p-10">
 			<h1>Track test</h1>
 			<Track
-				song={song}
-				isPlaying={isPlaying}
+				song={song()}
+				isPlaying={isPlaying()}
 				onPlay={() => setIsPlaying(!isPlaying)}
-				activeNoteIdx={activeNoteIdx}
+				activeNoteIdx={activeNoteIdx()}
 				onNoteClicked={onNoteClicked}
 				onRemove={onNoteRemoved}
 				onAddBefore={onNoteAddedBefore}

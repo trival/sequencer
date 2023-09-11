@@ -1,17 +1,12 @@
 import { tw } from '@/styles/tw-utils'
-import { Popover, PopoverPanelProps } from '@headlessui/react'
-import {
-	PlusIcon,
-	PlayIcon,
-	PauseIcon,
-	StopIcon,
-} from '@heroicons/react/20/solid'
-import { TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
+import { Icon } from 'solid-heroicons'
+import { plus, play, pause, stop } from 'solid-heroicons/solid'
+import { trash, pencilSquare } from 'solid-heroicons/outline'
 import clsx from 'clsx'
-import { ElementType, PropsWithChildren, ReactNode, useState } from 'react'
-import { usePopper } from 'react-popper'
+import { JSX, ParentProps, createSignal, mergeProps, onMount } from 'solid-js'
+import { createPopper } from '@popperjs/core'
 
-interface ButtonProps extends PropsWithChildren {
+interface ButtonProps {
 	onClick?: () => void
 	class?: string
 	color?: keyof typeof btnColors
@@ -27,87 +22,79 @@ const btnColors = {
 
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
 
-export const IconButton = ({
-	children,
-	onClick,
-	class,
-	color = 'white',
-	type = 'button',
-}: ButtonProps) => (
-	<button
-		type={type}
-		class={clsx(
-			'rounded-full shadow-sm shadow-slate-400',
-			btnColors[color],
-			btnFocus,
-			class,
-		)}
-		onClick={onClick}
-	>
-		{children}
-	</button>
-)
-
-export const Button = ({
-	children,
-	onClick,
-	class,
-	color = 'white',
-	type = 'button',
-}: ButtonProps) => (
-	<button
-		type={type}
-		class={clsx(
-			'rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm',
-			btnColors[color],
-			btnFocus,
-			class,
-		)}
-		onClick={onClick}
-	>
-		{children}
-	</button>
-)
-
-interface PopoverChildren {
-	children: PopoverPanelProps<ElementType>['children']
+export const IconButton = (_props: ParentProps<ButtonProps>) => {
+	const props = mergeProps({ color: 'white', type: 'button' }, _props)
+	return (
+		<button
+			type={props.type}
+			class={clsx(
+				'rounded-full shadow-sm shadow-slate-400',
+				btnColors[props.color],
+				btnFocus,
+				props.class,
+			)}
+			onClick={() => props.onClick()}
+		>
+			{props.children}
+		</button>
+	)
 }
 
-export const IconButtonPopover = ({
-	children,
-	buttonChildren,
-	class,
-	color = 'white',
-}: Omit<ButtonProps, 'children'> & {
-	buttonChildren: ReactNode
-} & PopoverChildren) => {
-	const [referenceElement, setReferenceElement] =
-		useState<HTMLButtonElement | null>(null)
-	const [popperElement, setPopperElement] = useState<HTMLDivElement | null>(
-		null,
+export const Button = (_props: ParentProps<ButtonProps>) => {
+	const props = mergeProps({ color: 'white', type: 'button' }, _props)
+	return (
+		<button
+			type={props.type}
+			class={clsx(
+				'rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm',
+				btnColors[props.color],
+				btnFocus,
+				props.class,
+			)}
+			onClick={() => props.onClick}
+		>
+			{props.children}
+		</button>
 	)
-	const { styles, attributes } = usePopper(referenceElement, popperElement)
+}
+
+export const IconButtonPopover = (
+	_props: ParentProps<
+		ButtonProps & {
+			buttonElement: JSX.Element
+		}
+	>,
+) => {
+	const props = mergeProps({ color: 'white' }, _props)
+
+	let referenceElement: HTMLButtonElement
+	let popperElement: HTMLDivElement
+
+	onMount(() => {
+		createPopper(referenceElement, popperElement)
+	})
+
 	return (
 		<Popover class="relative">
 			<Popover.Button
-				ref={setReferenceElement}
+				ref={referenceElement}
 				type="button"
 				class={clsx(
 					'm-2 rounded-full p-2 shadow-sm shadow-slate-400',
-					btnColors[color],
+					btnColors[props.color],
 					btnFocus,
-					class,
+					props.class,
 				)}
 			>
-				{buttonChildren}
+				{props.buttonElement}
 			</Popover.Button>
 			<Popover.Panel
-				ref={setPopperElement}
+				ref={popperElement}
 				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
 				style={styles.popper}
 				{...attributes.popper}
 			>
-				{children}
+				{props.children}
 			</Popover.Panel>
 		</Popover>
 	)
@@ -117,7 +104,7 @@ interface DeleteButtonProps {
 	onConfirm: () => void
 }
 
-export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
+export const DeleteButton = (props: DeleteButtonProps) => {
 	return (
 		<IconButtonPopover
 			color="rose"
@@ -128,7 +115,7 @@ export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 					color="rose"
 					onClick={() => {
 						close()
-						onConfirm()
+						props.onConfirm()
 					}}
 				>
 					Confirm
@@ -138,26 +125,24 @@ export const DeleteButton = ({ onConfirm }: DeleteButtonProps) => {
 	)
 }
 
-export const AddButton = ({ children }: PopoverChildren) => {
+export const AddButton = (props: PopoverChildren) => {
 	return (
 		<IconButtonPopover
 			color="indigo"
 			buttonChildren={<PlusIcon class="h-6 w-6" aria-hidden="true" />}
 		>
-			{children}
+			{props.children}
 		</IconButtonPopover>
 	)
 }
 
-export const EditButton = ({ children }: PopoverChildren) => {
+export const EditButton = (props: PopoverChildren) => {
 	return (
 		<IconButtonPopover
 			color="teal"
-			buttonChildren={
-				<PencilSquareIcon class="h-6 w-6" aria-hidden="true" />
-			}
+			buttonChildren={<PencilSquareIcon class="h-6 w-6" aria-hidden="true" />}
 		>
-			{children}
+			{props.children}
 		</IconButtonPopover>
 	)
 }
@@ -167,23 +152,19 @@ interface PlayButtonProps {
 	onClick: () => void
 	class?: string
 }
-export const PlayButton = ({
-	isPlaying,
-	onClick,
-	class,
-}: PlayButtonProps) => {
+export const PlayButton = (props: PlayButtonProps) => {
 	return (
 		<button
 			type="button"
-			onClick={onClick}
+			onClick={props.onClick}
 			class={clsx(
 				'm-2 rounded p-2 shadow-sm',
 				btnColors.white,
 				btnFocus,
-				class,
+				props.class,
 			)}
 		>
-			{isPlaying ? (
+			{props.isPlaying ? (
 				<PauseIcon class="h-6 w-6" />
 			) : (
 				<PlayIcon class="h-6 w-6" />

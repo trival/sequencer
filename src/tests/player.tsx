@@ -6,9 +6,9 @@ import { TrackNote, ProcessedNote, useSong } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { useState } from 'react'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import * as Tone from 'tone'
+import { createSignal } from 'solid-js'
 
 const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -27,18 +27,18 @@ export default function PlayerTest() {
 	const { song, addNote, removeNote, changeDuration, updateNoteTones } =
 		useSong({ bpm: 160, tracks: [initialMelody] })
 
-	const [activeNoteIdx, setActiveNoteIdx] = useState<[number, number] | null>(
-		null,
-	)
-	const [isPlaying, setIsPlaying] = useState(false)
-	const [playingSequence, setPlayingSequence] = useState<
+	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
+		[number, number] | null
+	>(null)
+	const [isPlaying, setIsPlaying] = createSignal(false)
+	const [playingSequence, setPlayingSequence] = createSignal<
 		Tone.Part<ProcessedNote>[] | null
 	>(null)
 
 	const onPlay = async () => {
 		if (!isPlaying) {
 			await Tone.start()
-			const seqs = song.map((track, i) => {
+			const seqs = song().map((track, i) => {
 				const seq = new Tone.Part((time, note: ProcessedNote) => {
 					synth.play(note.midiNotes, note.duration, time)
 					setActiveNoteIdx([i, track.notes.indexOf(note)])
@@ -63,7 +63,7 @@ export default function PlayerTest() {
 			setPlayingSequence(seqs)
 			setIsPlaying(true)
 		} else {
-			playingSequence?.forEach((seq) => {
+			playingSequence()?.forEach((seq) => {
 				seq.stop()
 			})
 
@@ -157,7 +157,7 @@ export default function PlayerTest() {
 		changeDuration(trackIdx, noteIdx, duration)
 	}
 
-	const [settings, setSettings] = useState<Partial<KeyboardSettings>>({
+	const [settings, setSettings] = createSignal<Partial<KeyboardSettings>>({
 		baseNote: toMidi('C3'),
 		scaleHighlight: ScaleHighlight.Major,
 		toneColorType: ToneColorType.CircleOfFiths,
@@ -185,9 +185,9 @@ export default function PlayerTest() {
 			</div>
 			<div class="mt-2">
 				<Track
-					song={song}
-					isPlaying={isPlaying}
-					activeNoteIdx={activeNoteIdx}
+					song={song()}
+					isPlaying={isPlaying()}
+					activeNoteIdx={activeNoteIdx()}
 					onPlay={onPlay}
 					onNoteClicked={onNoteClicked}
 					onRemove={onNoteRemoved}

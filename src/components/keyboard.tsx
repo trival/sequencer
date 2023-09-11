@@ -9,18 +9,25 @@ import {
 	mod,
 } from '@/utils/tone-colors'
 import clsx from 'clsx'
-import { useEffect, useMemo, useRef, useState } from 'react'
 import * as Tone from 'tone'
-import { Popover } from '@headlessui/react'
-import { ChartBarIcon } from '@heroicons/react/20/solid'
+import { chartBar } from 'solid-heroicons/solid-mini'
 import {
-	ArrowSmallDownIcon,
-	ArrowSmallLeftIcon,
-	ArrowSmallRightIcon,
-	ArrowSmallUpIcon,
-} from '@heroicons/react/24/outline'
+	arrowSmallDown,
+	arrowSmallLeft,
+	arrowSmallRight,
+	arrowSmallUp,
+} from 'solid-heroicons/outline'
 import { IconButton } from './buttons'
 import { Input, Select } from './Select'
+import { Icon } from 'solid-heroicons'
+import {
+	For,
+	createMemo,
+	createSignal,
+	mergeProps,
+	onCleanup,
+	onMount,
+} from 'solid-js'
 
 type Mode = 'Record' | 'Play'
 
@@ -59,230 +66,230 @@ const defaultSettings: KeyboardSettings = {
 	toneColorType: ToneColorType.CircleOfFiths,
 } as const
 
-export const Keyboard: React.FC<KeyboardProps> = ({
-	activeNotes = [],
-	onNoteActivated = () => {},
-	onNoteDeactivated = () => {},
-	onSettingsChanged,
-	class,
-	settings,
-}: KeyboardProps) => {
-	const currentSettings: KeyboardSettings = { ...defaultSettings, ...settings }
-	const {
-		keyLength,
-		baseNote,
-		maxCols,
-		maxRows,
-		mode,
-		offsetX,
-		offsetY,
-		scaleHighlight,
-		toneColorType,
-	} = currentSettings
-
-	const keySize = keyLength + 2 * keyMargin
-
-	const [pointerDown, setPointerDown] = useState(false)
-	const wrapperRef = useRef<HTMLDivElement>(null)
-
-	const baseFrequency = useMemo(
-		() => Tone.Frequency(baseNote, 'midi'),
-		[baseNote],
+export const Keyboard = (_props: KeyboardProps) => {
+	const props = mergeProps(
+		{ activeNotes: [], onNoteActivated: () => {}, onNoteDeactivated: () => {} },
+		_props,
 	)
 
-	const notes = useMemo(() => {
-		return activeNotes.reduce((acc, note) => {
-			acc[note] = true
-			return acc
-		}, {} as Record<number, boolean>)
-	}, [activeNotes])
+	const settings = createMemo((): KeyboardSettings => {
+		return {
+			...defaultSettings,
+			...props.settings,
+		}
+	})
+
+	const keySize = () => settings().keyLength + 2 * keyMargin
+
+	const [pointerDown, setPointerDown] = createSignal(false)
+	let wrapperRef: HTMLDivElement
+
+	const baseFrequency = () => Tone.Frequency(settings().baseNote, 'midi')
+
+	const notes = () => {
+		return props.activeNotes.reduce(
+			(acc, note) => {
+				acc[note] = true
+				return acc
+			},
+			{} as Record<number, boolean>,
+		)
+	}
 
 	const toneBg = (tone: ToneValue) =>
 		getToneBgColor(
 			tone,
-			midiToToneValue(baseNote),
-			scaleHighlight,
-			toneColorType,
+			midiToToneValue(settings().baseNote),
+			settings().scaleHighlight,
+			settings().toneColorType,
 		)
 
 	const isToneBgDark = (tone: ToneValue) => {
 		let color = getScaleToneColor(
 			tone,
-			midiToToneValue(baseNote),
-			scaleHighlight,
+			midiToToneValue(settings().baseNote),
+			settings().scaleHighlight,
 		)
 		return color.highlight === ToneHighlight.Strong
 	}
 
 	const onPointerDown = (midi: number) => {
 		setPointerDown(true)
-		if (mode === 'Record') {
+		if (settings().mode === 'Record') {
 			if (notes[midi]) {
-				onNoteDeactivated(midi)
+				props.onNoteDeactivated(midi)
 			} else {
-				onNoteActivated(midi)
+				props.onNoteActivated(midi)
 			}
 		} else {
-			onNoteActivated(midi)
+			props.onNoteActivated(midi)
 		}
 	}
 
 	const onPointerUp = (midi: number) => {
 		setPointerDown(false)
-		if (mode === 'Play') {
-			onNoteDeactivated(midi)
+		if (settings().mode === 'Play') {
+			props.onNoteDeactivated(midi)
 		}
 	}
 
 	const onPointerEnter = (midi: number) => {
 		if (pointerDown) {
-			if (mode === 'Record') {
+			if (settings().mode === 'Record') {
 				if (notes[midi]) {
-					onNoteDeactivated(midi)
+					props.onNoteDeactivated(midi)
 				} else {
-					onNoteActivated(midi)
+					props.onNoteActivated(midi)
 				}
 			} else {
-				onNoteActivated(midi)
+				props.onNoteActivated(midi)
 			}
 		}
 	}
 
 	const onPointerOut = (midi: number) => {
 		if (pointerDown) {
-			if (mode === 'Play') {
-				onNoteDeactivated(midi)
+			if (settings().mode === 'Play') {
+				props.onNoteDeactivated(midi)
 			}
 		}
 	}
 
-	const stopPreventAnd = (fn: () => void) => (e: React.BaseSyntheticEvent) => {
+	const stopPreventAnd = (fn: () => void) => (e: Event) => {
 		e.preventDefault()
 		e.stopPropagation()
 		fn()
 		return false
 	}
 
-	const preventAnd = (fn: () => void) => (e: React.BaseSyntheticEvent) => {
+	const preventAnd = (fn: () => void) => (e: Event) => {
 		e.preventDefault()
 		fn()
 	}
 
 	// compute the keys
 
-	const [width, setWidth] = useState(maxCols)
-	const [height, setHeight] = useState(maxRows)
+	const [width, setWidth] = createSignal(0)
+	const [height, setHeight] = createSignal(0)
 
-	useEffect(() => {
-		function rescale() {
-			if (wrapperRef.current) {
-				const { width: boxWidth, height: boxHeight } =
-					wrapperRef.current.getBoundingClientRect()
-				console.log(
-					boxHeight,
-					wrapperRef.current.clientHeight,
-					wrapperRef.current.offsetHeight,
-				)
-				const cols = Math.min(
-					Math.floor((boxWidth - 2 * keyMargin) / keySize),
-					maxCols,
-				)
-				const rows = Math.min(
-					Math.floor((boxHeight - 2 * keyMargin) / keySize),
-					maxRows,
-				)
-				setWidth(cols)
-				setHeight(rows)
-			}
+	function rescale() {
+		if (wrapperRef) {
+			const { width: boxWidth, height: boxHeight } =
+				wrapperRef.getBoundingClientRect()
+
+			console.log(boxHeight, wrapperRef.clientHeight, wrapperRef.offsetHeight)
+
+			const cols = Math.min(
+				Math.floor((boxWidth - 2 * keyMargin) / keySize()),
+				settings().maxCols,
+			)
+			const rows = Math.min(
+				Math.floor((boxHeight - 2 * keyMargin) / keySize()),
+				settings().maxRows,
+			)
+
+			setWidth(cols)
+			setHeight(rows)
 		}
+	}
 
+	onMount(() => {
 		rescale()
 
 		window.addEventListener('resize', rescale)
-		return () => window.removeEventListener('resize', rescale)
-	}, [keySize, maxCols, maxRows])
+	})
 
-	const base = baseFrequency.transpose(-2 + offsetX + (-2 + offsetY) * 5)
-	const keys = []
-	let rowStart = 0
+	onCleanup(() => {
+		window.removeEventListener('resize', rescale)
+	})
 
-	for (let i = 0; i < height; i++) {
-		const row = []
+	const base = () =>
+		baseFrequency().transpose(
+			-2 + settings().offsetX + (-2 + settings().offsetY) * 5,
+		)
 
-		for (let j = 0; j < width; j++) {
-			const val = rowStart + j
-			const f = base.transpose(val)
-			const midi = f.toMidi()
-			row.push({
-				frequency: f,
-				midi,
-				toneColor: mod(midi, 12) as ToneValue,
-			})
+	const keys = createMemo(() => {
+		const ks = []
+		let rowStart = 0
+
+		for (let i = 0; i < height(); i++) {
+			const row = []
+
+			for (let j = 0; j < width(); j++) {
+				const val = rowStart + j
+				const f = base().transpose(val)
+				const midi = f.toMidi()
+				row.push({
+					frequency: f,
+					midi,
+					toneColor: mod(midi, 12) as ToneValue,
+				})
+			}
+
+			ks.push(row)
+			rowStart += 5
 		}
 
-		keys.push(row)
-		rowStart += 5
-	}
-
-	keys.reverse()
+		return ks.reverse()
+	})
 
 	return (
 		<div
 			ref={wrapperRef}
 			class={clsx(
-				class,
+				props.class,
 				'relative flex max-h-full max-w-full items-center justify-evenly overflow-hidden',
 			)}
 			style={{
-				height: `${maxRows * keySize + 2 * keyMargin}px`,
-				width: `${maxCols * keySize + 2 * keyMargin}px`,
+				height: `${settings().maxRows * keySize() + 2 * keyMargin}px`,
+				width: `${settings().maxCols * keySize() + 2 * keyMargin}px`,
 			}}
 		>
-			{onSettingsChanged && (
+			{props.onSettingsChanged && (
 				<Popover class="absolute right-0 top-0">
 					<Popover.Button type="button" class="m-0">
-						<ChartBarIcon class="h-6 w-6 -rotate-90" />
+						<Icon path={chartBar} class="h-6 w-6 -rotate-90" />
 					</Popover.Button>
 					<Popover.Panel class="absolute right-8 top-1 rounded bg-gray-100/90 shadow-lg shadow-gray-400">
-						<KeyboardSettings
-							onSettingsChanged={onSettingsChanged}
-							currentSettings={currentSettings}
+						<KeyboardSettingsEditor
+							onSettingsChanged={props.onSettingsChanged}
+							currentSettings={settings()}
 						/>
 					</Popover.Panel>
 				</Popover>
 			)}
 
 			<div class="flex h-full w-full flex-col justify-evenly">
-				{keys.map((row, i) => (
-					<div
-						key={i}
-						class="flex w-full touch-none justify-evenly whitespace-nowrap"
-					>
-						{row.map((cell, j) => (
-							<button
-								class={clsx(
-									'box-border touch-none select-none rounded-md text-gray-700 shadow-sm transition-all',
-									{ 'scale-110 border-4 border-red-400': notes[cell.midi] },
+				<For each={keys()}>
+					{(row) => (
+						<div class="flex w-full touch-none justify-evenly whitespace-nowrap">
+							<For each={row}>
+								{(cell) => (
+									<button
+										class={clsx(
+											'box-border touch-none select-none rounded-md text-gray-700 shadow-sm transition-all',
+											{ 'scale-110 border-4 border-red-400': notes[cell.midi] },
+										)}
+										style={{
+											'background-color': toneBg(cell.toneColor),
+											width: `${settings().keyLength}px`,
+											height: `${settings().keyLength}px`,
+											margin: `${keyMargin}px`,
+											color: isToneBgDark(cell.toneColor) ? 'black' : undefined,
+										}}
+										onPointerDown={preventAnd(() => onPointerDown(cell.midi))}
+										onPointerUp={preventAnd(() => onPointerUp(cell.midi))}
+										onPointerEnter={preventAnd(() => onPointerEnter(cell.midi))}
+										onPointerOut={preventAnd(() => onPointerOut(cell.midi))}
+										onContextMenu={stopPreventAnd(() => {})}
+									>
+										{cell.frequency.toNote().replaceAll('#', '♯')}
+									</button>
 								)}
-								style={{
-									backgroundColor: toneBg(cell.toneColor),
-									width: `${keyLength}px`,
-									height: `${keyLength}px`,
-									margin: `${keyMargin}px`,
-									color: isToneBgDark(cell.toneColor) ? 'black' : undefined,
-								}}
-								key={j}
-								onPointerDown={preventAnd(() => onPointerDown(cell.midi))}
-								onPointerUp={preventAnd(() => onPointerUp(cell.midi))}
-								onPointerEnter={preventAnd(() => onPointerEnter(cell.midi))}
-								onPointerOut={preventAnd(() => onPointerOut(cell.midi))}
-								onContextMenu={stopPreventAnd(() => {})}
-							>
-								{cell.frequency.toNote().replaceAll('#', '♯')}
-							</button>
-						))}
-					</div>
-				))}
+							</For>
+						</div>
+					)}
+				</For>
 			</div>
 		</div>
 	)
@@ -293,50 +300,48 @@ type KeyboardSettingsProps = {
 	currentSettings: KeyboardSettings
 }
 
-function KeyboardSettings({
-	onSettingsChanged,
-	currentSettings,
-}: KeyboardSettingsProps) {
-	const { offsetX, offsetY } = currentSettings
+function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
+	const offsetX = () => props.currentSettings.offsetX
+	const offsetY = () => props.currentSettings.offsetY
 
 	const changeSetting = (setting: Partial<KeyboardSettings>) => () =>
-		onSettingsChanged({ ...currentSettings, ...setting })
+		props.onSettingsChanged({ ...props.currentSettings, ...setting })
 
 	return (
 		<div>
 			<div class="flex justify-center">
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetX: offsetX + 1 })}
+					onClick={changeSetting({ offsetX: offsetX() + 1 })}
 				>
-					<ArrowSmallLeftIcon class="h-6 w-6" />
+					<Icon path={arrowSmallLeft} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetY: offsetY - 1 })}
+					onClick={changeSetting({ offsetY: offsetY() - 1 })}
 				>
-					<ArrowSmallUpIcon class="h-6 w-6" />
+					<Icon path={arrowSmallUp} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetY: offsetY + 1 })}
+					onClick={changeSetting({ offsetY: offsetY() + 1 })}
 				>
-					<ArrowSmallDownIcon class="h-6 w-6" />
+					<Icon path={arrowSmallDown} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetX: offsetX - 1 })}
+					onClick={changeSetting({ offsetX: offsetX() - 1 })}
 				>
-					<ArrowSmallRightIcon class="h-6 w-6" />
+					<Icon path={arrowSmallRight} class="h-6 w-6" />
 				</IconButton>
 			</div>
 			<div class="mx-2 mb-2 flex justify-center">
 				<Select
 					class="w-40"
-					value={currentSettings.scaleHighlight}
+					value={props.currentSettings.scaleHighlight}
 					onSelect={(value) =>
-						onSettingsChanged({
-							...currentSettings,
+						props.onSettingsChanged({
+							...props.currentSettings,
 							scaleHighlight: parseInt(value as string) as ScaleHighlight,
 						})
 					}
@@ -346,15 +351,15 @@ function KeyboardSettings({
 				/>
 				<Select
 					class="ml-2 w-20"
-					value={currentSettings.baseNote}
+					value={props.currentSettings.baseNote}
 					onSelect={(value) =>
-						onSettingsChanged({
-							...currentSettings,
+						props.onSettingsChanged({
+							...props.currentSettings,
 							baseNote: value as number,
 						})
 					}
 					options={[...Array(12).keys()].map((i) => {
-						let start = currentSettings.baseNote - 4
+						let start = props.currentSettings.baseNote - 4
 						const note = start + i
 						return {
 							value: note,
@@ -369,10 +374,10 @@ function KeyboardSettings({
 			<div class="mx-2 mb-2 flex justify-center">
 				<Select
 					class="w-40"
-					value={currentSettings.toneColorType}
+					value={props.currentSettings.toneColorType}
 					onSelect={(value) =>
-						onSettingsChanged({
-							...currentSettings,
+						props.onSettingsChanged({
+							...props.currentSettings,
 							toneColorType: parseInt(value as string) as ToneColorType,
 						})
 					}
@@ -383,10 +388,10 @@ function KeyboardSettings({
 				<Input
 					type="number"
 					class="ml-2 w-20 px-2"
-					value={currentSettings.keyLength}
+					value={props.currentSettings.keyLength}
 					onChange={(value) =>
-						onSettingsChanged({
-							...currentSettings,
+						props.onSettingsChanged({
+							...props.currentSettings,
 							keyLength: parseInt(value as string),
 						})
 					}

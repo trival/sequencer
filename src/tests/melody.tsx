@@ -3,7 +3,7 @@
 import { TrackNote, ProcessedNote, useSong } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
-import { useEffect } from 'react'
+import { onMount } from 'solid-js'
 import * as Tone from 'tone'
 
 const melodyData: TrackNote[] = [
@@ -30,10 +30,10 @@ const melodyData: TrackNote[] = [
 ]
 
 export default function SequenceTest() {
-	useEffect(() => {
+	onMount(() => {
 		Tone.Transport.start()
 		Tone.Transport.bpm.value = 160
-	}, [])
+	})
 
 	const synth = useSynth()
 	const { song } = useSong({ bpm: 160, tracks: [melodyData] })

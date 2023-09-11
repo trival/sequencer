@@ -4,6 +4,7 @@ import { Keyboard, KeyboardSettings } from '@/components/keyboard'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
+import { createSignal } from 'solid-js'
 
 export default function Home() {
 	const synth = useSynth()
@@ -16,7 +17,7 @@ export default function Home() {
 		synth.stop([midi])
 	}
 
-	const [settings, setSettings] = useState<Partial<KeyboardSettings>>({
+	const [settings, setSettings] = createSignal<Partial<KeyboardSettings>>({
 		baseNote: toMidi('C3'),
 		scaleHighlight: ScaleHighlight.Major,
 		toneColorType: ToneColorType.CircleOfFiths,
@@ -26,11 +27,11 @@ export default function Home() {
 	return (
 		<div class="relative h-screen max-w-full">
 			<Keyboard
-				activeNotes={synth.playingNotes}
+				activeNotes={synth.playingNotes()}
 				onNoteActivated={onActivateNote}
 				onNoteDeactivated={onDeactivateNote}
 				onSettingsChanged={setSettings}
-				settings={settings}
+				settings={settings()}
 			/>
 		</div>
 	)

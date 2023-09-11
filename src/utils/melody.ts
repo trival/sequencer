@@ -1,3 +1,5 @@
+import { produce } from 'immer'
+import { createSignal, onMount } from 'solid-js'
 import * as Tone from 'tone'
 import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
 
@@ -71,16 +73,19 @@ function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
 	if (!Array.isArray(duration)) {
 		duration = [duration]
 	}
-	return duration.reduce((acc, val) => {
-		if (val) {
-			if (acc[val]) {
-				acc[val]++
-			} else {
-				acc[val] = 1
+	return duration.reduce(
+		(acc, val) => {
+			if (val) {
+				if (acc[val]) {
+					acc[val]++
+				} else {
+					acc[val] = 1
+				}
 			}
-		}
-		return acc
-	}, {} as Record<Subdivision, number>)
+			return acc
+		},
+		{} as Record<Subdivision, number>,
+	)
 }
 
 export function toDurations(duration: TimeObject): Subdivision[] {
@@ -99,95 +104,89 @@ const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 }
 
 export const useSong = (data: SongData) => {
-	const [song, updateSong] = useImmer<ProcessedTrack[]>([])
+	const [song, setSong] = createSignal<ProcessedTrack[]>([])
+	const updateSong = (
+		fn: ((song: ProcessedTrack[]) => void) | ProcessedTrack[],
+	) => {
+		setSong(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
+	}
 
-	useEffect(() => {
+	onMount(() => {
 		Tone.Transport.start()
 		Tone.Transport.bpm.value = data.bpm
 		updateSong(data.tracks.map((track) => processTrack(track)))
-	}, [data, updateSong])
+	})
 
-	const removeNote = useCallback(
-		(trackIdx: number, noteIdx: number) => {
-			updateSong((song) => {
-				const track = song[trackIdx]
-				if (track) {
-					track.notes = track.notes.filter((_, i) => i !== noteIdx)
-					recalculateTrack(track)
-				}
-			})
-		},
-		[updateSong]
-	)
+	const removeNote = (trackIdx: number, noteIdx: number) => {
+		updateSong((song) => {
+			const track = song[trackIdx]
+			if (track) {
+				track.notes = track.notes.filter((_, i) => i !== noteIdx)
+				recalculateTrack(track)
+			}
+		})
+	}
 
-	const changeDuration = useCallback(
-		(
-			trackIdx: number,
-			noteIdx: number,
-			duration: Subdivision | Subdivision[]
-		) => {
-			updateSong((song) => {
-				const track = song[trackIdx]
-				if (track) {
-					const note = track.notes[noteIdx]
-					if (note) {
-						note.subdivisions = duration
-						recalculateTrack(track)
-					}
-				}
-			})
-		},
-		[updateSong]
-	)
-
-	const addNote = useCallback(
-		(trackIdx: number, noteIdx: number, noteData: TrackNote) => {
-			updateSong((song) => {
-				const track = song[trackIdx]
-				if (track) {
-					const [before, after] = divideAt(track.notes, noteIdx)
-
-					track.notes = [
-						...before,
-						{
-							midiNotes: noteData.midiNotes,
-							subdivisions: noteData.duration,
-							duration: {},
-							durationSec: 0,
-							time: 0,
-						},
-						...after,
-					]
-
-					recalculateTrack(track)
-				}
-			})
-		},
-		[updateSong]
-	)
-
-	const updateNoteTones = useCallback(
-		(trackIdx: number, noteIdx: number, midiNotes: number[]) => {
-			updateSong((song) => {
-				const track = song[trackIdx]
-				if (!track) return
+	const changeDuration = (
+		trackIdx: number,
+		noteIdx: number,
+		duration: Subdivision | Subdivision[],
+	) => {
+		updateSong((song) => {
+			const track = song[trackIdx]
+			if (track) {
 				const note = track.notes[noteIdx]
-				if (!note) return
-				note.midiNotes = midiNotes
-			})
-		},
-		[updateSong]
-	)
+				if (note) {
+					note.subdivisions = duration
+					recalculateTrack(track)
+				}
+			}
+		})
+	}
 
-	return useMemo(
-		() => ({
-			song,
-			updateMelody: updateSong,
-			removeNote,
-			addNote,
-			changeDuration,
-			updateNoteTones,
-		}),
-		[song, updateSong, removeNote, addNote, changeDuration, updateNoteTones]
-	)
+	const addNote = (trackIdx: number, noteIdx: number, noteData: TrackNote) => {
+		updateSong((song) => {
+			const track = song[trackIdx]
+			if (track) {
+				const [before, after] = divideAt(track.notes, noteIdx)
+
+				track.notes = [
+					...before,
+					{
+						midiNotes: noteData.midiNotes,
+						subdivisions: noteData.duration,
+						duration: {},
+						durationSec: 0,
+						time: 0,
+					},
+					...after,
+				]
+
+				recalculateTrack(track)
+			}
+		})
+	}
+
+	const updateNoteTones = (
+		trackIdx: number,
+		noteIdx: number,
+		midiNotes: number[],
+	) => {
+		updateSong((song) => {
+			const track = song[trackIdx]
+			if (!track) return
+			const note = track.notes[noteIdx]
+			if (!note) return
+			note.midiNotes = midiNotes
+		})
+	}
+
+	return {
+		song,
+		updateSong,
+		removeNote,
+		addNote,
+		changeDuration,
+		updateNoteTones,
+	}
 }
