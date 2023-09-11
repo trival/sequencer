@@ -1,4 +1,4 @@
-import { ProcessedMelody, toDurations } from '@/utils/melody'
+import { ProcessedTrack, toDurations } from '@/utils/melody'
 import clsx from 'clsx'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import {
@@ -54,24 +54,32 @@ export const Note = ({
 }
 
 interface TrackProps {
-	melody: ProcessedMelody
+	song: ProcessedTrack[]
 	isPlaying?: boolean
-	activeNoteIdx?: number | null
-	onNoteClicked?: (idx: number) => void
-	onAddAfter?: (idx: number, duration: Subdivision | Subdivision[]) => void
-	onAddBefore?: (idx: number, duration: Subdivision | Subdivision[]) => void
-	onRemove?: (idx: number) => void
+	activeNoteIdx?: [number, number] | null
+	onNoteClicked?: (trackIdx: number, noteIdx: number) => void
+	onAddAfter?: (
+		trackIdx: number,
+		noteIdx: number,
+		duration: Subdivision | Subdivision[],
+	) => void
+	onAddBefore?: (
+		trackIdx: number,
+		noteIdx: number,
+		duration: Subdivision | Subdivision[],
+	) => void
+	onRemove?: (trackIdx: number, noteIdx: number) => void
 	onDurationChanged?: (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => void
 	defaultDuration?: Subdivision
 	onPlay?: () => void
-	onStop?: () => void
 }
 
 export const Track = ({
-	melody,
+	song,
 	isPlaying,
 	activeNoteIdx,
 	onNoteClicked,
@@ -81,13 +89,16 @@ export const Track = ({
 	onDurationChanged,
 	defaultDuration = '4n',
 	onPlay,
-	onStop,
 }: TrackProps) => {
-	const countMeasures = melody.measureSec
-		? Math.floor(melody.durationSec / melody.measureSec) + 1
-		: 0
+	const trackCountMeasures = song.map((track) =>
+		track.measureSec ? Math.floor(track.durationSec / track.measureSec) + 1 : 0,
+	)
+	const countMeasures = trackCountMeasures.reduce((a, b) => Math.max(a, b), 0)
+	let measureSec = song[0]?.measureSec ?? 0
 
-	const activeNote = activeNoteIdx != null ? melody.notes[activeNoteIdx] : null
+	const activeNote = activeNoteIdx
+		? song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+		: null
 
 	return (
 		<div className="relative w-full">
@@ -98,28 +109,30 @@ export const Track = ({
 							<span
 								key={i}
 								className="absolute h-full w-[1px] bg-cyan-300"
-								style={{ left: melody.measureSec * i * secondWidthFactor }}
+								style={{ left: measureSec * i * secondWidthFactor }}
 							></span>
 						))}
 					</div>
-					<div className="flex h-12 items-center">
-						{melody.notes.map((note, i) => {
-							return (
-								<Note
-									key={i}
-									durationSec={note.durationSec}
-									isActive={activeNoteIdx === i}
-									isEmpty={note.midiNotes.length === 0}
-									onSelected={onNoteClicked && (() => onNoteClicked(i))}
-								></Note>
-							)
-						})}
-					</div>
+					{song.map((track, i) => (
+						<div className="flex h-12 items-center" key={i}>
+							{track.notes.map((note, j) => {
+								return (
+									<Note
+										key={j}
+										durationSec={note.durationSec}
+										isActive={activeNoteIdx?.[1] === j}
+										isEmpty={note.midiNotes.length === 0}
+										onSelected={onNoteClicked && (() => onNoteClicked(i, j))}
+									></Note>
+								)
+							})}
+						</div>
+					))}
 				</div>
 			</div>
 			<div className="relative flex w-full pb-2">
 				{onPlay && <PlayButton isPlaying={isPlaying} onClick={onPlay} />}
-				{activeNoteIdx != null && !isPlaying && (
+				{activeNoteIdx && !isPlaying && (
 					<div className="relative flex w-fit">
 						{onAddBefore && (
 							<AddButton>
@@ -128,7 +141,7 @@ export const Track = ({
 										defaultDuration={defaultDuration}
 										onSelect={(durations) => {
 											close()
-											onAddBefore(activeNoteIdx, durations)
+											onAddBefore(activeNoteIdx[0], activeNoteIdx[1], durations)
 										}}
 									/>
 								)}
@@ -142,14 +155,20 @@ export const Track = ({
 										defaultDuration={defaultDuration}
 										onSelect={(durations) => {
 											close()
-											onDurationChanged(activeNoteIdx, durations)
+											onDurationChanged(
+												activeNoteIdx[0],
+												activeNoteIdx[1],
+												durations,
+											)
 										}}
 									/>
 								)}
 							</EditButton>
 						)}
 						{onRemove && (
-							<DeleteButton onConfirm={() => onRemove(activeNoteIdx)} />
+							<DeleteButton
+								onConfirm={() => onRemove(activeNoteIdx[0], activeNoteIdx[1])}
+							/>
 						)}
 						{onAddAfter && (
 							<AddButton>
@@ -158,7 +177,7 @@ export const Track = ({
 										defaultDuration={defaultDuration}
 										onSelect={(durations) => {
 											close()
-											onAddAfter(activeNoteIdx, durations)
+											onAddAfter(activeNoteIdx[0], activeNoteIdx[1], durations)
 										}}
 									/>
 								)}

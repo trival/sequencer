@@ -3,63 +3,70 @@ import * as Tone from 'tone'
 import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
 import { useImmer } from 'use-immer'
 
-export interface MelodyNote {
+export interface TrackNote {
 	midiNotes: number[]
 	duration: Subdivision | Subdivision[]
+}
+
+export interface SongData {
+	tracks: TrackNote[][]
+	bpm: number
+	swing?: number
+	swingSubdivision?: Subdivision
 }
 
 export interface ProcessedNote {
 	midiNotes: number[]
 	time: Time
 	duration: TimeObject
+	subdivisions: Subdivision | Subdivision[]
 	durationSec: number
 }
 
-export interface ProcessedMelody {
+export interface ProcessedTrack {
 	notes: ProcessedNote[]
 	duration: TimeObject
 	durationSec: number
 	measureSec: number
 }
 
-export function emptyMelody(): ProcessedMelody {
+export function emptyTrack(): ProcessedTrack {
 	return { duration: {}, durationSec: 0, notes: [], measureSec: 0 }
 }
 
-export function processNote(noteData: MelodyNote): ProcessedNote {
-	const duration = collectDurations(noteData.duration)
-	return {
-		midiNotes: noteData.midiNotes,
-		duration,
-		durationSec: Tone.Time(duration).toSeconds(),
+export function processTrack(trackData: TrackNote[]): ProcessedTrack {
+	const track = emptyTrack()
+	track.notes = trackData.map((n) => ({
+		midiNotes: n.midiNotes,
+		subdivisions: n.duration,
+		duration: {},
+		durationSec: 0,
 		time: 0,
-	}
+	}))
+
+	recalculateTrack(track)
+
+	return track
 }
 
-export function processMelody(melody: MelodyNote[]): ProcessedMelody {
-	const notes: ProcessedNote[] = []
+export function recalculateTrack(track: ProcessedTrack): void {
 	const subdivisions: Subdivision[] = []
 
-	for (const note of melody) {
-		const newNote = processNote(note)
-		newNote.time = Tone.Time(
-			collectDurations(subdivisions),
-		).toBarsBeatsSixteenths()
-		notes.push(newNote)
+	for (const note of track.notes) {
+		note.duration = collectDurations(note.subdivisions)
+		note.durationSec = Tone.Time(note.duration).toSeconds()
+		note.time = Tone.Time(collectDurations(subdivisions)).toSeconds()
 
-		Array.isArray(note.duration)
-			? subdivisions.push(...note.duration)
-			: subdivisions.push(note.duration)
+		Array.isArray(note.subdivisions)
+			? subdivisions.push(...note.subdivisions)
+			: subdivisions.push(note.subdivisions)
 	}
 
 	const duration = collectDurations(subdivisions)
 
-	return {
-		notes,
-		duration,
-		durationSec: Tone.Time(duration).toSeconds(),
-		measureSec: Tone.Time('1m').toSeconds(),
-	}
+	track.duration = duration
+	track.durationSec = Tone.Time(duration).toSeconds()
+	track.measureSec = Tone.Time('1m').toSeconds()
 }
 
 function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
@@ -89,146 +96,100 @@ export function toDurations(duration: TimeObject): Subdivision[] {
 	return result
 }
 
-function addDurations(d1: TimeObject, d2: TimeObject): TimeObject {
-	const result = { ...d1 }
-	for (const key in d2) {
-		const k = key as Subdivision
-		if (result[k]) {
-			result[k]! += d2[k] || 0
-		} else {
-			result[k] = d2[k]
-		}
-	}
-	return result
-}
-
-function subDurations(d1: TimeObject, d2: TimeObject): TimeObject {
-	const result = { ...d1 }
-	for (const key in d2) {
-		const k = key as Subdivision
-		if (result[k]) {
-			result[k]! -= d2[k] || 0
-		}
-	}
-	return result
-}
-
 const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 	return [xs.slice(0, idx), xs.slice(idx)]
 }
 
-export const useMelody = (
-	melodyNotes: MelodyNote[] = [{ duration: '4n', midiNotes: [] }],
-) => {
-	const [melody, updateMelody] = useImmer(emptyMelody())
+export const useSong = (data: SongData) => {
+	const [song, updateSong] = useImmer<ProcessedTrack[]>([])
+
 	useEffect(() => {
-		updateMelody(processMelody(melodyNotes))
-	}, [melodyNotes, updateMelody])
+		Tone.Transport.start()
+		Tone.Transport.bpm.value = data.bpm
+		updateSong(data.tracks.map((track) => processTrack(track)))
+	}, [data, updateSong])
 
 	const removeNote = useCallback(
-		(idx: number) => {
-			updateMelody((melody) => {
-				const note = melody.notes[idx]
-				melody.notes = melody.notes.filter((_, i) => i !== idx)
-				melody.durationSec -= note.durationSec
-				melody.duration = subDurations(melody.duration, note.duration)
+		(trackIdx: number, noteIdx: number) => {
+			updateSong((song) => {
+				const track = song[trackIdx]
+				if (track) {
+					track.notes = track.notes.filter((_, i) => i !== noteIdx)
+					recalculateTrack(track)
+				}
 			})
 		},
-		[updateMelody],
+		[updateSong],
 	)
 
 	const changeDuration = useCallback(
-		(idx: number, duration: Subdivision | Subdivision[]) => {
-			updateMelody((melody) => {
-				if (idx < 0 || idx >= melody.notes.length) {
-					return
+		(
+			trackIdx: number,
+			noteIdx: number,
+			duration: Subdivision | Subdivision[],
+		) => {
+			updateSong((song) => {
+				const track = song[trackIdx]
+				if (track) {
+					const note = track.notes[noteIdx]
+					if (note) {
+						note.subdivisions = duration
+						recalculateTrack(track)
+					}
 				}
-
-				const [before, [note, ...after]] = divideAt(melody.notes, idx)
-
-				let allDurations = before.reduce(
-					(acc, val) => addDurations(acc, val.duration),
-					{} as TimeObject,
-				)
-
-				const newDuration = collectDurations(duration)
-
-				note.duration = newDuration
-				note.durationSec = Tone.Time(newDuration).toSeconds()
-
-				allDurations = addDurations(allDurations, note.duration)
-
-				after.forEach((n) => {
-					n.time = Tone.Time(allDurations).toBarsBeatsSixteenths()
-					allDurations = addDurations(allDurations, n.duration)
-				})
-
-				melody.notes = [...before, note, ...after]
-				melody.duration = allDurations
-				melody.durationSec = Tone.Time(allDurations).toSeconds()
 			})
 		},
-		[updateMelody],
+		[updateSong],
 	)
 
 	const addNote = useCallback(
-		(idx: number, noteData: MelodyNote) => {
-			updateMelody((melody) => {
-				if (idx < 0 || idx > melody.notes.length) {
-					return
+		(trackIdx: number, noteIdx: number, noteData: TrackNote) => {
+			updateSong((song) => {
+				const track = song[trackIdx]
+				if (track) {
+					const [before, after] = divideAt(track.notes, noteIdx)
+
+					track.notes = [
+						...before,
+						{
+							midiNotes: noteData.midiNotes,
+							subdivisions: noteData.duration,
+							duration: {},
+							durationSec: 0,
+							time: 0,
+						},
+						...after,
+					]
+
+					recalculateTrack(track)
 				}
-
-				const [before, after] = divideAt(melody.notes, idx)
-
-				let allDuration = before.reduce(
-					(acc, val) => addDurations(acc, val.duration),
-					{} as TimeObject,
-				)
-
-				const note = processNote(noteData)
-				note.time = Tone.Time(allDuration).toBarsBeatsSixteenths()
-
-				allDuration = addDurations(allDuration, note.duration)
-
-				after.forEach((n) => {
-					n.time = Tone.Time(allDuration).toBarsBeatsSixteenths()
-					allDuration = addDurations(allDuration, n.duration)
-				})
-
-				melody.notes = [...before, note, ...after]
-				melody.duration = allDuration
-				melody.durationSec = melody.durationSec + note.durationSec
 			})
 		},
-		[updateMelody],
+		[updateSong],
 	)
 
 	const updateNoteTones = useCallback(
-		(idx: number, midiNotes: number[]) => {
-			updateMelody((melody) => {
-				const note = melody.notes[idx]
+		(trackIdx: number, noteIdx: number, midiNotes: number[]) => {
+			updateSong((song) => {
+				const track = song[trackIdx]
+				if (!track) return
+				const note = track.notes[noteIdx]
+				if (!note) return
 				note.midiNotes = midiNotes
 			})
 		},
-		[updateMelody],
+		[updateSong],
 	)
 
 	return useMemo(
 		() => ({
-			melody,
-			updateMelody,
+			song,
+			updateMelody: updateSong,
 			removeNote,
 			addNote,
 			changeDuration,
 			updateNoteTones,
 		}),
-		[
-			melody,
-			updateMelody,
-			removeNote,
-			addNote,
-			changeDuration,
-			updateNoteTones,
-		],
+		[song, updateSong, removeNote, addNote, changeDuration, updateNoteTones],
 	)
 }

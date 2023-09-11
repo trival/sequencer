@@ -1,12 +1,12 @@
 'use client'
 
 import { Track } from '@/components/track'
-import { MelodyNote, useMelody } from '@/utils/melody'
+import { TrackNote, useSong } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
 import { useState } from 'react'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 
-const initialMelody: MelodyNote[] = [
+const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
 	{ midiNotes: [toMidi('C3')], duration: '4n.' },
 	{ midiNotes: [toMidi('C3')], duration: '4n.' },
@@ -18,57 +18,69 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export default function EditorPage() {
-	const { melody, addNote, removeNote, changeDuration } =
-		useMelody(initialMelody)
+	const { song, addNote, removeNote, changeDuration } = useSong({
+		bpm: 160,
+		tracks: [initialMelody],
+	})
 
-	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
+	const [activeNoteIdx, setActiveNoteIdx] = useState<[number, number] | null>(
+		null,
+	)
 	const [isPlaying, setIsPlaying] = useState(false)
 
-	const onNoteClicked = (idx: number) => {
-		console.log('onNoteClicked', idx)
-		if (activeNoteIdx === idx) {
+	const onNoteClicked = (trackIdx: number, noteIdx: number) => {
+		console.log('onNoteClicked', trackIdx, noteIdx)
+		if (
+			activeNoteIdx &&
+			activeNoteIdx[0] === trackIdx &&
+			activeNoteIdx[1] === noteIdx
+		) {
 			setActiveNoteIdx(null)
 		} else {
-			setActiveNoteIdx(idx)
+			setActiveNoteIdx([trackIdx, noteIdx])
 		}
 	}
 
 	const onNoteAddedBefore = (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		console.log('onNoteAddedBefore', idx)
-		addNote(idx, { duration, midiNotes: [] })
+		console.log('onNoteAddedBefore', trackIdx, noteIdx)
+		addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
 	}
 
 	const onNoteAddedAfter = (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		console.log('onNoteAddedAfter', idx)
-		addNote(idx + 1, { duration, midiNotes: [] })
-		onNoteClicked(idx + 1)
+		console.log('onNoteAddedAfter', trackIdx, noteIdx)
+		addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
+		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
-	const onNoteRemoved = (idx: number) => {
-		console.log('onNoteRemoved', idx)
-		removeNote(idx)
+	const onNoteRemoved = (trackIdx: number, noteIdx: number) => {
+		console.log('onNoteRemoved', trackIdx, noteIdx)
+		removeNote(trackIdx, noteIdx)
 	}
 
 	const onDurationChanged = (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		console.log('onDurationChanged', idx)
-		changeDuration(idx, duration)
+		console.log('onDurationChanged', trackIdx, noteIdx)
+		changeDuration(trackIdx, noteIdx, duration)
 	}
 
 	return (
 		<div className="p-10">
 			<h1>Track test</h1>
 			<Track
-				melody={melody}
+				song={song}
 				isPlaying={isPlaying}
+				onPlay={() => setIsPlaying(!isPlaying)}
 				activeNoteIdx={activeNoteIdx}
 				onNoteClicked={onNoteClicked}
 				onRemove={onNoteRemoved}

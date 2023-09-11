@@ -1,12 +1,12 @@
 'use client'
 
-import { MelodyNote, ProcessedNote, useMelody } from '@/utils/melody'
+import { TrackNote, ProcessedNote, useSong } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
 import { useEffect } from 'react'
 import * as Tone from 'tone'
 
-const melodyData: MelodyNote[] = [
+const melodyData: TrackNote[] = [
 	{ midiNotes: [toMidi('C4'), toMidi('E4'), toMidi('G4')], duration: '4n' },
 	{ midiNotes: [toMidi('C4'), toMidi('E4'), toMidi('G4')], duration: '2n' },
 	{ midiNotes: [toMidi('C4'), toMidi('E4'), toMidi('G4')], duration: '4n' },
@@ -36,17 +36,17 @@ export default function SequenceTest() {
 	}, [])
 
 	const synth = useSynth()
-	const { melody } = useMelody(melodyData)
+	const { song } = useSong({ bpm: 160, tracks: [melodyData] })
 
 	const onClick = async () => {
 		await Tone.start()
 
 		const seq = new Tone.Part((time, note: ProcessedNote) => {
 			synth.play(note.midiNotes, note.duration, time)
-		}, melody.notes)
+		}, song[0].notes)
 
 		seq.loop = 2
-		seq.loopEnd = melody.duration
+		seq.loopEnd = song[0].duration
 		seq.start()
 	}
 

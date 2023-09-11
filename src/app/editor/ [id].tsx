@@ -1,7 +1,7 @@
-import { MelodyNote } from '@/utils/melody'
+import { TrackNote } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
 
-const initialMelody: MelodyNote[] = [
+const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
 	{ midiNotes: [toMidi('C3')], duration: '4n.' },
 	{ midiNotes: [toMidi('C3')], duration: '4n.' },

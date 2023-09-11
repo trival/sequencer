@@ -2,15 +2,15 @@
 
 import { Keyboard, KeyboardSettings } from '@/components/keyboard'
 import { Track } from '@/components/track'
-import { MelodyNote, ProcessedNote, useMelody } from '@/utils/melody'
+import { TrackNote, ProcessedNote, useSong } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import * as Tone from 'tone'
 
-const initialMelody: MelodyNote[] = [
+const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
 	{ midiNotes: [toMidi('C3')], duration: '4n.' },
 	{ midiNotes: [toMidi('C3')], duration: '4n.' },
@@ -22,41 +22,50 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export default function PlayerTest() {
-	useEffect(() => {
-		Tone.Transport.start()
-		Tone.Transport.bpm.value = 160
-	}, [])
-
 	const synth = useSynth()
 
-	const { melody, addNote, removeNote, changeDuration, updateNoteTones } =
-		useMelody(initialMelody)
+	const { song, addNote, removeNote, changeDuration, updateNoteTones } =
+		useSong({ bpm: 160, tracks: [initialMelody] })
 
-	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
+	const [activeNoteIdx, setActiveNoteIdx] = useState<[number, number] | null>(
+		null,
+	)
 	const [isPlaying, setIsPlaying] = useState(false)
-	const [playingSequence, setPlayingSequence] =
-		useState<Tone.Part<ProcessedNote> | null>(null)
+	const [playingSequence, setPlayingSequence] = useState<
+		Tone.Part<ProcessedNote>[] | null
+	>(null)
 
-	const onPlay = () => {
+	const onPlay = async () => {
 		if (!isPlaying) {
-			const seq = new Tone.Part((time, note: ProcessedNote) => {
-				synth.play(note.midiNotes, note.duration, time)
-				setActiveNoteIdx(melody.notes.indexOf(note))
-			}, melody.notes)
-			seq.loop = true
-			seq.loopEnd = melody.duration
+			await Tone.start()
+			const seqs = song.map((track, i) => {
+				const seq = new Tone.Part((time, note: ProcessedNote) => {
+					synth.play(note.midiNotes, note.duration, time)
+					setActiveNoteIdx([i, track.notes.indexOf(note)])
+				}, track.notes)
+				seq.loop = true
+				seq.loopEnd = track.duration
+				return seq
+			})
 
-			if (activeNoteIdx !== null) {
-				const note = melody.notes[activeNoteIdx]
-				seq.start(note.time)
+			const note =
+				activeNoteIdx && song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+			if (note) {
+				seqs.forEach((seq) => {
+					seq.start(0, note.time)
+				})
 			} else {
-				seq.start()
+				seqs.forEach((seq) => {
+					seq.start()
+				})
 			}
 
-			setPlayingSequence(seq)
+			setPlayingSequence(seqs)
 			setIsPlaying(true)
 		} else {
-			playingSequence?.stop()
+			playingSequence?.forEach((seq) => {
+				seq.stop()
+			})
 
 			setPlayingSequence(null)
 			setIsPlaying(false)
@@ -64,11 +73,12 @@ export default function PlayerTest() {
 	}
 
 	const onActivateNote = (midi: number) => {
-		if (activeNoteIdx !== null) {
-			const note = melody.notes[activeNoteIdx]
+		if (activeNoteIdx) {
+			const note = song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+			if (!note) return
 			if (!note.midiNotes.includes(midi)) {
 				const newNotes = [...note.midiNotes, midi]
-				updateNoteTones(activeNoteIdx, newNotes)
+				updateNoteTones(activeNoteIdx[0], activeNoteIdx[1], newNotes)
 				synth.play(newNotes, note.duration)
 			} else {
 				synth.play(note.midiNotes, note.duration)
@@ -79,11 +89,12 @@ export default function PlayerTest() {
 	}
 
 	const onDeactivateNote = (midi: number) => {
-		if (activeNoteIdx !== null) {
-			const note = melody.notes[activeNoteIdx]
+		if (activeNoteIdx) {
+			const note = song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+			if (!note) return
 			if (note.midiNotes.includes(midi)) {
 				const newNotes = note.midiNotes.filter((n) => n !== midi)
-				updateNoteTones(activeNoteIdx, newNotes)
+				updateNoteTones(activeNoteIdx[0], activeNoteIdx[1], newNotes)
 				synth.play(newNotes, note.duration)
 			} else {
 				synth.play(note.midiNotes, note.duration)
@@ -93,47 +104,57 @@ export default function PlayerTest() {
 		}
 	}
 
-	const onNoteClicked = (idx: number) => {
-		if (activeNoteIdx === idx) {
+	const onNoteClicked = (trackIdx: number, noteIdx: number) => {
+		if (
+			activeNoteIdx &&
+			activeNoteIdx[0] === trackIdx &&
+			activeNoteIdx[1] === noteIdx
+		) {
 			setActiveNoteIdx(null)
 		} else {
-			setActiveNoteIdx(idx)
-			const note = melody.notes[idx]
+			setActiveNoteIdx([trackIdx, noteIdx])
+			const note = song[trackIdx]?.notes[noteIdx]
+			if (!note) return
 			synth.play(note.midiNotes, note.duration)
 		}
 	}
 
 	const onNoteAddedBefore = (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		addNote(idx, { duration, midiNotes: [] })
+		addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
 	}
 
 	const onNoteAddedAfter = (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		addNote(idx + 1, { duration, midiNotes: [] })
-		onNoteClicked(idx + 1)
+		addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
+		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
-	const onNoteRemoved = (idx: number) => {
-		if (idx === melody.notes.length - 1) {
-			if (melody.notes.length > 1) {
-				setActiveNoteIdx(idx - 1)
+	const onNoteRemoved = (trackIdx: number, noteIdx: number) => {
+		const track = song[trackIdx]
+		if (!track) return
+		if (noteIdx === track.notes.length - 1) {
+			if (track.notes.length > 1) {
+				setActiveNoteIdx([trackIdx, noteIdx - 1])
 			} else {
 				setActiveNoteIdx(null)
 			}
 		}
-		removeNote(idx)
+		removeNote(trackIdx, noteIdx)
 	}
 
 	const onDurationChanged = (
-		idx: number,
+		trackIdx: number,
+		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		changeDuration(idx, duration)
+		changeDuration(trackIdx, noteIdx, duration)
 	}
 
 	const [settings, setSettings] = useState<Partial<KeyboardSettings>>({
@@ -142,16 +163,16 @@ export default function PlayerTest() {
 		toneColorType: ToneColorType.CircleOfFiths,
 	})
 
+	const activeNote = activeNoteIdx
+		? song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+		: null
+
 	return (
 		<div>
 			<div className="relative h-[620px] w-[620px] max-w-full shadow-md">
 				<div className="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
 					<Keyboard
-						activeNotes={
-							activeNoteIdx !== null
-								? melody.notes[activeNoteIdx].midiNotes
-								: synth.playingNotes
-						}
+						activeNotes={activeNote ? activeNote.midiNotes : synth.playingNotes}
 						onNoteActivated={onActivateNote}
 						onNoteDeactivated={onDeactivateNote}
 						onSettingsChanged={setSettings}
@@ -164,7 +185,7 @@ export default function PlayerTest() {
 			</div>
 			<div className="mt-2">
 				<Track
-					melody={melody}
+					song={song}
 					isPlaying={isPlaying}
 					activeNoteIdx={activeNoteIdx}
 					onPlay={onPlay}
