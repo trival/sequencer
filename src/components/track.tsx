@@ -7,24 +7,20 @@ import {
 	DeleteButton,
 	EditButton,
 	IconButton,
+	PlayButton,
 } from '@/components/buttons'
 import { Select } from './Select'
 import { subdivisions } from '@/utils/utils'
 import { useImmer } from 'use-immer'
-import { PlusIcon } from '@heroicons/react/20/solid'
-import { MinusIcon } from '@heroicons/react/20/solid'
+import { PlusIcon, MinusIcon } from '@heroicons/react/20/solid'
 
 const secondWidthFactor = 60
 
 interface NoteProps {
 	durationSec: number
 	isActive?: boolean
+	isEmpty?: boolean
 	onSelected?: () => void
-}
-
-export enum TrackMode {
-	Edit,
-	Play,
 }
 
 const durationOptions = subdivisions.map((s) => ({
@@ -32,7 +28,12 @@ const durationOptions = subdivisions.map((s) => ({
 	label: s,
 }))
 
-export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
+export const Note = ({
+	durationSec,
+	isActive,
+	isEmpty,
+	onSelected,
+}: NoteProps) => {
 	return (
 		<div
 			style={{
@@ -44,7 +45,7 @@ export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
 			<button
 				className={clsx(
 					'h-full w-full',
-					isActive ? 'bg-cyan-300' : 'bg-slate-300',
+					isActive ? 'bg-cyan-300' : isEmpty ? 'bg-slate-200' : 'bg-slate-300',
 				)}
 				onClick={onSelected}
 			></button>
@@ -54,7 +55,7 @@ export const Note = ({ durationSec, isActive, onSelected }: NoteProps) => {
 
 interface TrackProps {
 	melody: ProcessedMelody
-	mode: TrackMode
+	isPlaying?: boolean
 	activeNoteIdx?: number | null
 	onNoteClicked?: (idx: number) => void
 	onAddAfter?: (idx: number, duration: Subdivision | Subdivision[]) => void
@@ -65,11 +66,13 @@ interface TrackProps {
 		duration: Subdivision | Subdivision[],
 	) => void
 	defaultDuration?: Subdivision
+	onPlay?: () => void
+	onStop?: () => void
 }
 
 export const Track = ({
 	melody,
-	mode,
+	isPlaying,
 	activeNoteIdx,
 	onNoteClicked,
 	onRemove,
@@ -77,6 +80,8 @@ export const Track = ({
 	onAddAfter,
 	onDurationChanged,
 	defaultDuration = '4n',
+	onPlay,
+	onStop,
 }: TrackProps) => {
 	const countMeasures = melody.measureSec
 		? Math.floor(melody.durationSec / melody.measureSec) + 1
@@ -104,6 +109,7 @@ export const Track = ({
 									key={i}
 									durationSec={note.durationSec}
 									isActive={activeNoteIdx === i}
+									isEmpty={note.midiNotes.length === 0}
 									onSelected={onNoteClicked && (() => onNoteClicked(i))}
 								></Note>
 							)
@@ -111,8 +117,9 @@ export const Track = ({
 					</div>
 				</div>
 			</div>
-			<div className="relative w-full pb-2">
-				{activeNoteIdx != null && mode === TrackMode.Edit ? (
+			<div className="relative flex w-full pb-2">
+				{onPlay && <PlayButton isPlaying={isPlaying} onClick={onPlay} />}
+				{activeNoteIdx != null && !isPlaying && (
 					<div className="relative flex w-fit">
 						{onAddBefore && (
 							<AddButton>
@@ -158,8 +165,6 @@ export const Track = ({
 							</AddButton>
 						)}
 					</div>
-				) : (
-					<div></div>
 				)}
 			</div>
 		</div>

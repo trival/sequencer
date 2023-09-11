@@ -1,6 +1,11 @@
 import { tw } from '@/styles/tw-utils'
 import { Popover, PopoverPanelProps } from '@headlessui/react'
-import { PlusIcon } from '@heroicons/react/20/solid'
+import {
+	PlusIcon,
+	PlayIcon,
+	PauseIcon,
+	StopIcon,
+} from '@heroicons/react/20/solid'
 import { TrashIcon, PencilSquareIcon } from '@heroicons/react/24/outline'
 import clsx from 'clsx'
 import { ElementType, PropsWithChildren, ReactNode, useState } from 'react'
@@ -17,7 +22,7 @@ const btnColors = {
 	indigo: tw`bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white`,
 	rose: tw`bg-rose-600 hover:bg-rose-500 focus-visible:outline-rose-600 text-white`,
 	teal: tw`bg-teal-600 hover:bg-teal-500 focus-visible:outline-teal-600 text-white`,
-	white: tw`bg-white border border-slate-400 text-slate-500 shadow-slate-400 hover:border-indigo-500 focus-visible:outline-indigo-500`,
+	white: tw`bg-white border border-slate-400 text-slate-500 shadow-slate-400 hover:border-indigo-500 hover:text-indigo-500 focus-visible:outline-indigo-500`,
 }
 
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
@@ -32,7 +37,7 @@ export const IconButton = ({
 	<button
 		type={type}
 		className={clsx(
-			'rounded-full shadow-sm',
+			'rounded-full shadow-sm shadow-slate-400',
 			btnColors[color],
 			btnFocus,
 			className,
@@ -88,7 +93,7 @@ export const IconButtonPopover = ({
 				ref={setReferenceElement}
 				type="button"
 				className={clsx(
-					'm-2 rounded-full p-2 shadow-sm',
+					'm-2 rounded-full p-2 shadow-sm shadow-slate-400',
 					btnColors[color],
 					btnFocus,
 					className,
@@ -154,5 +159,35 @@ export const EditButton = ({ children }: PopoverChildren) => {
 		>
 			{children}
 		</IconButtonPopover>
+	)
+}
+
+interface PlayButtonProps {
+	isPlaying?: boolean
+	onClick: () => void
+	className?: string
+}
+export const PlayButton = ({
+	isPlaying,
+	onClick,
+	className,
+}: PlayButtonProps) => {
+	return (
+		<button
+			type="button"
+			onClick={onClick}
+			className={clsx(
+				'm-2 rounded p-2 shadow-sm',
+				btnColors.white,
+				btnFocus,
+				className,
+			)}
+		>
+			{isPlaying ? (
+				<PauseIcon className="h-6 w-6" />
+			) : (
+				<PlayIcon className="h-6 w-6" />
+			)}
+		</button>
 	)
 }

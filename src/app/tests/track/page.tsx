@@ -1,6 +1,6 @@
 'use client'
 
-import { Track, TrackMode } from '@/components/track'
+import { Track } from '@/components/track'
 import { MelodyNote, useMelody } from '@/utils/melody'
 import { toMidi } from '@/utils/utils'
 import { useState } from 'react'
@@ -22,6 +22,7 @@ export default function EditorPage() {
 		useMelody(initialMelody)
 
 	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
+	const [isPlaying, setIsPlaying] = useState(false)
 
 	const onNoteClicked = (idx: number) => {
 		console.log('onNoteClicked', idx)
@@ -66,8 +67,8 @@ export default function EditorPage() {
 		<div className="p-10">
 			<h1>Track test</h1>
 			<Track
-				mode={TrackMode.Edit}
 				melody={melody}
+				isPlaying={isPlaying}
 				activeNoteIdx={activeNoteIdx}
 				onNoteClicked={onNoteClicked}
 				onRemove={onNoteRemoved}

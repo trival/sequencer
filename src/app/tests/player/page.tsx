@@ -1,13 +1,14 @@
 'use client'
 
 import { Keyboard, KeyboardSettings } from '@/components/keyboard'
-import { Track, TrackMode } from '@/components/track'
-import { MelodyNote, useMelody } from '@/utils/melody'
+import { Track } from '@/components/track'
+import { MelodyNote, ProcessedNote, useMelody } from '@/utils/melody'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
+import * as Tone from 'tone'
 
 const initialMelody: MelodyNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -21,12 +22,46 @@ const initialMelody: MelodyNote[] = [
 ]
 
 export default function PlayerTest() {
+	useEffect(() => {
+		Tone.Transport.start()
+		Tone.Transport.bpm.value = 160
+	}, [])
+
 	const synth = useSynth()
 
 	const { melody, addNote, removeNote, changeDuration, updateNoteTones } =
 		useMelody(initialMelody)
 
 	const [activeNoteIdx, setActiveNoteIdx] = useState<number | null>(null)
+	const [isPlaying, setIsPlaying] = useState(false)
+	const [playingSequence, setPlayingSequence] =
+		useState<Tone.Part<ProcessedNote> | null>(null)
+
+	const onPlay = () => {
+		if (!isPlaying) {
+			const seq = new Tone.Part((time, note: ProcessedNote) => {
+				synth.play(note.midiNotes, note.duration, time)
+				setActiveNoteIdx(melody.notes.indexOf(note))
+			}, melody.notes)
+			seq.loop = true
+			seq.loopEnd = melody.duration
+
+			if (activeNoteIdx !== null) {
+				const note = melody.notes[activeNoteIdx]
+				seq.start(note.time)
+			} else {
+				seq.start()
+			}
+
+			setPlayingSequence(seq)
+			setIsPlaying(true)
+		} else {
+			playingSequence?.stop()
+
+			setPlayingSequence(null)
+			setIsPlaying(false)
+		}
+	}
 
 	const onActivateNote = (midi: number) => {
 		if (activeNoteIdx !== null) {
@@ -129,9 +164,10 @@ export default function PlayerTest() {
 			</div>
 			<div className="mt-2">
 				<Track
-					mode={activeNoteIdx !== null ? TrackMode.Edit : TrackMode.Play} // TODO: keep track of playing state
 					melody={melody}
+					isPlaying={isPlaying}
 					activeNoteIdx={activeNoteIdx}
+					onPlay={onPlay}
 					onNoteClicked={onNoteClicked}
 					onRemove={onNoteRemoved}
 					onAddBefore={onNoteAddedBefore}
