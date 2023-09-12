@@ -1,9 +1,6 @@
-'use client'
-
-import { TrackNote, ProcessedNote, useSong } from '@/utils/melody'
+import { TrackNote, ProcessedNote, useSong } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
-import { onMount } from 'solid-js'
 import * as Tone from 'tone'
 
 const melodyData: TrackNote[] = [
@@ -30,23 +27,22 @@ const melodyData: TrackNote[] = [
 ]
 
 export default function SequenceTest() {
-	onMount(() => {
-		Tone.Transport.start()
-		Tone.Transport.bpm.value = 160
-	})
-
 	const synth = useSynth()
 	const { song } = useSong({ bpm: 160, tracks: [melodyData] })
 
 	const onClick = async () => {
 		await Tone.start()
+		Tone.Transport.start()
+		Tone.Transport.bpm.value = 160
+
+		let track = song()[0]
 
 		const seq = new Tone.Part((time, note: ProcessedNote) => {
 			synth.play(note.midiNotes, note.duration, time)
-		}, song[0].notes)
+		}, track.notes)
 
 		seq.loop = 2
-		seq.loopEnd = song[0].duration
+		seq.loopEnd = track.duration
 		seq.start()
 	}
 

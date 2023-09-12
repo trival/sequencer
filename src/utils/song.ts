@@ -112,7 +112,6 @@ export const useSong = (data: SongData) => {
 	}
 
 	onMount(() => {
-		Tone.Transport.start()
 		Tone.Transport.bpm.value = data.bpm
 		updateSong(data.tracks.map((track) => processTrack(track)))
 	})

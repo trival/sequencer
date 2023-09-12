@@ -1,7 +1,5 @@
-'use client'
-
 import { Track } from '@/components/track'
-import { TrackNote, useSong } from '@/utils/melody'
+import { TrackNote, useSong } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
@@ -30,11 +28,8 @@ export default function EditorPage() {
 
 	const onNoteClicked = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteClicked', trackIdx, noteIdx)
-		if (
-			activeNoteIdx &&
-			activeNoteIdx[0] === trackIdx &&
-			activeNoteIdx[1] === noteIdx
-		) {
+		let idx = activeNoteIdx()
+		if (idx && idx[0] === trackIdx && idx[1] === noteIdx) {
 			setActiveNoteIdx(null)
 		} else {
 			setActiveNoteIdx([trackIdx, noteIdx])
@@ -80,7 +75,7 @@ export default function EditorPage() {
 			<Track
 				song={song()}
 				isPlaying={isPlaying()}
-				onPlay={() => setIsPlaying(!isPlaying)}
+				onPlay={() => setIsPlaying(!isPlaying())}
 				activeNoteIdx={activeNoteIdx()}
 				onNoteClicked={onNoteClicked}
 				onRemove={onNoteRemoved}

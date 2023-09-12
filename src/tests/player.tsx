@@ -1,8 +1,6 @@
-'use client'
-
 import { Keyboard, KeyboardSettings } from '@/components/keyboard'
 import { Track } from '@/components/track'
-import { TrackNote, ProcessedNote, useSong } from '@/utils/melody'
+import { TrackNote, ProcessedNote, useSong } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
@@ -36,8 +34,10 @@ export default function PlayerTest() {
 	>(null)
 
 	const onPlay = async () => {
-		if (!isPlaying) {
+		if (!isPlaying()) {
 			await Tone.start()
+			Tone.Transport.start()
+
 			const seqs = song().map((track, i) => {
 				const seq = new Tone.Part((time, note: ProcessedNote) => {
 					synth.play(note.midiNotes, note.duration, time)
@@ -48,8 +48,9 @@ export default function PlayerTest() {
 				return seq
 			})
 
-			const note =
-				activeNoteIdx && song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+			const idx = activeNoteIdx()
+			const note = idx && song()[idx[0]]?.notes[idx[1]]
+
 			if (note) {
 				seqs.forEach((seq) => {
 					seq.start(0, note.time)
@@ -67,18 +68,20 @@ export default function PlayerTest() {
 				seq.stop()
 			})
 
+			Tone.Transport.stop()
 			setPlayingSequence(null)
 			setIsPlaying(false)
 		}
 	}
 
 	const onActivateNote = (midi: number) => {
-		if (activeNoteIdx) {
-			const note = song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+		const idx = activeNoteIdx()
+		if (idx) {
+			const note = song()[idx[0]]?.notes[idx[1]]
 			if (!note) return
 			if (!note.midiNotes.includes(midi)) {
 				const newNotes = [...note.midiNotes, midi]
-				updateNoteTones(activeNoteIdx[0], activeNoteIdx[1], newNotes)
+				updateNoteTones(idx[0], idx[1], newNotes)
 				synth.play(newNotes, note.duration)
 			} else {
 				synth.play(note.midiNotes, note.duration)
@@ -89,12 +92,13 @@ export default function PlayerTest() {
 	}
 
 	const onDeactivateNote = (midi: number) => {
-		if (activeNoteIdx) {
-			const note = song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
+		const idx = activeNoteIdx()
+		if (idx) {
+			const note = song()[idx[0]]?.notes[idx[1]]
 			if (!note) return
 			if (note.midiNotes.includes(midi)) {
 				const newNotes = note.midiNotes.filter((n) => n !== midi)
-				updateNoteTones(activeNoteIdx[0], activeNoteIdx[1], newNotes)
+				updateNoteTones(idx[0], idx[1], newNotes)
 				synth.play(newNotes, note.duration)
 			} else {
 				synth.play(note.midiNotes, note.duration)
@@ -105,15 +109,12 @@ export default function PlayerTest() {
 	}
 
 	const onNoteClicked = (trackIdx: number, noteIdx: number) => {
-		if (
-			activeNoteIdx &&
-			activeNoteIdx[0] === trackIdx &&
-			activeNoteIdx[1] === noteIdx
-		) {
+		const idx = activeNoteIdx()
+		if (idx && idx[0] === trackIdx && idx[1] === noteIdx) {
 			setActiveNoteIdx(null)
 		} else {
 			setActiveNoteIdx([trackIdx, noteIdx])
-			const note = song[trackIdx]?.notes[noteIdx]
+			const note = song()[trackIdx]?.notes[noteIdx]
 			if (!note) return
 			synth.play(note.midiNotes, note.duration)
 		}
@@ -137,7 +138,7 @@ export default function PlayerTest() {
 	}
 
 	const onNoteRemoved = (trackIdx: number, noteIdx: number) => {
-		const track = song[trackIdx]
+		const track = song()[trackIdx]
 		if (!track) return
 		if (noteIdx === track.notes.length - 1) {
 			if (track.notes.length > 1) {
@@ -163,23 +164,24 @@ export default function PlayerTest() {
 		toneColorType: ToneColorType.CircleOfFiths,
 	})
 
-	const activeNote = activeNoteIdx
-		? song[activeNoteIdx[0]]?.notes[activeNoteIdx[1]]
-		: null
+	const activeNote = () => {
+		const idx = activeNoteIdx()
+		return idx ? song()[idx[0]]?.notes[idx[1]] : null
+	}
 
 	return (
 		<div>
 			<div class="relative h-[620px] w-[620px] max-w-full shadow-md">
 				<div class="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
 					<Keyboard
-						activeNotes={activeNote ? activeNote.midiNotes : synth.playingNotes}
+						activeNotes={
+							activeNote() ? activeNote().midiNotes : synth.playingNotes()
+						}
 						onNoteActivated={onActivateNote}
 						onNoteDeactivated={onDeactivateNote}
 						onSettingsChanged={setSettings}
-						settings={{
-							...settings,
-							mode: activeNoteIdx !== null ? 'Record' : 'Play',
-						}}
+						settings={settings()}
+						mode={activeNoteIdx() !== null ? 'Record' : 'Play'}
 					/>
 				</div>
 			</div>

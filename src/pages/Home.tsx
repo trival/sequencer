@@ -1,5 +1,3 @@
-'use client'
-
 import { Keyboard, KeyboardSettings } from '@/components/keyboard'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
@@ -21,7 +19,6 @@ export default function Home() {
 		baseNote: toMidi('C3'),
 		scaleHighlight: ScaleHighlight.Major,
 		toneColorType: ToneColorType.CircleOfFiths,
-		mode: 'Play',
 	})
 
 	return (
@@ -32,6 +29,7 @@ export default function Home() {
 				onNoteDeactivated={onDeactivateNote}
 				onSettingsChanged={setSettings}
 				settings={settings()}
+				mode="Play"
 			/>
 		</div>
 	)

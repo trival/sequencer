@@ -1,4 +1,4 @@
-import { ProcessedTrack, toDurations } from '@/utils/melody'
+import { ProcessedTrack, toDurations } from '@/utils/song'
 import clsx from 'clsx'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import {

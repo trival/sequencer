@@ -11,7 +11,7 @@ export const useSynth = (Synth = Tone.Synth) => {
 	const [playingNotes, setPlayingNotes] = createSignal(Array.from(activeNotes))
 
 	const playNotes = (notes: number[], duration?: Time, time?: number) => {
-		if (synth) {
+		if (synth && started) {
 			if (duration) {
 				synth.triggerAttackRelease(
 					notes.map((n) => fromMidi(n).toFrequency()),

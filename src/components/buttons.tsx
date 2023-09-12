@@ -11,6 +11,7 @@ interface ButtonProps {
 	class?: string
 	color?: keyof typeof btnColors
 	type?: 'button' | 'submit' | 'reset'
+	ref?: HTMLButtonElement
 }
 
 const btnColors = {
@@ -34,6 +35,7 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 				props.class,
 			)}
 			onClick={() => props.onClick()}
+			ref={props.ref}
 		>
 			{props.children}
 		</button>
@@ -51,7 +53,8 @@ export const Button = (_props: ParentProps<ButtonProps>) => {
 				btnFocus,
 				props.class,
 			)}
-			onClick={() => props.onClick}
+			onClick={() => props.onClick()}
+			ref={props.ref}
 		>
 			{props.children}
 		</button>
@@ -79,7 +82,7 @@ export const IconButtonPopover = (
 				ref={btnRef}
 				type="button"
 				color={props.color}
-				class={props.class}
+				class={clsx('p-2 m-2', props.class)}
 				onClick={open}
 			>
 				{props.buttonElement}
@@ -89,6 +92,10 @@ export const IconButtonPopover = (
 				onClose={close}
 				visible={isOpen()}
 				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
+				popperOptions={{
+					placement: 'bottom-start',
+					modifiers: [{ name: 'offset', options: { offset: [0, 10] } }],
+				}}
 			>
 				{props.children(close)}
 			</Popover>

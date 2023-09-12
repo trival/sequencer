@@ -34,7 +34,6 @@ type Mode = 'Record' | 'Play'
 
 export interface KeyboardSettings {
 	baseNote: number
-	mode: Mode
 	offsetX: number
 	offsetY: number
 	maxRows: number
@@ -51,6 +50,7 @@ interface KeyboardProps {
 	onNoteDeactivated?: (midi: number) => void
 	onSettingsChanged?: (updatedSettings: KeyboardSettings) => void
 	class?: string
+	mode: Mode
 }
 
 const keyMargin = 3
@@ -62,7 +62,6 @@ const defaultSettings: KeyboardSettings = {
 	maxCols: 12,
 	maxRows: 12,
 	keyLength: 58,
-	mode: 'Record',
 	scaleHighlight: ScaleHighlight.Major,
 	toneColorType: ToneColorType.CircleOfFiths,
 } as const
@@ -116,8 +115,8 @@ export const Keyboard = (_props: KeyboardProps) => {
 
 	const onPointerDown = (midi: number) => {
 		setPointerDown(true)
-		if (settings().mode === 'Record') {
-			if (notes[midi]) {
+		if (props.mode === 'Record') {
+			if (notes()[midi]) {
 				props.onNoteDeactivated(midi)
 			} else {
 				props.onNoteActivated(midi)
@@ -129,15 +128,15 @@ export const Keyboard = (_props: KeyboardProps) => {
 
 	const onPointerUp = (midi: number) => {
 		setPointerDown(false)
-		if (settings().mode === 'Play') {
+		if (props.mode === 'Play') {
 			props.onNoteDeactivated(midi)
 		}
 	}
 
 	const onPointerEnter = (midi: number) => {
-		if (pointerDown) {
-			if (settings().mode === 'Record') {
-				if (notes[midi]) {
+		if (pointerDown()) {
+			if (props.mode === 'Record') {
+				if (notes()[midi]) {
 					props.onNoteDeactivated(midi)
 				} else {
 					props.onNoteActivated(midi)
@@ -149,8 +148,8 @@ export const Keyboard = (_props: KeyboardProps) => {
 	}
 
 	const onPointerOut = (midi: number) => {
-		if (pointerDown) {
-			if (settings().mode === 'Play') {
+		if (pointerDown()) {
+			if (props.mode === 'Play') {
 				props.onNoteDeactivated(midi)
 			}
 		}
@@ -166,7 +165,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 			const { width: boxWidth, height: boxHeight } =
 				wrapperRef.getBoundingClientRect()
 
-			console.log(boxHeight, wrapperRef.clientHeight, wrapperRef.offsetHeight)
+			// console.log(boxHeight, wrapperRef.clientHeight, wrapperRef.offsetHeight)
 
 			const cols = Math.min(
 				Math.floor((boxWidth - 2 * keyMargin) / keySize()),
@@ -250,7 +249,9 @@ export const Keyboard = (_props: KeyboardProps) => {
 									<button
 										class={clsx(
 											'box-border touch-none select-none rounded-md text-gray-700 shadow-sm transition-all',
-											{ 'scale-110 border-4 border-red-400': notes[cell.midi] },
+											{
+												'scale-110 border-4 border-red-400': notes()[cell.midi],
+											},
 										)}
 										style={{
 											'background-color': toneBg(cell.toneColor),
