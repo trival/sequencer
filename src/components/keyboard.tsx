@@ -28,6 +28,7 @@ import {
 	onCleanup,
 	onMount,
 } from 'solid-js'
+import Popover from './Popover'
 
 type Mode = 'Record' | 'Play'
 
@@ -155,18 +156,6 @@ export const Keyboard = (_props: KeyboardProps) => {
 		}
 	}
 
-	const stopPreventAnd = (fn: () => void) => (e: Event) => {
-		e.preventDefault()
-		e.stopPropagation()
-		fn()
-		return false
-	}
-
-	const preventAnd = (fn: () => void) => (e: Event) => {
-		e.preventDefault()
-		fn()
-	}
-
 	// compute the keys
 
 	const [width, setWidth] = createSignal(0)
@@ -246,17 +235,10 @@ export const Keyboard = (_props: KeyboardProps) => {
 			}}
 		>
 			{props.onSettingsChanged && (
-				<Popover class="absolute right-0 top-0">
-					<Popover.Button type="button" class="m-0">
-						<Icon path={chartBar} class="h-6 w-6 -rotate-90" />
-					</Popover.Button>
-					<Popover.Panel class="absolute right-8 top-1 rounded bg-gray-100/90 shadow-lg shadow-gray-400">
-						<KeyboardSettingsEditor
-							onSettingsChanged={props.onSettingsChanged}
-							currentSettings={settings()}
-						/>
-					</Popover.Panel>
-				</Popover>
+				<KeyboardSettingsBtn
+					onSettingsChanged={props.onSettingsChanged}
+					currentSettings={settings()}
+				/>
 			)}
 
 			<div class="flex h-full w-full flex-col justify-evenly">
@@ -277,11 +259,27 @@ export const Keyboard = (_props: KeyboardProps) => {
 											margin: `${keyMargin}px`,
 											color: isToneBgDark(cell.toneColor) ? 'black' : undefined,
 										}}
-										onPointerDown={preventAnd(() => onPointerDown(cell.midi))}
-										onPointerUp={preventAnd(() => onPointerUp(cell.midi))}
-										onPointerEnter={preventAnd(() => onPointerEnter(cell.midi))}
-										onPointerOut={preventAnd(() => onPointerOut(cell.midi))}
-										onContextMenu={stopPreventAnd(() => {})}
+										onPointerDown={(e) => {
+											e.preventDefault()
+											onPointerDown(cell.midi)
+										}}
+										onPointerUp={(e) => {
+											e.preventDefault()
+											onPointerUp(cell.midi)
+										}}
+										onPointerEnter={(e) => {
+											e.preventDefault()
+											onPointerEnter(cell.midi)
+										}}
+										onPointerOut={(e) => {
+											e.preventDefault()
+											onPointerOut(cell.midi)
+										}}
+										onContextMenu={(e) => {
+											e.preventDefault()
+											e.stopPropagation()
+											return false
+										}}
 									>
 										{cell.frequency.toNote().replaceAll('#', '♯')}
 									</button>
@@ -300,11 +298,42 @@ type KeyboardSettingsProps = {
 	currentSettings: KeyboardSettings
 }
 
+function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
+	const [isOpen, setOpen] = createSignal(false)
+
+	const close = () => setOpen(false)
+	const open = () => setOpen(true)
+	let btnRef
+
+	return (
+		<div class="absolute left-0 top-0">
+			<button ref={btnRef} type="button" onClick={open}>
+				<Icon path={chartBar} class="h-6 w-6 rotate-90" />
+			</button>
+			<Popover
+				popperOptions={{
+					placement: 'right-start',
+					modifiers: [{ name: 'offset', options: { offset: [10, 10] } }],
+				}}
+				referenceElement={btnRef}
+				onClose={close}
+				visible={isOpen()}
+				class="rounded bg-gray-100/90 shadow-lg shadow-gray-400"
+			>
+				<KeyboardSettingsEditor
+					onSettingsChanged={props.onSettingsChanged}
+					currentSettings={props.currentSettings}
+				/>
+			</Popover>
+		</div>
+	)
+}
+
 function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 	const offsetX = () => props.currentSettings.offsetX
 	const offsetY = () => props.currentSettings.offsetY
 
-	const changeSetting = (setting: Partial<KeyboardSettings>) => () =>
+	const changeSetting = (setting: Partial<KeyboardSettings>) =>
 		props.onSettingsChanged({ ...props.currentSettings, ...setting })
 
 	return (
@@ -312,25 +341,25 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 			<div class="flex justify-center">
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetX: offsetX() + 1 })}
+					onClick={() => changeSetting({ offsetX: offsetX() + 1 })}
 				>
 					<Icon path={arrowSmallLeft} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetY: offsetY() - 1 })}
+					onClick={() => changeSetting({ offsetY: offsetY() - 1 })}
 				>
 					<Icon path={arrowSmallUp} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetY: offsetY() + 1 })}
+					onClick={() => changeSetting({ offsetY: offsetY() + 1 })}
 				>
 					<Icon path={arrowSmallDown} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={changeSetting({ offsetX: offsetX() - 1 })}
+					onClick={() => changeSetting({ offsetX: offsetX() - 1 })}
 				>
 					<Icon path={arrowSmallRight} class="h-6 w-6" />
 				</IconButton>

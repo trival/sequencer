@@ -12,7 +12,8 @@ import {
 import { Select } from './Select'
 import { subdivisions } from '@/utils/utils'
 import { plus, minus } from 'solid-heroicons/solid'
-import { mergeProps } from 'solid-js'
+import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
+import { Icon } from 'solid-heroicons'
 
 const secondWidthFactor = 60
 
@@ -99,30 +100,34 @@ export const Track = (_props: TrackProps) => {
 			<div class="relative w-full overflow-x-auto pb-2">
 				<div class="relative w-fit px-2">
 					<div class="absolute h-full">
-						{[...Array(countMeasures())].map((_, i) => (
-							<span
-								class="absolute h-full w-[1px] bg-cyan-300"
-								style={{ left: measureSec * i * secondWidthFactor }}
-							/>
-						))}
+						<For each={[...Array(countMeasures())].map((_, i) => i)}>
+							{(i) => (
+								<span
+									class="absolute h-full w-[1px] bg-cyan-300"
+									style={{ left: measureSec() * i * secondWidthFactor + 'px' }}
+								/>
+							)}
+						</For>
 					</div>
-					{props.song.map((track, i) => (
-						<div class="flex h-12 items-center">
-							{track.notes.map((note, j) => {
-								return (
-									<Note
-										key={j}
-										durationSec={note.durationSec}
-										isActive={props.activeNoteIdx?.[1] === j}
-										isEmpty={note.midiNotes.length === 0}
-										onSelected={
-											props.onNoteClicked && (() => props.onNoteClicked(i, j))
-										}
-									/>
-								)
-							})}
-						</div>
-					))}
+					<For each={props.song}>
+						{(track, i) => (
+							<div class="flex h-12 items-center">
+								<For each={track.notes}>
+									{(note, j) => (
+										<Note
+											durationSec={note.durationSec}
+											isActive={props.activeNoteIdx?.[1] === j()}
+											isEmpty={note.midiNotes.length === 0}
+											onSelected={
+												props.onNoteClicked &&
+												(() => props.onNoteClicked(i(), j()))
+											}
+										/>
+									)}
+								</For>
+							</div>
+						)}
+					</For>
 				</div>
 			</div>
 			<div class="relative flex w-full pb-2">
@@ -133,7 +138,7 @@ export const Track = (_props: TrackProps) => {
 					<div class="relative flex w-fit">
 						{props.onAddBefore && (
 							<AddButton>
-								{({ close }) => (
+								{(close) => (
 									<DurationSelector
 										defaultDuration={props.defaultDuration}
 										onSelect={(durations) => {
@@ -150,9 +155,9 @@ export const Track = (_props: TrackProps) => {
 						)}
 						{props.onDurationChanged && activeNote && (
 							<EditButton>
-								{({ close }) => (
+								{(close) => (
 									<DurationSelector
-										value={toDurations(activeNote.duration)}
+										value={toDurations(activeNote().duration)}
 										defaultDuration={props.defaultDuration}
 										onSelect={(durations) => {
 											close()
@@ -175,7 +180,7 @@ export const Track = (_props: TrackProps) => {
 						)}
 						{props.onAddAfter && (
 							<AddButton>
-								{({ close }) => (
+								{(close) => (
 									<DurationSelector
 										defaultDuration={props.defaultDuration}
 										onSelect={(durations) => {
@@ -205,58 +210,61 @@ interface DurationSelectorProps {
 
 function DurationSelector(_props: DurationSelectorProps) {
 	const props = mergeProps({ value: [] }, _props)
-	const initialDurations = props.value.length
-		? props.value
-		: [props.defaultDuration]
-	const [durations, updateDuration] = useImmer(initialDurations)
+
+	const [durations, setDurations] = createSignal<Subdivision[]>([
+		props.defaultDuration,
+	])
+
+	createEffect(() => {
+		if (props.value.length) {
+			setDurations(props.value)
+		}
+	})
 
 	return (
 		<div>
-			{durations.map((dur, i) => {
-				return (
+			<For each={durations()}>
+				{(dur, i) => (
 					<span class="mb-2 flex items-center justify-start">
 						<Select
 							class="mr-3 w-20"
 							value={dur}
 							onSelect={(duration) => {
-								updateDuration((durs) => {
-									durs[i] = duration as Subdivision
+								setDurations((durs) => {
+									durs[i()] = duration as Subdivision
+									return durs
 								})
 							}}
 							options={durationOptions}
 						/>
-						{i > 0 && (
+						<Show when={i() > 0}>
 							<IconButton
 								onClick={() =>
-									updateDuration((ds) => ds.filter((_, j) => j !== i))
+									setDurations((ds) => ds.filter((_, j) => j !== i()))
 								}
 							>
-								<MinusIcon class="h-6 w-6" aria-hidden="true" />
+								<Icon path={minus} class="h-6 w-6" aria-hidden="true" />
 							</IconButton>
-						)}
+						</Show>
 					</span>
-				)
-			})}
+				)}
+			</For>
 			<span class="mt-3 flex items-center justify-center">
 				<Button
 					color="teal"
 					class="mr-3 w-20"
 					onClick={() => {
 						props.onSelect(
-							durations.length ? durations : [props.defaultDuration],
+							durations().length ? durations() : [props.defaultDuration],
 						)
 					}}
 				>
 					Ok
 				</Button>
 				<IconButton
-					onClick={() =>
-						updateDuration((ds) => {
-							ds.push(props.defaultDuration)
-						})
-					}
+					onClick={() => setDurations((ds) => [...ds, props.defaultDuration])}
 				>
-					<PlusIcon class="h-6 w-6" aria-hidden="true" />
+					<Icon path={plus} class="h-6 w-6" aria-hidden="true" />
 				</IconButton>
 			</span>
 		</div>

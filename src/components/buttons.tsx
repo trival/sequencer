@@ -3,8 +3,8 @@ import { Icon } from 'solid-heroicons'
 import { plus, play, pause } from 'solid-heroicons/solid'
 import { trash, pencilSquare } from 'solid-heroicons/outline'
 import clsx from 'clsx'
-import { JSX, ParentProps, mergeProps, onMount } from 'solid-js'
-import { createPopper } from '@popperjs/core'
+import { JSX, ParentProps, createSignal, mergeProps } from 'solid-js'
+import Popover from './Popover'
 
 interface ButtonProps {
 	onClick?: () => void
@@ -59,44 +59,40 @@ export const Button = (_props: ParentProps<ButtonProps>) => {
 }
 
 export const IconButtonPopover = (
-	_props: ParentProps<
-		ButtonProps & {
-			buttonElement: JSX.Element
-		}
-	>,
+	_props: ButtonProps & {
+		buttonElement: JSX.Element
+		children: (close: () => void) => JSX.Element
+	},
 ) => {
 	const props = mergeProps({ color: 'white' }, _props)
 
-	let referenceElement: HTMLButtonElement
-	let popperElement: HTMLDivElement
+	const [isOpen, setOpen] = createSignal(false)
 
-	onMount(() => {
-		createPopper(referenceElement, popperElement)
-	})
+	const close = () => setOpen(false)
+	const open = () => setOpen(true)
+
+	let btnRef
 
 	return (
-		<Popover class="relative">
-			<Popover.Button
-				ref={referenceElement}
+		<div class="relative inline-block">
+			<IconButton
+				ref={btnRef}
 				type="button"
-				class={clsx(
-					'm-2 rounded-full p-2 shadow-sm shadow-slate-400',
-					btnColors[props.color],
-					btnFocus,
-					props.class,
-				)}
+				color={props.color}
+				class={props.class}
+				onClick={open}
 			>
 				{props.buttonElement}
-			</Popover.Button>
-			<Popover.Panel
-				ref={popperElement}
+			</IconButton>
+			<Popover
+				referenceElement={btnRef}
+				onClose={close}
+				visible={isOpen()}
 				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
-				style={styles.popper}
-				{...attributes.popper}
 			>
-				{props.children}
-			</Popover.Panel>
-		</Popover>
+				{props.children(close)}
+			</Popover>
+		</div>
 	)
 }
 
@@ -110,7 +106,7 @@ export const DeleteButton = (props: DeleteButtonProps) => {
 			color="rose"
 			buttonElement={<Icon path={trash} class="h-6 w-6" aria-hidden="true" />}
 		>
-			{({ close }) => (
+			{(close) => (
 				<Button
 					color="rose"
 					onClick={() => {
@@ -125,7 +121,9 @@ export const DeleteButton = (props: DeleteButtonProps) => {
 	)
 }
 
-export const AddButton = (props: ParentProps) => {
+export const AddButton = (props: {
+	children: (close: () => void) => JSX.Element
+}) => {
 	return (
 		<IconButtonPopover
 			color="indigo"
@@ -136,7 +134,9 @@ export const AddButton = (props: ParentProps) => {
 	)
 }
 
-export const EditButton = (props: ParentProps) => {
+export const EditButton = (props: {
+	children: (close: () => void) => JSX.Element
+}) => {
 	return (
 		<IconButtonPopover
 			color="teal"
