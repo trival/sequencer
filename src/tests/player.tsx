@@ -22,8 +22,15 @@ const initialMelody: TrackNote[] = [
 export default function PlayerTest() {
 	const synth = useSynth()
 
-	const { song, addNote, removeNote, changeDuration, updateNoteTones } =
-		useSong({ bpm: 160, tracks: [initialMelody] })
+	const {
+		tracks,
+		metadata,
+		addNote,
+		removeNote,
+		changeDuration,
+		updateNoteTones,
+		updateMetadata,
+	} = useSong({ bpm: 160, tracks: [initialMelody] })
 
 	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
 		[number, number] | null
@@ -38,7 +45,7 @@ export default function PlayerTest() {
 			await Tone.start()
 			Tone.Transport.start()
 
-			const seqs = song().map((track, i) => {
+			const seqs = tracks().map((track, i) => {
 				const seq = new Tone.Part((time, note: ProcessedNote) => {
 					synth.play(note.midiNotes, note.duration, time)
 					setActiveNoteIdx([i, track.notes.indexOf(note)])
@@ -49,7 +56,7 @@ export default function PlayerTest() {
 			})
 
 			const idx = activeNoteIdx()
-			const note = idx && song()[idx[0]]?.notes[idx[1]]
+			const note = idx && tracks()[idx[0]]?.notes[idx[1]]
 
 			if (note) {
 				seqs.forEach((seq) => {
@@ -74,10 +81,21 @@ export default function PlayerTest() {
 		}
 	}
 
+	const onStop = () => {
+		playingSequence()?.forEach((seq) => {
+			seq.stop()
+		})
+
+		Tone.Transport.stop()
+		setPlayingSequence(null)
+		setIsPlaying(false)
+		setActiveNoteIdx(null)
+	}
+
 	const onActivateNote = (midi: number) => {
 		const idx = activeNoteIdx()
 		if (idx) {
-			const note = song()[idx[0]]?.notes[idx[1]]
+			const note = tracks()[idx[0]]?.notes[idx[1]]
 			if (!note) return
 			if (!note.midiNotes.includes(midi)) {
 				const newNotes = [...note.midiNotes, midi]
@@ -94,7 +112,7 @@ export default function PlayerTest() {
 	const onDeactivateNote = (midi: number) => {
 		const idx = activeNoteIdx()
 		if (idx) {
-			const note = song()[idx[0]]?.notes[idx[1]]
+			const note = tracks()[idx[0]]?.notes[idx[1]]
 			if (!note) return
 			if (note.midiNotes.includes(midi)) {
 				const newNotes = note.midiNotes.filter((n) => n !== midi)
@@ -114,7 +132,7 @@ export default function PlayerTest() {
 			setActiveNoteIdx(null)
 		} else {
 			setActiveNoteIdx([trackIdx, noteIdx])
-			const note = song()[trackIdx]?.notes[noteIdx]
+			const note = tracks()[trackIdx]?.notes[noteIdx]
 			if (!note) return
 			synth.play(note.midiNotes, note.duration)
 		}
@@ -138,7 +156,7 @@ export default function PlayerTest() {
 	}
 
 	const onNoteRemoved = (trackIdx: number, noteIdx: number) => {
-		const track = song()[trackIdx]
+		const track = tracks()[trackIdx]
 		if (!track) return
 		if (noteIdx === track.notes.length - 1) {
 			if (track.notes.length > 1) {
@@ -166,7 +184,7 @@ export default function PlayerTest() {
 
 	const activeNote = () => {
 		const idx = activeNoteIdx()
-		return idx ? song()[idx[0]]?.notes[idx[1]] : null
+		return idx ? tracks()[idx[0]]?.notes[idx[1]] : null
 	}
 
 	return (
@@ -187,10 +205,13 @@ export default function PlayerTest() {
 			</div>
 			<div class="mt-2">
 				<Track
-					song={song()}
+					song={tracks()}
 					isPlaying={isPlaying()}
 					activeNoteIdx={activeNoteIdx()}
+					bpm={metadata().bpm}
+					onTempoChanged={(bpm) => updateMetadata({ bpm })}
 					onPlay={onPlay}
+					onStop={onStop}
 					onNoteClicked={onNoteClicked}
 					onRemove={onNoteRemoved}
 					onAddBefore={onNoteAddedBefore}

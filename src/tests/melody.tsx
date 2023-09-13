@@ -28,14 +28,14 @@ const melodyData: TrackNote[] = [
 
 export default function SequenceTest() {
 	const synth = useSynth()
-	const { song } = useSong({ bpm: 160, tracks: [melodyData] })
+	const { tracks } = useSong({ bpm: 160, tracks: [melodyData] })
 
 	const onClick = async () => {
 		await Tone.start()
 		Tone.Transport.start()
 		Tone.Transport.bpm.value = 160
 
-		let track = song()[0]
+		let track = tracks()[0]
 
 		const seq = new Tone.Part((time, note: ProcessedNote) => {
 			synth.play(note.midiNotes, note.duration, time)

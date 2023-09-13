@@ -8,11 +8,15 @@ export interface TrackNote {
 	duration: Subdivision | Subdivision[]
 }
 
-export interface SongData {
-	tracks: TrackNote[][]
+export interface Metadata {
 	bpm: number
 	swing?: number
 	swingSubdivision?: Subdivision
+	title?: string
+}
+
+export interface SongData extends Metadata {
+	tracks: TrackNote[][]
 }
 
 export interface ProcessedNote {
@@ -104,20 +108,27 @@ const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 }
 
 export const useSong = (data: SongData) => {
-	const [song, setSong] = createSignal<ProcessedTrack[]>([])
-	const updateSong = (
+	const [tracks, setTracks] = createSignal<ProcessedTrack[]>([])
+	const updateTracks = (
 		fn: ((song: ProcessedTrack[]) => void) | ProcessedTrack[],
 	) => {
-		setSong(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
+		setTracks(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
 	}
+
+	const [metadata, setMetadata] = createSignal<Metadata>({
+		bpm: data.bpm,
+		swing: data.swing,
+		swingSubdivision: data.swingSubdivision,
+		title: data.title,
+	})
 
 	onMount(() => {
 		Tone.Transport.bpm.value = data.bpm
-		updateSong(data.tracks.map((track) => processTrack(track)))
+		updateTracks(data.tracks.map((track) => processTrack(track)))
 	})
 
 	const removeNote = (trackIdx: number, noteIdx: number) => {
-		updateSong((song) => {
+		updateTracks((song) => {
 			const track = song[trackIdx]
 			if (track) {
 				track.notes = track.notes.filter((_, i) => i !== noteIdx)
@@ -131,7 +142,7 @@ export const useSong = (data: SongData) => {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		updateSong((song) => {
+		updateTracks((song) => {
 			const track = song[trackIdx]
 			if (track) {
 				const note = track.notes[noteIdx]
@@ -144,7 +155,7 @@ export const useSong = (data: SongData) => {
 	}
 
 	const addNote = (trackIdx: number, noteIdx: number, noteData: TrackNote) => {
-		updateSong((song) => {
+		updateTracks((song) => {
 			const track = song[trackIdx]
 			if (track) {
 				const [before, after] = divideAt(track.notes, noteIdx)
@@ -171,7 +182,7 @@ export const useSong = (data: SongData) => {
 		noteIdx: number,
 		midiNotes: number[],
 	) => {
-		updateSong((song) => {
+		updateTracks((song) => {
 			const track = song[trackIdx]
 			if (!track) return
 			const note = track.notes[noteIdx]
@@ -180,9 +191,23 @@ export const useSong = (data: SongData) => {
 		})
 	}
 
+	const updateMetadata = (data: Partial<Metadata>) => {
+		setMetadata((prev) => ({ ...prev, ...data }))
+		if (data.bpm) {
+			Tone.Transport.bpm.value = data.bpm
+			updateTracks((song) => {
+				for (const track of song) {
+					recalculateTrack(track)
+				}
+			})
+		}
+	}
+
 	return {
-		song,
-		updateSong,
+		tracks,
+		metadata,
+		updateTracks,
+		updateMetadata,
 		removeNote,
 		addNote,
 		changeDuration,

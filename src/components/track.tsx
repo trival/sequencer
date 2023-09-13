@@ -9,9 +9,9 @@ import {
 	IconButton,
 	PlayButton,
 } from '@/components/buttons'
-import { Select } from './Select'
+import { Input, Select } from './Select'
 import { subdivisions } from '@/utils/utils'
-import { plus, minus } from 'solid-heroicons/solid'
+import { plus, minus, stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
 import { Icon } from 'solid-heroicons'
 
@@ -55,6 +55,7 @@ export const Note = (props: NoteProps) => {
 
 interface TrackProps {
 	song: ProcessedTrack[]
+	bpm: number
 	isPlaying?: boolean
 	activeNoteIdx?: [number, number] | null
 	onNoteClicked?: (trackIdx: number, noteIdx: number) => void
@@ -76,6 +77,8 @@ interface TrackProps {
 	) => void
 	defaultDuration?: Subdivision
 	onPlay?: () => void
+	onStop?: () => void
+	onTempoChanged?: (tempo: number) => void
 }
 
 export const Track = (_props: TrackProps) => {
@@ -130,11 +133,20 @@ export const Track = (_props: TrackProps) => {
 					</For>
 				</div>
 			</div>
-			<div class="relative flex w-full pb-2">
+			<div class="relative flex w-full pb-2 items-center">
 				{props.onPlay && (
 					<PlayButton isPlaying={props.isPlaying} onClick={props.onPlay} />
 				)}
-				{props.activeNoteIdx && !props.isPlaying && (
+				{props.onStop && (
+					<Button
+						onClick={() => props.onStop()}
+						class="px-2 pt-2 pb-2 pl-2 pr-2 my-2 mr-2 rounded"
+					>
+						<Icon path={stop} class="h-6 w-6" />
+					</Button>
+				)}
+
+				{props.activeNoteIdx && !props.isPlaying ? (
 					<div class="relative flex w-fit">
 						{props.onAddBefore && (
 							<AddButton>
@@ -194,6 +206,23 @@ export const Track = (_props: TrackProps) => {
 									/>
 								)}
 							</AddButton>
+						)}
+					</div>
+				) : (
+					<div class="flex w-fit">
+						{props.onTempoChanged && (
+							<label class="ml-2">
+								Bpm:{' '}
+								<Input
+									class="w-20"
+									type="number"
+									value={props.bpm}
+									onChange={(val) => {
+										props.onStop && props.onStop()
+										props.onTempoChanged(parseInt(val as string))
+									}}
+								/>
+							</label>
 						)}
 					</div>
 				)}

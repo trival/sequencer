@@ -167,7 +167,7 @@ export const PlayButton = (props: PlayButtonProps) => {
 			type="button"
 			onClick={() => props.onClick()}
 			class={clsx(
-				'm-2 rounded p-2 shadow-sm',
+				'm-2 rounded-md p-2 shadow-sm',
 				btnColors.white,
 				btnFocus,
 				props.class,
