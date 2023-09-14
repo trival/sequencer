@@ -1,4 +1,5 @@
-import { TrackNote, ProcessedNote, useSong } from '@/utils/song'
+import { TrackNote } from '@/datamodel'
+import { ProcessedNote, useSong } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
 import * as Tone from 'tone'

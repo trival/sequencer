@@ -1,4 +1,5 @@
-import { Keyboard, KeyboardSettings } from '@/components/keyboard'
+import { Keyboard } from '@/components/keyboard'
+import { KeyboardSettings } from '@/datamodel'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'

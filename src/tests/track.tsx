@@ -1,5 +1,6 @@
 import { Track } from '@/components/track'
-import { TrackNote, useSong } from '@/utils/song'
+import { TrackNote } from '@/datamodel'
+import { useSong } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
