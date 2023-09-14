@@ -24,7 +24,7 @@ export default function PlayerTest() {
 
 	const {
 		tracks,
-		metadata,
+		data,
 		addNote,
 		removeNote,
 		changeDuration,
@@ -208,7 +208,7 @@ export default function PlayerTest() {
 					song={tracks()}
 					isPlaying={isPlaying()}
 					activeNoteIdx={activeNoteIdx()}
-					bpm={metadata().bpm}
+					bpm={data().bpm}
 					onTempoChanged={(bpm) => updateMetadata({ bpm })}
 					onPlay={onPlay}
 					onStop={onStop}

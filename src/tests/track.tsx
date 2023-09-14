@@ -16,7 +16,7 @@ const initialMelody: TrackNote[] = [
 ]
 
 export default function EditorPage() {
-	const { tracks, metadata, addNote, removeNote, changeDuration } = useSong({
+	const { tracks, data, addNote, removeNote, changeDuration } = useSong({
 		bpm: 160,
 		tracks: [initialMelody],
 	})
@@ -75,7 +75,7 @@ export default function EditorPage() {
 			<Track
 				song={tracks()}
 				isPlaying={isPlaying()}
-				bpm={metadata().bpm}
+				bpm={data().bpm}
 				onPlay={() => setIsPlaying(!isPlaying())}
 				activeNoteIdx={activeNoteIdx()}
 				onNoteClicked={onNoteClicked}

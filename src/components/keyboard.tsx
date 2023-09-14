@@ -10,7 +10,6 @@ import {
 } from '@/utils/tone-colors'
 import clsx from 'clsx'
 import * as Tone from 'tone'
-import { chartBar } from 'solid-heroicons/solid-mini'
 import {
 	arrowSmallDown,
 	arrowSmallLeft,
@@ -22,6 +21,7 @@ import { Input, Select } from './Select'
 import { Icon } from 'solid-heroicons'
 import {
 	For,
+	createEffect,
 	createMemo,
 	createSignal,
 	mergeProps,
@@ -181,9 +181,9 @@ export const Keyboard = (_props: KeyboardProps) => {
 		}
 	}
 
-	onMount(() => {
-		rescale()
+	createEffect(rescale)
 
+	onMount(() => {
 		window.addEventListener('resize', rescale)
 	})
 
@@ -308,18 +308,22 @@ function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 
 	return (
 		<div class="absolute left-0 top-0">
-			<button ref={btnRef} type="button" onClick={open}>
-				<Icon path={chartBar} class="h-6 w-6 rotate-90" />
-			</button>
+			<button
+				ref={btnRef}
+				type="button"
+				onClick={open}
+				title="Keyboard settings"
+				class="w-12 h-12 rounded-full bg-gray-100/90 shadow-sm shadow-gray-400 -ml-6 -translate-y-1/2 transition-all hover:scale-110 focus:outline-none"
+			/>
 			<Popover
 				popperOptions={{
 					placement: 'right-start',
-					modifiers: [{ name: 'offset', options: { offset: [10, 10] } }],
+					modifiers: [{ name: 'offset', options: { offset: [40, 6] } }],
 				}}
 				referenceElement={btnRef}
 				onClose={close}
 				visible={isOpen()}
-				class="rounded bg-gray-100/90 shadow-lg shadow-gray-400"
+				class="rounded bg-gray-100/90 shadow-md shadow-gray-500/60"
 			>
 				<KeyboardSettingsEditor
 					onSettingsChanged={props.onSettingsChanged}

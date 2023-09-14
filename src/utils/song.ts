@@ -1,5 +1,5 @@
 import { produce } from 'immer'
-import { createSignal, onMount } from 'solid-js'
+import { createEffect, createSignal, onMount } from 'solid-js'
 import * as Tone from 'tone'
 import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
 
@@ -115,12 +115,7 @@ export const useSong = (data: SongData) => {
 		setTracks(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
 	}
 
-	const [metadata, setMetadata] = createSignal<Metadata>({
-		bpm: data.bpm,
-		swing: data.swing,
-		swingSubdivision: data.swingSubdivision,
-		title: data.title,
-	})
+	const [rawData, setRawData] = createSignal<SongData>(data)
 
 	onMount(() => {
 		Tone.Transport.bpm.value = data.bpm
@@ -192,7 +187,7 @@ export const useSong = (data: SongData) => {
 	}
 
 	const updateMetadata = (data: Partial<Metadata>) => {
-		setMetadata((prev) => ({ ...prev, ...data }))
+		setRawData((prev) => ({ ...prev, ...data }))
 		if (data.bpm) {
 			Tone.Transport.bpm.value = data.bpm
 			updateTracks((song) => {
@@ -203,9 +198,21 @@ export const useSong = (data: SongData) => {
 		}
 	}
 
+	createEffect(() => {
+		setRawData((prev) => ({
+			...prev,
+			tracks: tracks().map((t) =>
+				t.notes.map((n) => ({
+					midiNotes: n.midiNotes,
+					duration: n.subdivisions,
+				})),
+			),
+		}))
+	})
+
 	return {
 		tracks,
-		metadata,
+		data: rawData,
 		updateTracks,
 		updateMetadata,
 		removeNote,
