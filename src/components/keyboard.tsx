@@ -29,19 +29,9 @@ import {
 	onMount,
 } from 'solid-js'
 import Popover from './Popover'
+import { KeyboardSettings } from '@/datamodel'
 
 type Mode = 'Record' | 'Play'
-
-export interface KeyboardSettings {
-	baseNote: number
-	offsetX: number
-	offsetY: number
-	maxRows: number
-	maxCols: number
-	keyLength: number
-	scaleHighlight: ScaleHighlight
-	toneColorType: ToneColorType
-}
 
 interface KeyboardProps {
 	activeNotes?: number[]

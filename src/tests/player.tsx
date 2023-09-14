@@ -1,12 +1,13 @@
-import { Keyboard, KeyboardSettings } from '@/components/keyboard'
+import { Keyboard } from '@/components/keyboard'
 import { Track } from '@/components/track'
-import { TrackNote, ProcessedNote, useSong } from '@/utils/song'
+import { ProcessedNote, useSong } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import * as Tone from 'tone'
 import { createSignal } from 'solid-js'
+import { KeyboardSettings, TrackNote } from '@/datamodel'
 
 const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },

@@ -1,23 +1,8 @@
+import { Song, TrackNote, SongProperties } from '@/datamodel'
 import { produce } from 'immer'
 import { createEffect, createSignal, onMount } from 'solid-js'
 import * as Tone from 'tone'
 import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
-
-export interface TrackNote {
-	midiNotes: number[]
-	duration: Subdivision | Subdivision[]
-}
-
-export interface Metadata {
-	bpm: number
-	swing?: number
-	swingSubdivision?: Subdivision
-	title?: string
-}
-
-export interface SongData extends Metadata {
-	tracks: TrackNote[][]
-}
 
 export interface ProcessedNote {
 	midiNotes: number[]
@@ -107,7 +92,7 @@ const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 	return [xs.slice(0, idx), xs.slice(idx)]
 }
 
-export const useSong = (data: SongData) => {
+export const useSong = (data: Song) => {
 	const [tracks, setTracks] = createSignal<ProcessedTrack[]>([])
 	const updateTracks = (
 		fn: ((song: ProcessedTrack[]) => void) | ProcessedTrack[],
@@ -115,7 +100,7 @@ export const useSong = (data: SongData) => {
 		setTracks(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
 	}
 
-	const [rawData, setRawData] = createSignal<SongData>(data)
+	const [rawData, setRawData] = createSignal<Song>(data)
 
 	onMount(() => {
 		Tone.Transport.bpm.value = data.bpm
@@ -186,7 +171,7 @@ export const useSong = (data: SongData) => {
 		})
 	}
 
-	const updateMetadata = (data: Partial<Metadata>) => {
+	const updateMetadata = (data: Partial<SongProperties>) => {
 		setRawData((prev) => ({ ...prev, ...data }))
 		if (data.bpm) {
 			Tone.Transport.bpm.value = data.bpm
