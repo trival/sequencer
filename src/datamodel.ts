@@ -1,6 +1,19 @@
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 
+export interface Profile {
+	id: string
+	username: string
+	color: string
+}
+
+export interface Collection {
+	id: string
+	userId: string
+	title: string
+	description?: string
+}
+
 export interface KeyboardSettings {
 	baseNote: number
 	offsetX: number
@@ -21,6 +34,14 @@ export interface TrackNote {
 	duration: Subdivision | Subdivision[]
 }
 
+export interface SongMeta {
+	userId: string
+	title?: string
+	description?: string
+	collection?: string
+	basedOn?: string
+}
+
 export interface SongProperties {
 	bpm: number
 	swing?: number
@@ -29,25 +50,9 @@ export interface SongProperties {
 }
 
 export interface Song extends SongProperties {
-	tracks: TrackNote[][]
-}
-
-export interface SongMeta {
 	id: string
-	title?: string
-	description?: string
-	collection?: string
-	user?: string
-
-	// stored as JSON
-	song: Song
+	meta: SongMeta
+	tracks: TrackNote[][]
 	keyboardSettings?: Partial<KeyboardSettings>
 	trackSettings?: Partial<TrackSettings>
-}
-
-export interface Collection {
-	id: string
-	title: string
-	description?: string
-	user?: string
 }
