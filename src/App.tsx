@@ -5,6 +5,7 @@ const App: Component = () => {
 	return (
 		<Routes>
 			<Route path="/" component={lazy(() => import('@/pages/Home'))} />
+			<Route path="/app" component={lazy(() => import('@/pages/App'))} />
 			<Route
 				path="/tests/colors"
 				component={lazy(() => import('@/tests/colors'))}

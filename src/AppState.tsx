@@ -1,7 +1,8 @@
-import { ParentProps, createContext, useContext } from 'solid-js'
+import { ParentProps, createContext, createEffect, useContext } from 'solid-js'
 import { Collection, Profile, Song } from './datamodel'
 import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
+import { Session } from './utils/session'
 
 export interface AppState {
 	profile: Profile | null
@@ -14,7 +15,7 @@ export interface AppState {
 }
 
 export interface AppActions {
-	setProfile: (profile: Profile | null) => void
+	updateProfile: (profile: Partial<Profile>) => void
 
 	openSong(id: string): void
 	openNewSong(): void
@@ -42,32 +43,51 @@ type AppCtx = [AppState, AppActions]
 
 const ctx = createContext<AppCtx>([emptyAppState(), {} as AppActions])
 
-export const AppStateProvider = (props: ParentProps<{ storage: Storage }>) => {
+export const AppStateProvider = (
+	props: ParentProps<{ storage: Storage; session: Session }>,
+) => {
 	const [state, _setState] = createStore<AppState>(emptyAppState())
 
+	createEffect(() => {
+		let userId = props.session.userId()
+		if (userId) {
+			props.storage
+				.getProfile(userId)
+				.then((profile) => {
+					_setState('profile', profile)
+				})
+				.catch((err) => {
+					console.log(err)
+					_setState('profile', userId ? { userId } : null)
+				})
+		} else {
+			_setState('profile', null)
+		}
+	})
+
 	const actions: AppActions = {
-		setProfile: function (profile: Profile | null): void {
+		updateProfile: function (profile): void {
 			throw new Error('Function not implemented.')
 		},
-		openSong: function (id: string): void {
+		openSong: function (id): void {
 			throw new Error('Function not implemented.')
 		},
 		openNewSong: function (): void {
 			throw new Error('Function not implemented.')
 		},
-		openSongCopy: function (id: string): void {
+		openSongCopy: function (id): void {
 			throw new Error('Function not implemented.')
 		},
-		closeSong: function (id: string): void {
+		closeSong: function (id): void {
 			throw new Error('Function not implemented.')
 		},
-		saveSong: function (id: string): void {
+		saveSong: function (id): void {
 			throw new Error('Function not implemented.')
 		},
-		saveSongMeta: function (id: string, meta: Partial<Song>): void {
+		saveSongMeta: function (id, meta): void {
 			throw new Error('Function not implemented.')
 		},
-		deleteSong: function (id: string): void {
+		deleteSong: function (id): void {
 			throw new Error('Function not implemented.')
 		},
 	}

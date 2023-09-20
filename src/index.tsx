@@ -4,7 +4,9 @@ import { render } from 'solid-js/web'
 import App from './App'
 import { Router, hashIntegration } from '@solidjs/router'
 import { AppStateProvider } from './AppState'
-import { createLocalStorage } from './utils/storage'
+import { createSupabaseStorage } from './utils/storage'
+import { supabase } from './utils/supabase'
+import { createSupabaseSession } from './utils/session'
 
 const root = document.getElementById('root')
 
@@ -14,12 +16,13 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 	)
 }
 
-const storage = createLocalStorage()
+const storage = createSupabaseStorage(supabase)
+const session = createSupabaseSession(supabase)
 
 render(
 	() => (
 		<Router source={hashIntegration()}>
-			<AppStateProvider storage={storage}>
+			<AppStateProvider storage={storage} session={session}>
 				<App />
 			</AppStateProvider>
 		</Router>

@@ -2,7 +2,7 @@ import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 
 export interface Profile {
-	id: string
+	userId: string
 	username: string
 	color: string
 }
