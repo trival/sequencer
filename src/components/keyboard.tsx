@@ -58,7 +58,11 @@ const defaultSettings: KeyboardSettings = {
 
 export const Keyboard = (_props: KeyboardProps) => {
 	const props = mergeProps(
-		{ activeNotes: [], onNoteActivated: () => {}, onNoteDeactivated: () => {} },
+		{
+			activeNotes: [],
+			onNoteActivated: () => {},
+			onNoteDeactivated: () => {},
+		} as const,
 		_props,
 	)
 
@@ -72,12 +76,12 @@ export const Keyboard = (_props: KeyboardProps) => {
 	const keySize = () => settings().keyLength + 2 * keyMargin
 
 	const [pointerDown, setPointerDown] = createSignal(false)
-	let wrapperRef: HTMLDivElement
+	let wrapperRef: HTMLDivElement | undefined
 
 	const baseFrequency = () => Tone.Frequency(settings().baseNote, 'midi')
 
 	const notes = () => {
-		return props.activeNotes.reduce(
+		return (props.activeNotes as number[]).reduce(
 			(acc, note) => {
 				acc[note] = true
 				return acc
@@ -294,7 +298,7 @@ function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 
 	const close = () => setOpen(false)
 	const open = () => setOpen(true)
-	let btnRef
+	let btnRef: HTMLButtonElement | undefined
 
 	return (
 		<div class="absolute left-0 top-0">
@@ -310,7 +314,7 @@ function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 					placement: 'right-start',
 					modifiers: [{ name: 'offset', options: { offset: [40, 6] } }],
 				}}
-				referenceElement={btnRef}
+				referenceElement={btnRef as HTMLButtonElement}
 				onClose={close}
 				visible={isOpen()}
 				class="rounded bg-gray-100/90 shadow-md shadow-gray-500/60"

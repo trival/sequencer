@@ -39,6 +39,8 @@ export interface SongMeta {
 	title?: string
 	description?: string
 	collection?: string
+	createdAt?: number
+	updatedAt?: number
 	basedOn?: string
 }
 
@@ -49,10 +51,14 @@ export interface SongProperties {
 	timeSignature?: number
 }
 
-export interface Song extends SongProperties {
-	id: string
-	meta: SongMeta
+export interface SongData extends SongProperties {
 	tracks: TrackNote[][]
 	keyboardSettings?: Partial<KeyboardSettings>
 	trackSettings?: Partial<TrackSettings>
+}
+
+export interface Song {
+	id: string
+	meta: SongMeta
+	data: SongData
 }

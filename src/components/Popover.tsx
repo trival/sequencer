@@ -16,7 +16,7 @@ interface PopoverProps {
 }
 
 export default function Popover(props: ParentProps<PopoverProps>) {
-	let ref: HTMLDivElement
+	let ref: HTMLDivElement | undefined
 	let popper: Instance
 
 	function close() {
@@ -26,10 +26,10 @@ export default function Popover(props: ParentProps<PopoverProps>) {
 	createEffect(() => {
 		if (props.visible) {
 			requestAnimationFrame(() => {
-				popper = createPopper(props.referenceElement, ref, props.popperOptions)
+				popper = createPopper(props.referenceElement, ref!, props.popperOptions)
 				popper.setOptions((options) => {
 					options.modifiers = [
-						...options.modifiers,
+						...(options.modifiers as any[]),
 						{ name: 'eventListeners', enabled: true },
 					]
 					return options

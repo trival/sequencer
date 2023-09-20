@@ -18,3 +18,15 @@ export interface Storage {
 
 	updateProfile(profile: Partial<Profile>): Promise<void>
 }
+
+export function createLocalStorage(): Storage {
+	const storage: Storage = {} as Storage
+
+	return storage
+}
+
+export function createDBStorage(): Storage {
+	const storage: Storage = {} as Storage
+
+	return storage
+}

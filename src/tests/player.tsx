@@ -1,13 +1,5 @@
-import { Keyboard } from '@/components/keyboard'
-import { Track } from '@/components/track'
-import { ProcessedNote, useSong } from '@/utils/song'
-import { useSynth } from '@/utils/synth'
-import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { Subdivision } from 'tone/build/esm/core/type/Units'
-import * as Tone from 'tone'
-import { createSignal } from 'solid-js'
-import { KeyboardSettings, Song, TrackNote } from '@/datamodel'
+import { TrackNote } from '@/datamodel'
 import Player from '@/components/player'
 
 const initialMelody: TrackNote[] = [

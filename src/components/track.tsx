@@ -47,7 +47,7 @@ export const Note = (props: NoteProps) => {
 						? 'bg-slate-200'
 						: 'bg-slate-300',
 				)}
-				onClick={() => props.onSelected()}
+				onClick={() => props.onSelected?.()}
 			/>
 		</div>
 	)
@@ -82,7 +82,7 @@ interface TrackProps {
 }
 
 export const Track = (_props: TrackProps) => {
-	const props = mergeProps({ defaultDuration: '4n' }, _props)
+	const props = mergeProps({ defaultDuration: '4n' } as const, _props)
 	const trackCountMeasures = () =>
 		props.song.map((track) =>
 			track.measureSec
@@ -121,10 +121,7 @@ export const Track = (_props: TrackProps) => {
 											durationSec={note.durationSec}
 											isActive={props.activeNoteIdx?.[1] === j()}
 											isEmpty={note.midiNotes.length === 0}
-											onSelected={
-												props.onNoteClicked &&
-												(() => props.onNoteClicked(i(), j()))
-											}
+											onSelected={() => props.onNoteClicked?.(i(), j())}
 										/>
 									)}
 								</For>
@@ -139,7 +136,7 @@ export const Track = (_props: TrackProps) => {
 				)}
 				{props.onStop && (
 					<Button
-						onClick={() => props.onStop()}
+						onClick={() => props.onStop?.()}
 						class="px-2 pt-2 pb-2 pl-2 pr-2 my-2 mr-2 rounded"
 					>
 						<Icon path={stop} class="h-6 w-6" />
@@ -155,9 +152,9 @@ export const Track = (_props: TrackProps) => {
 										defaultDuration={props.defaultDuration}
 										onSelect={(durations) => {
 											close()
-											props.onAddBefore(
-												props.activeNoteIdx[0],
-												props.activeNoteIdx[1],
+											props.onAddBefore?.(
+												props.activeNoteIdx![0],
+												props.activeNoteIdx![1],
 												durations,
 											)
 										}}
@@ -165,17 +162,17 @@ export const Track = (_props: TrackProps) => {
 								)}
 							</AddButton>
 						)}
-						{props.onDurationChanged && activeNote && (
+						{props.onDurationChanged && activeNote() && (
 							<EditButton>
 								{(close) => (
 									<DurationSelector
-										value={toDurations(activeNote().duration)}
+										value={toDurations(activeNote()!.duration)}
 										defaultDuration={props.defaultDuration}
 										onSelect={(durations) => {
 											close()
-											props.onDurationChanged(
-												props.activeNoteIdx[0],
-												props.activeNoteIdx[1],
+											props.onDurationChanged!(
+												props.activeNoteIdx![0],
+												props.activeNoteIdx![1],
 												durations,
 											)
 										}}
@@ -186,7 +183,10 @@ export const Track = (_props: TrackProps) => {
 						{props.onRemove && (
 							<DeleteButton
 								onConfirm={() =>
-									props.onRemove(props.activeNoteIdx[0], props.activeNoteIdx[1])
+									props.onRemove!(
+										props.activeNoteIdx![0],
+										props.activeNoteIdx![1],
+									)
 								}
 							/>
 						)}
@@ -197,9 +197,9 @@ export const Track = (_props: TrackProps) => {
 										defaultDuration={props.defaultDuration}
 										onSelect={(durations) => {
 											close()
-											props.onAddAfter(
-												props.activeNoteIdx[0],
-												props.activeNoteIdx[1],
+											props.onAddAfter!(
+												props.activeNoteIdx![0],
+												props.activeNoteIdx![1],
 												durations,
 											)
 										}}
@@ -219,7 +219,7 @@ export const Track = (_props: TrackProps) => {
 									value={props.bpm}
 									onChange={(val) => {
 										props.onStop && props.onStop()
-										props.onTempoChanged(parseInt(val as string))
+										props.onTempoChanged!(parseInt(val as string))
 									}}
 								/>
 							</label>

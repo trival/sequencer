@@ -1,4 +1,4 @@
-import { Song, TrackNote, SongProperties } from '@/datamodel'
+import { SongData, TrackNote, SongProperties } from '@/datamodel'
 import { produce } from 'immer'
 import { createEffect, createSignal, onMount } from 'solid-js'
 import * as Tone from 'tone'
@@ -92,7 +92,7 @@ const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 	return [xs.slice(0, idx), xs.slice(idx)]
 }
 
-export const useSong = (data: Song) => {
+export const useSong = (data: SongData) => {
 	const [tracks, setTracks] = createSignal<ProcessedTrack[]>([])
 	const updateTracks = (
 		fn: ((song: ProcessedTrack[]) => void) | ProcessedTrack[],
@@ -100,7 +100,7 @@ export const useSong = (data: Song) => {
 		setTracks(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
 	}
 
-	const [rawData, setRawData] = createSignal<Song>(data)
+	const [rawData, setRawData] = createSignal<SongData>(data)
 
 	onMount(() => {
 		Tone.Transport.bpm.value = data.bpm

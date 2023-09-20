@@ -1,4 +1,4 @@
-import { Song, KeyboardSettings } from '@/datamodel'
+import { SongData, KeyboardSettings } from '@/datamodel'
 import { useSong, ProcessedNote } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
@@ -10,8 +10,8 @@ import { Keyboard } from './keyboard'
 import { Track } from './track'
 
 interface PlayerProps {
-	song: Song
-	onSave: (song: Song) => void
+	song: SongData
+	onSave: (song: SongData) => void
 }
 
 export default function Player(props: PlayerProps) {
@@ -183,14 +183,16 @@ export default function Player(props: PlayerProps) {
 		return idx ? tracks()[idx[0]]?.notes[idx[1]] : null
 	}
 
+	const activeMidiNotes = () => {
+		const note = activeNote()
+		return note ? note.midiNotes : synth.playingNotes()
+	}
 	return (
 		<div>
 			<div class="relative h-[620px] w-[620px] max-w-full shadow-md">
 				<div class="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
 					<Keyboard
-						activeNotes={
-							activeNote() ? activeNote().midiNotes : synth.playingNotes()
-						}
+						activeNotes={activeMidiNotes()}
 						onNoteActivated={onActivateNote}
 						onNoteDeactivated={onDeactivateNote}
 						onSettingsChanged={setSettings}

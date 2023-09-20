@@ -24,7 +24,7 @@ const btnColors = {
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
 
 export const IconButton = (_props: ParentProps<ButtonProps>) => {
-	const props = mergeProps({ color: 'white', type: 'button' }, _props)
+	const props = mergeProps({ color: 'white', type: 'button' } as const, _props)
 	return (
 		<button
 			type={props.type}
@@ -34,7 +34,7 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 				btnFocus,
 				props.class,
 			)}
-			onClick={() => props.onClick()}
+			onClick={() => props.onClick?.()}
 			ref={props.ref}
 		>
 			{props.children}
@@ -43,7 +43,7 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 }
 
 export const Button = (_props: ParentProps<ButtonProps>) => {
-	const props = mergeProps({ color: 'white', type: 'button' }, _props)
+	const props = mergeProps({ color: 'white', type: 'button' } as const, _props)
 	return (
 		<button
 			type={props.type}
@@ -53,7 +53,7 @@ export const Button = (_props: ParentProps<ButtonProps>) => {
 				btnFocus,
 				props.class,
 			)}
-			onClick={() => props.onClick()}
+			onClick={() => props.onClick?.()}
 			ref={props.ref}
 		>
 			{props.children}
@@ -67,14 +67,14 @@ export const IconButtonPopover = (
 		children: (close: () => void) => JSX.Element
 	},
 ) => {
-	const props = mergeProps({ color: 'white' }, _props)
+	const props = mergeProps({ color: 'white' } as const, _props)
 
 	const [isOpen, setOpen] = createSignal(false)
 
 	const close = () => setOpen(false)
 	const open = () => setOpen(true)
 
-	let btnRef
+	let btnRef: HTMLButtonElement | undefined
 
 	return (
 		<div class="relative inline-block">
@@ -88,7 +88,7 @@ export const IconButtonPopover = (
 				{props.buttonElement}
 			</IconButton>
 			<Popover
-				referenceElement={btnRef}
+				referenceElement={btnRef as HTMLButtonElement}
 				onClose={close}
 				visible={isOpen()}
 				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"

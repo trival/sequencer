@@ -3,6 +3,8 @@ import { render } from 'solid-js/web'
 
 import App from './App'
 import { Router, hashIntegration } from '@solidjs/router'
+import { AppStateProvider } from './AppState'
+import { createLocalStorage } from './utils/storage'
 
 const root = document.getElementById('root')
 
@@ -12,10 +14,14 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
 	)
 }
 
+const storage = createLocalStorage()
+
 render(
 	() => (
 		<Router source={hashIntegration()}>
-			<App />
+			<AppStateProvider storage={storage}>
+				<App />
+			</AppStateProvider>
 		</Router>
 	),
 	root!,

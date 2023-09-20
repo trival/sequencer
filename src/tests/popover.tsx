@@ -3,14 +3,14 @@ import { createSignal } from 'solid-js'
 
 export default function PopoverTest() {
 	const [isVisibile, setVisible] = createSignal(false)
-	let button: HTMLButtonElement
+	let button: HTMLButtonElement | undefined
 	return (
 		<div class="h-[200vh] py-40 px-20">
 			<button onClick={() => setVisible(true)} ref={button}>
 				Click me
 			</button>
 			<Popover
-				referenceElement={button}
+				referenceElement={button as HTMLButtonElement}
 				onClose={() => setVisible(false)}
 				visible={isVisibile()}
 				class="bg-teal-200 w-fit shadow-md rounded-md p-4"
