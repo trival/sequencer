@@ -17,7 +17,7 @@ import {
 	arrowSmallUp,
 } from 'solid-heroicons/outline'
 import { IconButton } from './buttons'
-import { Input, Select } from './Select'
+import { Input, Select } from './Input'
 import { Icon } from 'solid-heroicons'
 import {
 	For,

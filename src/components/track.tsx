@@ -9,7 +9,7 @@ import {
 	IconButton,
 	PlayButton,
 } from '@/components/buttons'
-import { Input, Select } from './Select'
+import { Input, Select } from './Input'
 import { subdivisions } from '@/utils/utils'
 import { plus, minus, stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'

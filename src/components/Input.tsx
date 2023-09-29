@@ -63,3 +63,22 @@ export const Input = (_props: InputProps) => {
 		/>
 	)
 }
+
+interface FormFieldProps extends InputProps {
+	label: string
+}
+export const FormField = (props: FormFieldProps) => {
+	return (
+		<label class={props.class}>
+			<span class={clsx('block text-sm font-medium leading-6 text-gray-900')}>
+				{props.label}
+			</span>
+			<Input
+				type={props.type}
+				value={props.value}
+				onChange={props.onChange}
+				class="mt-2 w-full"
+			/>
+		</label>
+	)
+}
