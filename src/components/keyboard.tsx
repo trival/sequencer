@@ -220,7 +220,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 			ref={wrapperRef}
 			class={clsx(
 				props.class,
-				'relative flex max-h-full max-w-full items-center justify-evenly overflow-hidden',
+				'relative flex max-h-full max-w-full items-center justify-evenly overflow-hidden bg-white',
 			)}
 			style={{
 				height: `${settings().maxRows * keySize() + 2 * keyMargin}px`,

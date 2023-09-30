@@ -66,8 +66,29 @@ export const AppStateProvider = (
 	})
 
 	const actions: AppActions = {
-		updateProfile: function (profile): void {
-			throw new Error('Function not implemented.')
+		async updateProfile(profile) {
+			if (!state.profile?.userId) {
+				return
+			}
+
+			if (state.profile.username) {
+				await props.storage.updateProfile(state.profile.userId, {
+					username: profile.username,
+					color: profile.color,
+				})
+			} else if (profile.username) {
+				await props.storage.createProfile({
+					userId: state.profile.userId,
+					username: profile.username,
+					color: profile.color || '#ff0000',
+				})
+			}
+
+			_setState('profile', {
+				...state.profile,
+				username: profile.username,
+				color: profile.color,
+			})
 		},
 		openSong: function (id): void {
 			throw new Error('Function not implemented.')

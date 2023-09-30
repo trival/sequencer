@@ -9,7 +9,13 @@ export default function ProfileForm(props: ProfileFormProps) {
 	const [username, setUsername] = createSignal('')
 	const [color, setColor] = createSignal('')
 	return (
-		<form class="space-y-6">
+		<form
+			class="space-y-6"
+			onSubmit={(e) => {
+				e.preventDefault()
+				props.onSubmit(username(), color())
+			}}
+		>
 			<FormField
 				label="Username"
 				onChange={(val) => setUsername(val as string)}

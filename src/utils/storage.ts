@@ -43,7 +43,7 @@ export function createSupabaseStorage(
 				.eq('user_id', userId)
 				.single()
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error
 			}
 
@@ -54,6 +54,29 @@ export function createSupabaseStorage(
 						color: data.color ?? '',
 				  }
 				: null
+		},
+
+		createProfile: async (profile: Profile) => {
+			const { error, status } = await supabase.from('profile').insert({
+				user_id: profile.userId,
+				username: profile.username,
+				color: profile.color,
+			})
+
+			if (error || status >= 400) {
+				throw error
+			}
+		},
+
+		updateProfile: async (userId: string, profile: Partial<Profile>) => {
+			const { error, status } = await supabase
+				.from('profile')
+				.update(profile)
+				.eq('user_id', userId)
+
+			if (error || status >= 400) {
+				throw error
+			}
 		},
 	} as Storage
 
