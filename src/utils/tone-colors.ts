@@ -91,16 +91,16 @@ export function getMajorHighlight(tone: ToneValue): ToneHighlight {
 }
 
 export enum ScaleHighlight {
-	None,
-	Tonic,
-	Simple,
-	MinorPentatonic,
-	Major,
+	None = 'None',
+	Tonic = 'Tonic',
+	Simple = 'Simple',
+	MinorPentatonic = 'MinorPentatonic',
+	Major = 'Major',
 }
 
 export enum ToneColorType {
-	Chromatic,
-	CircleOfFiths,
+	Chromatic = 'Chromatic',
+	CircleOfFiths = 'CircleOfFiths',
 }
 
 export function getScaleToneColor(

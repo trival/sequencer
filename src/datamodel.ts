@@ -39,8 +39,8 @@ export interface SongMeta {
 	title?: string
 	description?: string
 	collection?: string
-	createdAt?: number
-	updatedAt?: number
+	createdAt?: string
+	updatedAt?: string
 	basedOn?: string
 }
 

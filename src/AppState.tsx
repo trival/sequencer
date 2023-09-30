@@ -49,7 +49,7 @@ export const AppStateProvider = (
 	const [state, _setState] = createStore<AppState>(emptyAppState())
 
 	createEffect(() => {
-		let userId = props.session.userId()
+		const userId = props.session.userId()
 		if (userId) {
 			props.storage
 				.getProfile(userId)
@@ -60,8 +60,23 @@ export const AppStateProvider = (
 					console.log(err)
 					_setState('profile', userId ? { userId } : null)
 				})
+				// eslint-disable-next-line solid/reactivity
+				.then(async () => {
+					if (userId) {
+						const collections = await props.storage.collectionsByUser(userId)
+						const songs = await props.storage.songsByUser(userId)
+						_setState({ collections, songs })
+					}
+				})
 		} else {
-			_setState('profile', null)
+			_setState({
+				profile: null,
+				collections: [],
+				songs: [],
+				openSongs: [],
+				currentSong: null,
+				playingSong: null,
+			})
 		}
 	})
 

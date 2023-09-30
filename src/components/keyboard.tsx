@@ -99,7 +99,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 		)
 
 	const isToneBgDark = (tone: ToneValue) => {
-		let color = getScaleToneColor(
+		const color = getScaleToneColor(
 			tone,
 			midiToToneValue(settings().baseNote),
 			settings().scaleHighlight,
@@ -370,7 +370,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					onSelect={(value) =>
 						props.onSettingsChanged({
 							...props.currentSettings,
-							scaleHighlight: parseInt(value as string) as ScaleHighlight,
+							scaleHighlight: value as ScaleHighlight,
 						})
 					}
 					options={Object.entries(ScaleHighlight)
@@ -387,7 +387,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 						})
 					}
 					options={[...Array(12).keys()].map((i) => {
-						let start = props.currentSettings.baseNote - 4
+						const start = props.currentSettings.baseNote - 4
 						const note = start + i
 						return {
 							value: note,
@@ -406,7 +406,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					onSelect={(value) =>
 						props.onSettingsChanged({
 							...props.currentSettings,
-							toneColorType: parseInt(value as string) as ToneColorType,
+							toneColorType: value as ToneColorType,
 						})
 					}
 					options={Object.entries(ToneColorType)

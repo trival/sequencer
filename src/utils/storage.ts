@@ -1,4 +1,4 @@
-import { Collection, Profile, Song } from '@/datamodel'
+import { Collection, Profile, Song, SongData } from '@/datamodel'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '../../database.types'
 
@@ -15,13 +15,13 @@ export interface Storage {
 	songsByLatest(): Promise<Song[]>
 	songById(id: string): Promise<Song>
 
-	collectionsByUser(userId: string): Promise<Collection[]>
-
 	createSong(song: Song): Promise<void>
 	updateSong(id: string, song: Partial<Song>): Promise<void>
 	deleteSong(id: string): Promise<void>
 
-	createCollection(collection: Collection): Promise<Collection>
+	collectionsByUser(userId: string): Promise<Collection[]>
+
+	createCollection(collection: Collection): Promise<void>
 	updateCollection(id: string, collection: Partial<Collection>): Promise<void>
 	deleteCollection(id: string): Promise<void>
 }
@@ -36,15 +36,15 @@ export function createSupabaseStorage(
 	supabase: SupabaseClient<Database>,
 ): Storage {
 	const storage: Storage = {
-		getProfile: async (userId: string) => {
+		getProfile: async (userId) => {
 			const { data, error, status } = await supabase
 				.from('profile')
 				.select('*')
 				.eq('user_id', userId)
 				.single()
 
-			if (error || status >= 400) {
-				throw error
+			if (error || status !== 200) {
+				throw error || new Error('Failed to get profile')
 			}
 
 			return data
@@ -56,29 +56,170 @@ export function createSupabaseStorage(
 				: null
 		},
 
-		createProfile: async (profile: Profile) => {
+		createProfile: async (profile) => {
 			const { error, status } = await supabase.from('profile').insert({
 				user_id: profile.userId,
 				username: profile.username,
 				color: profile.color,
 			})
 
-			if (error || status >= 400) {
-				throw error
+			if (error || status !== 200) {
+				throw error || new Error('Failed to create profile')
 			}
 		},
 
-		updateProfile: async (userId: string, profile: Partial<Profile>) => {
+		updateProfile: async (userId, profile) => {
 			const { error, status } = await supabase
 				.from('profile')
 				.update(profile)
 				.eq('user_id', userId)
 
-			if (error || status >= 400) {
-				throw error
+			if (error || status !== 200) {
+				throw error || new Error('Failed to update profile')
+			}
+		},
+
+		songsByUser: async (userId) => {
+			const { data, error, status } = await supabase
+				.from('song')
+				.select('*')
+				.eq('user_id', userId)
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to get songs')
+			}
+
+			return data.map(mapSongResult)
+		},
+
+		songById: async (id) => {
+			const { data, error, status } = await supabase
+				.from('song')
+				.select('*')
+				.eq('id', id)
+				.single()
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to get song')
+			}
+
+			return mapSongResult(data)
+		},
+
+		createSong: async (song) => {
+			const { error, status } = await supabase.from('song').insert({
+				id: song.id,
+				user_id: song.meta.userId,
+				title: song.meta.title,
+				description: song.meta.description,
+				collection: song.meta.collection,
+				data: song.data as any,
+			})
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to create song')
+			}
+		},
+
+		updateSong: async (id, song) => {
+			const { error, status } = await supabase
+				.from('song')
+				.update({
+					title: song.meta?.title,
+					description: song.meta?.description,
+					collection: song.meta?.collection,
+					data: song.data as any,
+				})
+				.eq('id', id)
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to update song')
+			}
+		},
+
+		deleteSong: async (id) => {
+			const { error, status } = await supabase
+				.from('song')
+				.delete()
+				.eq('id', id)
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to delete song')
+			}
+		},
+
+		collectionsByUser: async (userId) => {
+			const { data, error, status } = await supabase
+				.from('collection')
+				.select('*')
+				.eq('user_id', userId)
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to get collections')
+			}
+
+			return data.map((res) => ({
+				id: res.id,
+				userId: res.user_id,
+				title: res.title,
+				description: res.description,
+			}))
+		},
+
+		createCollection: async (collection) => {
+			const { error, status } = await supabase.from('collection').insert({
+				id: collection.id,
+				user_id: collection.userId,
+				title: collection.title,
+				description: collection.description,
+			})
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to create collection')
+			}
+		},
+
+		updateCollection: async (id, collection) => {
+			const { error, status } = await supabase
+				.from('collection')
+				.update({
+					title: collection.title,
+					description: collection.description,
+				})
+				.eq('id', id)
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to update collection')
+			}
+		},
+
+		deleteCollection: async (id) => {
+			const { error, status } = await supabase
+				.from('collection')
+				.delete()
+				.eq('id', id)
+
+			if (error || status !== 200) {
+				throw error || new Error('Failed to delete collection')
 			}
 		},
 	} as Storage
 
 	return storage
+}
+
+function mapSongResult(res: Database['public']['Tables']['song']['Row']): Song {
+	return {
+		id: res.id,
+		meta: {
+			userId: res.user_id,
+			title: res.title || '',
+			description: res.description || '',
+			collection: res.collection || undefined,
+			basedOn: res.copied_from || undefined,
+			createdAt: res.created_at,
+			updatedAt: res.updated_at,
+		},
+		data: res.data as unknown as SongData,
+	}
 }
