@@ -1,8 +1,15 @@
-import { ParentProps, createContext, createEffect, useContext } from 'solid-js'
-import { Collection, Profile, Song } from './datamodel'
+import {
+	ParentProps,
+	createContext,
+	createEffect,
+	createMemo,
+	useContext,
+} from 'solid-js'
+import { Collection, Profile, Song, SongData, SongMeta } from './datamodel'
 import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
 import { Session } from './utils/session'
+import { emptySong, emptySongData } from './utils/song'
 
 export interface AppState {
 	profile: Profile | null
@@ -10,7 +17,7 @@ export interface AppState {
 	songs: Song[]
 
 	openSongs: Song[]
-	currentSong: string | null
+	currentSong: Song | null
 	playingSong: string | null
 }
 
@@ -23,8 +30,8 @@ export interface AppActions {
 
 	closeSong(id: string): void
 
-	saveSong(id: string): void
-	saveSongMeta(id: string, meta: Partial<Song>): void
+	saveSong(id: string, data: SongData): void
+	saveSongMeta(id: string, meta: SongMeta): void
 	deleteSong(id: string): void
 }
 
@@ -46,7 +53,15 @@ const ctx = createContext<AppCtx>([emptyAppState(), {} as AppActions])
 export const AppStateProvider = (
 	props: ParentProps<{ storage: Storage; session: Session }>,
 ) => {
-	const [state, _setState] = createStore<AppState>(emptyAppState())
+	const [state, setState] = createStore<AppState>(emptyAppState())
+
+	const songsById = createMemo(() => {
+		const res = new Map<string, Song>()
+		for (const song of state.songs) {
+			res.set(song.id, song)
+		}
+		return res
+	})
 
 	createEffect(() => {
 		const userId = props.session.userId()
@@ -54,22 +69,22 @@ export const AppStateProvider = (
 			props.storage
 				.getProfile(userId)
 				.then((profile) => {
-					_setState('profile', profile)
+					setState('profile', profile)
 				})
 				.catch((err) => {
 					console.log(err)
-					_setState('profile', userId ? { userId } : null)
+					setState('profile', userId ? { userId } : null)
 				})
 				// eslint-disable-next-line solid/reactivity
 				.then(async () => {
 					if (userId) {
 						const collections = await props.storage.collectionsByUser(userId)
 						const songs = await props.storage.songsByUser(userId)
-						_setState({ collections, songs })
+						setState({ collections, songs })
 					}
 				})
 		} else {
-			_setState({
+			setState({
 				profile: null,
 				collections: [],
 				songs: [],
@@ -92,39 +107,113 @@ export const AppStateProvider = (
 					color: profile.color,
 				})
 			} else if (profile.username) {
+				if (!profile.color) {
+					profile.color =
+						'#' +
+						Math.floor(Math.random() * 255).toString(16) +
+						Math.floor(Math.random() * 255).toString(16) +
+						Math.floor(Math.random() * 255).toString(16)
+				}
+
 				await props.storage.createProfile({
 					userId: state.profile.userId,
 					username: profile.username,
-					color: profile.color || '#ff0000',
+					color: profile.color,
 				})
 			}
 
-			_setState('profile', {
+			setState('profile', {
 				...state.profile,
 				username: profile.username,
 				color: profile.color,
 			})
 		},
 		openSong: function (id): void {
-			throw new Error('Function not implemented.')
+			setState('currentSong', songsById().get(id) || null)
 		},
 		openNewSong: function (): void {
-			throw new Error('Function not implemented.')
+			setState('currentSong', emptySong())
 		},
 		openSongCopy: function (id): void {
-			throw new Error('Function not implemented.')
+			const song = songsById().get(id)
+			if (song) {
+				setState('currentSong', {
+					...song,
+					id: emptySong().id,
+					meta: {
+						...song.meta,
+						title: (song.meta.title || '') + ' (copy)',
+					},
+				})
+			}
 		},
 		closeSong: function (id): void {
-			throw new Error('Function not implemented.')
+			if (state.currentSong?.id === id) {
+				setState('currentSong', null)
+			}
+			setState(
+				'openSongs',
+				state.openSongs.filter((s) => s.id !== id),
+			)
 		},
-		saveSong: function (id): void {
-			throw new Error('Function not implemented.')
+		saveSong: function (id, data): void {
+			if (!id) return
+			const song = songsById().get(id)
+			if (song) {
+				props.storage.updateSong(id, { data }).catch(console.error)
+			} else if (id === state.currentSong?.id && state.profile?.userId) {
+				const song = {
+					id,
+					meta: {
+						userId: state.profile.userId,
+					},
+					data,
+				}
+				props.storage
+					.createSong(song)
+					// eslint-disable-next-line solid/reactivity
+					.then(() => {
+						setState('songs', [...state.songs, song])
+					})
+					.catch(console.error)
+			}
 		},
 		saveSongMeta: function (id, meta): void {
-			throw new Error('Function not implemented.')
+			if (!id) return
+			const song = songsById().get(id)
+			if (song) {
+				props.storage.updateSong(id, { meta }).catch(console.error)
+			} else if (id === state.currentSong?.id && state.profile?.userId) {
+				const song = {
+					id,
+					meta: {
+						...meta,
+						userId: state.profile.userId,
+					},
+					data: emptySongData(),
+				}
+				props.storage
+					.createSong(song)
+					// eslint-disable-next-line solid/reactivity
+					.then(() => {
+						setState('songs', [...state.songs, song])
+					})
+					.catch(console.error)
+			}
 		},
 		deleteSong: function (id): void {
-			throw new Error('Function not implemented.')
+			if (!id) return
+			const song = songsById().get(id)
+			if (song) {
+				props.storage.deleteSong(id).catch(console.error)
+				setState(
+					'songs',
+					state.songs.filter((s) => s.id !== id),
+				)
+			}
+			if (state.currentSong?.id === id) {
+				setState('currentSong', null)
+			}
 		},
 	}
 

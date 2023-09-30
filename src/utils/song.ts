@@ -1,8 +1,9 @@
-import { SongData, TrackNote, SongProperties } from '@/datamodel'
+import { SongData, TrackNote, SongProperties, Song } from '@/datamodel'
 import { produce } from 'immer'
 import { createEffect, createSignal, onMount } from 'solid-js'
 import * as Tone from 'tone'
 import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
+import * as uuid from 'uuid'
 
 export interface ProcessedNote {
 	midiNotes: number[]
@@ -17,6 +18,23 @@ export interface ProcessedTrack {
 	duration: TimeObject
 	durationSec: number
 	measureSec: number
+}
+
+export function emptySong(): Song {
+	return {
+		id: uuid.v4(),
+		data: emptySongData(),
+		meta: {
+			userId: '',
+		},
+	}
+}
+
+export function emptySongData(): SongData {
+	return {
+		bpm: 120,
+		tracks: [],
+	}
 }
 
 export function emptyTrack(): ProcessedTrack {

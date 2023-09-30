@@ -20,11 +20,13 @@
     "serve": "^14.2.1",
     "solid-heroicons": "^3.2.4",
     "solid-js": "^1.7.11",
-    "tone": "^14.7.77"
+    "tone": "^14.7.77",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.3",
     "@types/node": "18.16.2",
+    "@types/uuid": "^9.0.4",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
     "autoprefixer": "^10.4.15",
