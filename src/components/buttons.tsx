@@ -12,13 +12,14 @@ interface ButtonProps {
 	color?: keyof typeof btnColors
 	type?: 'button' | 'submit' | 'reset'
 	ref?: HTMLButtonElement
+	title?: string
 }
 
 const btnColors = {
 	indigo: tw`bg-indigo-600 hover:bg-indigo-500 focus-visible:outline-indigo-600 text-white`,
 	rose: tw`bg-rose-600 hover:bg-rose-500 focus-visible:outline-rose-600 text-white`,
 	teal: tw`bg-teal-600 hover:bg-teal-500 focus-visible:outline-teal-600 text-white`,
-	white: tw`bg-white border border-slate-400 text-slate-500 shadow-slate-400 hover:border-indigo-500 hover:text-indigo-500 focus-visible:outline-indigo-500`,
+	white: tw`bg-white border border-slate-400 text-slate-500 hover:border-indigo-500 hover:text-indigo-500 focus-visible:outline-indigo-500`,
 }
 
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
@@ -29,13 +30,14 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 		<button
 			type={props.type}
 			class={clsx(
-				'rounded-full shadow-sm shadow-slate-400',
+				'rounded-full shadow-sm shadow-slate-300',
 				btnColors[props.color],
 				btnFocus,
 				props.class,
 			)}
 			onClick={() => props.onClick?.()}
 			ref={props.ref}
+			title={props.title}
 		>
 			{props.children}
 		</button>
@@ -48,13 +50,14 @@ export const Button = (_props: ParentProps<ButtonProps>) => {
 		<button
 			type={props.type}
 			class={clsx(
-				'rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm',
+				'rounded-md px-3.5 py-2.5 text-sm font-semibold shadow-sm shadow-slate-300',
 				btnColors[props.color],
 				btnFocus,
 				props.class,
 			)}
 			onClick={() => props.onClick?.()}
 			ref={props.ref}
+			title={props.title}
 		>
 			{props.children}
 		</button>
@@ -82,8 +85,9 @@ export const IconButtonPopover = (
 				ref={btnRef}
 				type="button"
 				color={props.color}
-				class={clsx('p-2 m-2', props.class)}
+				class={clsx('m-2 p-2', props.class)}
 				onClick={open}
+				title={props.title}
 			>
 				{props.buttonElement}
 			</IconButton>
@@ -112,6 +116,7 @@ export const DeleteButton = (props: DeleteButtonProps) => {
 		<IconButtonPopover
 			color="rose"
 			buttonElement={<Icon path={trash} class="h-6 w-6" aria-hidden="true" />}
+			title="Delete"
 		>
 			{(close) => (
 				<Button
@@ -135,6 +140,7 @@ export const AddButton = (props: {
 		<IconButtonPopover
 			color="indigo"
 			buttonElement={<Icon path={plus} class="h-6 w-6" aria-hidden="true" />}
+			title="Add"
 		>
 			{props.children}
 		</IconButtonPopover>
@@ -150,6 +156,7 @@ export const EditButton = (props: {
 			buttonElement={
 				<Icon path={pencilSquare} class="h-6 w-6" aria-hidden="true" />
 			}
+			title="Edit"
 		>
 			{props.children}
 		</IconButtonPopover>
@@ -167,11 +174,12 @@ export const PlayButton = (props: PlayButtonProps) => {
 			type="button"
 			onClick={() => props.onClick()}
 			class={clsx(
-				'm-2 rounded-md p-2 shadow-sm',
+				'm-2 rounded-md p-2 shadow-sm shadow-slate-300',
 				btnColors.white,
 				btnFocus,
 				props.class,
 			)}
+			title={props.isPlaying ? 'Pause' : 'Play'}
 		>
 			{props.isPlaying ? (
 				<Icon path={pause} class="h-6 w-6" />

@@ -1,3 +1,4 @@
+import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
 import { TrackNote } from '@/datamodel'
 import { useSong } from '@/utils/song'
@@ -29,7 +30,7 @@ export default function EditorPage() {
 
 	const onNoteClicked = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteClicked', trackIdx, noteIdx)
-		let idx = activeNoteIdx()
+		const idx = activeNoteIdx()
 		if (idx && idx[0] === trackIdx && idx[1] === noteIdx) {
 			setActiveNoteIdx(null)
 		} else {
@@ -75,11 +76,18 @@ export default function EditorPage() {
 			<h1>Track test</h1>
 			<Track
 				song={tracks()}
-				isPlaying={isPlaying()}
-				bpm={data().bpm}
-				onPlay={() => setIsPlaying(!isPlaying())}
 				activeNoteIdx={activeNoteIdx()}
 				onNoteClicked={onNoteClicked}
+			/>
+			<SongControls
+				song={data()}
+				isPlaying={isPlaying()}
+				onPlay={() => setIsPlaying(!isPlaying())}
+				onStop={() => {
+					setIsPlaying(false)
+					setActiveNoteIdx(null)
+				}}
+				activeNoteIdx={activeNoteIdx()}
 				onRemove={onNoteRemoved}
 				onAddBefore={onNoteAddedBefore}
 				onAddAfter={onNoteAddedAfter}

@@ -189,7 +189,7 @@ export const useSong = (data: SongData) => {
 		})
 	}
 
-	const updateMetadata = (data: Partial<SongProperties>) => {
+	const updateProps = (data: Partial<SongProperties>) => {
 		setRawData((prev) => ({ ...prev, ...data }))
 		if (data.bpm) {
 			Tone.Transport.bpm.value = data.bpm
@@ -217,7 +217,7 @@ export const useSong = (data: SongData) => {
 		tracks,
 		data: rawData,
 		updateTracks,
-		updateMetadata,
+		updateProps,
 		removeNote,
 		addNote,
 		changeDuration,

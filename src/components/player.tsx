@@ -8,6 +8,7 @@ import * as Tone from 'tone'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Keyboard } from './keyboard'
 import { Track } from './track'
+import { SongControls } from './songControls'
 
 interface PlayerProps {
 	song: SongData
@@ -24,7 +25,7 @@ export default function Player(props: PlayerProps) {
 		removeNote,
 		changeDuration,
 		updateNoteTones,
-		updateMetadata,
+		updateProps,
 		// eslint-disable-next-line solid/reactivity
 	} = useSong(props.song)
 
@@ -204,17 +205,21 @@ export default function Player(props: PlayerProps) {
 			<div class="mt-2">
 				<Track
 					song={tracks()}
+					activeNoteIdx={activeNoteIdx()}
+					onNoteClicked={onNoteClicked}
+				/>
+				<SongControls
+					song={data()}
 					isPlaying={isPlaying()}
 					activeNoteIdx={activeNoteIdx()}
-					bpm={data().bpm}
-					onTempoChanged={(bpm) => updateMetadata({ bpm })}
+					onPropsChanged={(data) => updateProps(data)}
 					onPlay={onPlay}
 					onStop={onStop}
-					onNoteClicked={onNoteClicked}
 					onRemove={onNoteRemoved}
 					onAddBefore={onNoteAddedBefore}
 					onAddAfter={onNoteAddedAfter}
 					onDurationChanged={onDurationChanged}
+					onSave={() => props.onSave(data())}
 				/>
 			</div>
 		</div>
