@@ -2,7 +2,7 @@ import './styles/globals.css'
 import { render } from 'solid-js/web'
 
 import App from './App'
-import { Router, hashIntegration } from '@solidjs/router'
+import { Router } from '@solidjs/router'
 import { AppStateProvider } from './AppState'
 import { createSupabaseStorage } from './utils/storage'
 import { supabase } from './utils/supabase'
@@ -21,7 +21,7 @@ const session = createSupabaseSession(supabase)
 
 render(
 	() => (
-		<Router source={hashIntegration()}>
+		<Router>
 			<AppStateProvider storage={storage} session={session}>
 				<App />
 			</AppStateProvider>
