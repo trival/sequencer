@@ -16,6 +16,7 @@
     "@solidjs/router": "^0.8.3",
     "@supabase/auth-ui-solid": "^0.3.5",
     "@supabase/supabase-js": "^2.36.0",
+    "date-fns": "^2.30.0",
     "immer": "^10.0.1",
     "serve": "^14.2.1",
     "solid-heroicons": "^3.2.4",

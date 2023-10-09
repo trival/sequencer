@@ -33,12 +33,25 @@ export function emptySong(): Song {
 export function emptySongData(): SongData {
 	return {
 		bpm: 120,
-		tracks: [],
+		tracks: [[{ midiNotes: [], duration: '4n' }]],
 	}
 }
 
 export function emptyTrack(): ProcessedTrack {
-	return { duration: {}, durationSec: 0, notes: [], measureSec: 0 }
+	return {
+		duration: {},
+		durationSec: 0,
+		notes: [
+			{
+				subdivisions: '4n',
+				midiNotes: [],
+				duration: {},
+				durationSec: 0,
+				time: 0,
+			},
+		],
+		measureSec: 0,
+	}
 }
 
 export function processTrack(trackData: TrackNote[]): ProcessedTrack {
@@ -118,11 +131,19 @@ export const useSong = (data: SongData) => {
 		setTracks(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
 	}
 
+	if (!data.tracks.length) {
+		data.tracks = emptySongData().tracks
+	}
+
 	const [rawData, setRawData] = createSignal<SongData>(data)
 
 	onMount(() => {
 		Tone.Transport.bpm.value = data.bpm
-		updateTracks(data.tracks.map((track) => processTrack(track)))
+		updateTracks(
+			data.tracks.map((track) =>
+				processTrack(track.length ? track : emptySongData().tracks[0]),
+			),
+		)
 	})
 
 	const removeNote = (trackIdx: number, noteIdx: number) => {
@@ -130,6 +151,9 @@ export const useSong = (data: SongData) => {
 			const track = song[trackIdx]
 			if (track) {
 				track.notes = track.notes.filter((_, i) => i !== noteIdx)
+				if (!track.notes.length) {
+					track.notes.push(emptyTrack().notes[0])
+				}
 				recalculateTrack(track)
 			}
 		})

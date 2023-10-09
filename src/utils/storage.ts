@@ -43,7 +43,7 @@ export function createSupabaseStorage(
 				.eq('user_id', userId)
 				.single()
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to get profile')
 			}
 
@@ -63,7 +63,7 @@ export function createSupabaseStorage(
 				color: profile.color,
 			})
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to create profile')
 			}
 		},
@@ -71,10 +71,10 @@ export function createSupabaseStorage(
 		updateProfile: async (userId, profile) => {
 			const { error, status } = await supabase
 				.from('profile')
-				.update(profile)
+				.update({ ...profile })
 				.eq('user_id', userId)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to update profile')
 			}
 		},
@@ -85,7 +85,7 @@ export function createSupabaseStorage(
 				.select('*')
 				.eq('user_id', userId)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to get songs')
 			}
 
@@ -99,7 +99,7 @@ export function createSupabaseStorage(
 				.eq('id', id)
 				.single()
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to get song')
 			}
 
@@ -116,7 +116,7 @@ export function createSupabaseStorage(
 				data: song.data as any,
 			})
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to create song')
 			}
 		},
@@ -129,10 +129,11 @@ export function createSupabaseStorage(
 					description: song.meta?.description,
 					collection: song.meta?.collection,
 					data: song.data as any,
+					updated_at: new Date().toISOString(),
 				})
 				.eq('id', id)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to update song')
 			}
 		},
@@ -143,7 +144,7 @@ export function createSupabaseStorage(
 				.delete()
 				.eq('id', id)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to delete song')
 			}
 		},
@@ -154,7 +155,7 @@ export function createSupabaseStorage(
 				.select('*')
 				.eq('user_id', userId)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to get collections')
 			}
 
@@ -174,7 +175,7 @@ export function createSupabaseStorage(
 				description: collection.description,
 			})
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to create collection')
 			}
 		},
@@ -185,10 +186,11 @@ export function createSupabaseStorage(
 				.update({
 					title: collection.title,
 					description: collection.description,
+					updated_at: new Date().toISOString(),
 				})
 				.eq('id', id)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to update collection')
 			}
 		},
@@ -199,7 +201,7 @@ export function createSupabaseStorage(
 				.delete()
 				.eq('id', id)
 
-			if (error || status !== 200) {
+			if (error || status >= 400) {
 				throw error || new Error('Failed to delete collection')
 			}
 		},

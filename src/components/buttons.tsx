@@ -7,7 +7,7 @@ import { JSX, ParentProps, createSignal, mergeProps } from 'solid-js'
 import Popover from './Popover'
 
 interface ButtonProps {
-	onClick?: () => void
+	onClick?: (e: Event) => void
 	class?: string
 	color?: keyof typeof btnColors
 	type?: 'button' | 'submit' | 'reset'
@@ -35,7 +35,7 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 				btnFocus,
 				props.class,
 			)}
-			onClick={() => props.onClick?.()}
+			onClick={(e) => props.onClick?.(e)}
 			ref={props.ref}
 			title={props.title}
 		>
@@ -55,7 +55,7 @@ export const Button = (_props: ParentProps<ButtonProps>) => {
 				btnFocus,
 				props.class,
 			)}
-			onClick={() => props.onClick?.()}
+			onClick={(e) => props.onClick?.(e)}
 			ref={props.ref}
 			title={props.title}
 		>

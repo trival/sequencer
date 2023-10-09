@@ -3,6 +3,7 @@ import { useAppState } from '@/AppState'
 import { Button } from './buttons'
 import { Icon } from 'solid-heroicons'
 import { documentPlus } from 'solid-heroicons/outline'
+import { format } from 'date-fns'
 
 export default function ProfileSongList() {
 	const [state, actions] = useAppState()
@@ -22,20 +23,23 @@ export default function ProfileSongList() {
 		<div>
 			<ul>
 				<For each={songs()}>
-					{(song) => (
-						<li>
-							<button
-								class="font-semibold underline"
-								onClick={() => actions.openSong(song.id)}
-							>
-								{song.meta.title}
-							</button>
-						</li>
-					)}
+					{(song) => {
+						const date = new Date(song.meta.updatedAt!)
+						return (
+							<li>
+								<button
+									class="font-semibold underline"
+									onClick={() => actions.openSong(song.id)}
+								>
+									{song.meta.title} ({format(date, 'yyyy-MM-dd')})
+								</button>
+							</li>
+						)
+					}}
 				</For>
 			</ul>
 			<Button class="flex" onClick={() => actions.openNewSong()}>
-				<Icon path={documentPlus} class="w-6 h-6 inline-block" />
+				<Icon path={documentPlus} class="inline-block h-6 w-6" />
 				New Song
 			</Button>
 		</div>

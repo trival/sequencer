@@ -3,7 +3,7 @@ import { useSong, ProcessedNote } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { createSignal } from 'solid-js'
+import { createMemo, createSignal } from 'solid-js'
 import * as Tone from 'tone'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Keyboard } from './keyboard'
@@ -18,16 +18,23 @@ interface PlayerProps {
 export default function Player(props: PlayerProps) {
 	const synth = useSynth()
 
-	const {
-		tracks,
-		data,
-		addNote,
-		removeNote,
-		changeDuration,
-		updateNoteTones,
-		updateProps,
-		// eslint-disable-next-line solid/reactivity
-	} = useSong(props.song)
+	const utils = createMemo(() => useSong(props.song))
+	const tracks = () => utils().tracks()
+
+	const propsSettings = createMemo(
+		() =>
+			props.song.keyboardSettings ?? {
+				baseNote: toMidi('C3'),
+				scaleHighlight: ScaleHighlight.Major,
+				toneColorType: ToneColorType.CircleOfFiths,
+			},
+	)
+
+	const [updatedSettings, setSettings] = createSignal<
+		Partial<KeyboardSettings>
+	>({})
+
+	const settings = () => ({ ...propsSettings(), ...updatedSettings() })
 
 	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
 		[number, number] | null
@@ -96,7 +103,7 @@ export default function Player(props: PlayerProps) {
 			if (!note) return
 			if (!note.midiNotes.includes(midi)) {
 				const newNotes = [...note.midiNotes, midi]
-				updateNoteTones(idx[0], idx[1], newNotes)
+				utils().updateNoteTones(idx[0], idx[1], newNotes)
 				synth.play(newNotes, note.duration)
 			} else {
 				synth.play(note.midiNotes, note.duration)
@@ -113,7 +120,7 @@ export default function Player(props: PlayerProps) {
 			if (!note) return
 			if (note.midiNotes.includes(midi)) {
 				const newNotes = note.midiNotes.filter((n) => n !== midi)
-				updateNoteTones(idx[0], idx[1], newNotes)
+				utils().updateNoteTones(idx[0], idx[1], newNotes)
 				synth.play(newNotes, note.duration)
 			} else {
 				synth.play(note.midiNotes, note.duration)
@@ -140,7 +147,7 @@ export default function Player(props: PlayerProps) {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
+		utils().addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
 	}
 
 	const onNoteAddedAfter = (
@@ -148,7 +155,7 @@ export default function Player(props: PlayerProps) {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
+		utils().addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
 		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
@@ -162,7 +169,7 @@ export default function Player(props: PlayerProps) {
 				setActiveNoteIdx(null)
 			}
 		}
-		removeNote(trackIdx, noteIdx)
+		utils().removeNote(trackIdx, noteIdx)
 	}
 
 	const onDurationChanged = (
@@ -170,14 +177,8 @@ export default function Player(props: PlayerProps) {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		changeDuration(trackIdx, noteIdx, duration)
+		utils().changeDuration(trackIdx, noteIdx, duration)
 	}
-
-	const [settings, setSettings] = createSignal<Partial<KeyboardSettings>>({
-		baseNote: toMidi('C3'),
-		scaleHighlight: ScaleHighlight.Major,
-		toneColorType: ToneColorType.CircleOfFiths,
-	})
 
 	const activeNote = () => {
 		const idx = activeNoteIdx()
@@ -209,17 +210,19 @@ export default function Player(props: PlayerProps) {
 					onNoteClicked={onNoteClicked}
 				/>
 				<SongControls
-					song={data()}
+					song={utils().data()}
 					isPlaying={isPlaying()}
 					activeNoteIdx={activeNoteIdx()}
-					onPropsChanged={(data) => updateProps(data)}
+					onPropsChanged={(data) => utils().updateProps(data)}
 					onPlay={onPlay}
 					onStop={onStop}
 					onRemove={onNoteRemoved}
 					onAddBefore={onNoteAddedBefore}
 					onAddAfter={onNoteAddedAfter}
 					onDurationChanged={onDurationChanged}
-					onSave={() => props.onSave(data())}
+					onSave={() =>
+						props.onSave({ ...utils().data(), keyboardSettings: settings() })
+					}
 				/>
 			</div>
 		</div>

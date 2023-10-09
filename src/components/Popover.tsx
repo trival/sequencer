@@ -20,6 +20,7 @@ export default function Popover(props: ParentProps<PopoverProps>) {
 	let popper: Instance
 
 	function close() {
+		// console.log('close popover with window click')
 		props.onClose()
 	}
 

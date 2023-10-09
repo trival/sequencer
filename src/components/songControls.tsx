@@ -13,7 +13,7 @@ import {
 	plus,
 	minus,
 	archiveBoxArrowDown,
-	arrowUpOnSquare,
+	cloudArrowUp,
 } from 'solid-heroicons/outline'
 import { stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
@@ -193,7 +193,7 @@ export function SongControls(_props: SongControlsProps) {
 							title="Save"
 							color="indigo"
 						>
-							<Icon path={arrowUpOnSquare} class="h-6 w-6" />
+							<Icon path={cloudArrowUp} class="h-6 w-6" />
 						</Button>
 					)}
 				</div>
@@ -231,6 +231,7 @@ function DurationSelector(_props: DurationSelectorProps) {
 							value={dur}
 							onSelect={(duration) => {
 								setDurations((durs) => {
+									durs = [...durs]
 									durs[i()] = duration as Subdivision
 									return durs
 								})
@@ -239,9 +240,10 @@ function DurationSelector(_props: DurationSelectorProps) {
 						/>
 						<Show when={i() > 0}>
 							<IconButton
-								onClick={() =>
+								onClick={(e) => {
+									e.stopPropagation()
 									setDurations((ds) => ds.filter((_, j) => j !== i()))
-								}
+								}}
 							>
 								<Icon path={minus} class="h-6 w-6" aria-hidden="true" />
 							</IconButton>
