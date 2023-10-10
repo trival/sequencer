@@ -10,6 +10,7 @@ import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
 import { Session } from './utils/session'
 import { emptySong, emptySongData } from './utils/song'
+import { defined } from './utils/utils'
 
 export interface AppState {
 	profile: Profile | null
@@ -130,6 +131,12 @@ export const AppStateProvider = (
 		},
 		openSong: function (id): void {
 			setState('currentSong', songsById().get(id) || null)
+			const openSongs = new Set(state.openSongs.map((s) => s.id))
+			openSongs.add(id)
+			setState(
+				'openSongs',
+				[...openSongs].map((id) => songsById().get(id)).filter(defined),
+			)
 		},
 		openNewSong: function (): void {
 			setState('currentSong', emptySong())

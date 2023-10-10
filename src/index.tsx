@@ -1,31 +1,48 @@
 import './styles/globals.css'
-import { render } from 'solid-js/web'
 
-import App from './App'
-import { Router } from '@solidjs/router'
+import { Route, Router, Routes } from '@solidjs/router'
+import { render } from 'solid-js/web'
 import { AppStateProvider } from './AppState'
+import { createSupabaseSession } from './utils/session'
 import { createSupabaseStorage } from './utils/storage'
 import { supabase } from './utils/supabase'
-import { createSupabaseSession } from './utils/session'
+import { lazy } from 'solid-js'
 
 const root = document.getElementById('root')
-
-if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
-	throw new Error(
-		'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
-	)
-}
 
 const storage = createSupabaseStorage(supabase)
 const session = createSupabaseSession(supabase)
 
 render(
 	() => (
-		<Router>
-			<AppStateProvider storage={storage} session={session}>
-				<App />
-			</AppStateProvider>
-		</Router>
+		<AppStateProvider storage={storage} session={session}>
+			<Router>
+				<Routes>
+					<Route path="/" component={lazy(() => import('@/pages/Home'))} />
+					<Route path="/app" component={lazy(() => import('@/pages/App'))} />
+					<Route
+						path="/tests/colors"
+						component={lazy(() => import('@/tests/colors'))}
+					/>
+					<Route
+						path="/tests/melody"
+						component={lazy(() => import('@/tests/melody'))}
+					/>
+					<Route
+						path="/tests/player"
+						component={lazy(() => import('@/tests/player'))}
+					/>
+					<Route
+						path="/tests/popover"
+						component={lazy(() => import('@/tests/popover'))}
+					/>
+					<Route
+						path="/tests/track"
+						component={lazy(() => import('@/tests/track'))}
+					/>
+				</Routes>
+			</Router>
+		</AppStateProvider>
 	),
 	root!,
 )
