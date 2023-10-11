@@ -1,7 +1,7 @@
-# touch synth app
+# trival sequencer
 
 a little scetchbook for melodies and harmonies with a mobile friendly interface.
-Implemented with React and Tone.js
+Implemented with Solid.js, Tone.js and Supabase.
 
 ## Developmet
 
@@ -9,3 +9,8 @@ Implemented with React and Tone.js
 npm install
 npm run dev
 ```
+
+## License
+
+This project is licensed under the MIT license. See the [LICENSE](LICENSE) file
+for more info.

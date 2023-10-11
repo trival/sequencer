@@ -1,7 +1,16 @@
 {
-  "name": "touch-synth-app",
+  "name": "trival-sequencer",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Thomas Gorny",
+    "email": "hello@trival.xyz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/trival/sequencer"
+  },
   "scripts": {
     "start": "serve dist",
     "dev": "vite --host --port 3000",
