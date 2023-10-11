@@ -1,4 +1,4 @@
-import { Show } from 'solid-js'
+import { Show, createMemo } from 'solid-js'
 import { useAppState } from '@/AppState'
 import ProfileForm from '@/components/profileForm'
 import { supabase } from '@/utils/supabase'
@@ -9,6 +9,9 @@ import Player from '@/components/player'
 
 export default function App() {
 	const [state, { updateProfile, saveSong }] = useAppState()
+	const currentSong = createMemo(
+		() => (state.currentSongId && state.songs[state.currentSongId]) || null,
+	)
 
 	return (
 		<div class="flex min-h-full flex-col justify-center">
@@ -16,18 +19,17 @@ export default function App() {
 				state.profile.username ? (
 					<>
 						<NavBar />
-						<Show when={state.currentSong} fallback={<ProfileSongList />}>
+						<Show when={currentSong()} fallback={<ProfileSongList />}>
 							<Player
-								onSave={(songData) =>
-									state.currentSong && saveSong(state.currentSong.id, songData)
-								}
-								song={state.currentSong!.data}
+								onSave={(songData) => saveSong(currentSong()!.id, songData)}
+								song={currentSong()!.data}
 							/>
 						</Show>
 					</>
 				) : (
-					<div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12 sm:w-full sm:max-w-[480px] m-auto my-4 md:my-16">
+					<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
 						<ProfileForm
+							username=""
 							onSubmit={(username, color) => {
 								updateProfile({ username, color })
 							}}
@@ -35,7 +37,7 @@ export default function App() {
 					</div>
 				)
 			) : (
-				<div class="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12 sm:w-full sm:max-w-[480px] m-auto my-4 md:my-16">
+				<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
 					<Auth supabaseClient={supabase} />
 				</div>
 			)}

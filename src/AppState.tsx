@@ -1,25 +1,18 @@
-import {
-	ParentProps,
-	createContext,
-	createEffect,
-	createMemo,
-	useContext,
-} from 'solid-js'
+import { ParentProps, createContext, createEffect, useContext } from 'solid-js'
 import { Collection, Profile, Song, SongData, SongMeta } from './datamodel'
 import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
 import { Session } from './utils/session'
-import { emptySong, emptySongData } from './utils/song'
-import { defined } from './utils/utils'
+import { emptySong } from './utils/song'
 
 export interface AppState {
 	profile: Profile | null
-	collections: Collection[]
-	songs: Song[]
+	collections: { [id: string]: Collection }
+	songs: { [id: string]: Song }
 
-	openSongs: Song[]
-	currentSong: Song | null
-	playingSong: string | null
+	openSongIds: string[]
+	currentSongId: string | null
+	playingSongId: string | null
 }
 
 export interface AppActions {
@@ -32,18 +25,18 @@ export interface AppActions {
 	closeSong(id: string): void
 
 	saveSong(id: string, data: SongData): void
-	saveSongMeta(id: string, meta: SongMeta): void
+	saveSongMeta(id: string, meta: Partial<SongMeta>): void
 	deleteSong(id: string): void
 }
 
 function emptyAppState(): AppState {
 	return {
 		profile: null,
-		collections: [],
-		songs: [],
-		openSongs: [],
-		currentSong: null,
-		playingSong: null,
+		collections: {},
+		songs: {},
+		openSongIds: [],
+		currentSongId: null,
+		playingSongId: null,
 	}
 }
 
@@ -55,14 +48,6 @@ export const AppStateProvider = (
 	props: ParentProps<{ storage: Storage; session: Session }>,
 ) => {
 	const [state, setState] = createStore<AppState>(emptyAppState())
-
-	const songsById = createMemo(() => {
-		const res = new Map<string, Song>()
-		for (const song of state.songs) {
-			res.set(song.id, song)
-		}
-		return res
-	})
 
 	createEffect(() => {
 		const userId = props.session.userId()
@@ -81,17 +66,28 @@ export const AppStateProvider = (
 					if (userId) {
 						const collections = await props.storage.collectionsByUser(userId)
 						const songs = await props.storage.songsByUser(userId)
-						setState({ collections, songs })
+
+						const songsById: { [id: string]: Song } = {}
+						songs.forEach((s) => {
+							songsById[s.id] = s
+						})
+
+						const collectionsById: { [id: string]: Collection } = {}
+						collections.forEach((c) => {
+							collectionsById[c.id] = c
+						})
+
+						setState({ collections: collectionsById, songs: songsById })
 					}
 				})
 		} else {
 			setState({
 				profile: null,
-				collections: [],
-				songs: [],
-				openSongs: [],
-				currentSong: null,
-				playingSong: null,
+				collections: {},
+				songs: {},
+				openSongIds: [],
+				currentSongId: null,
+				playingSongId: null,
 			})
 		}
 	})
@@ -129,22 +125,26 @@ export const AppStateProvider = (
 				color: profile.color,
 			})
 		},
-		openSong: function (id): void {
-			setState('currentSong', songsById().get(id) || null)
-			const openSongs = new Set(state.openSongs.map((s) => s.id))
+
+		openSong(id) {
+			setState('currentSongId', state.songs[id] ? id : null)
+			const openSongs = new Set(state.openSongIds)
 			openSongs.add(id)
-			setState(
-				'openSongs',
-				[...openSongs].map((id) => songsById().get(id)).filter(defined),
-			)
+			setState('openSongIds', [...openSongs])
 		},
-		openNewSong: function (): void {
-			setState('currentSong', emptySong())
+
+		openNewSong() {
+			const newSong = emptySong()
+			setState('songs', newSong.id, newSong)
+			setState('currentSongId', newSong.id)
 		},
-		openSongCopy: function (id): void {
-			const song = songsById().get(id)
+
+		openSongCopy(id) {
+			const song = state.songs[id]
 			if (song) {
-				setState('currentSong', {
+				const newSong = emptySong()
+				setState('currentSongId', newSong.id)
+				setState('songs', newSong.id, {
 					...song,
 					id: emptySong().id,
 					meta: {
@@ -154,72 +154,92 @@ export const AppStateProvider = (
 				})
 			}
 		},
-		closeSong: function (id): void {
-			if (state.currentSong?.id === id) {
-				setState('currentSong', null)
+
+		closeSong(id) {
+			if (state.currentSongId === id) {
+				setState('currentSongId', null)
 			}
 			setState(
-				'openSongs',
-				state.openSongs.filter((s) => s.id !== id),
+				'openSongIds',
+				state.openSongIds.filter((openId) => openId !== id),
 			)
 		},
-		saveSong: function (id, data): void {
+
+		saveSong(id, data) {
 			if (!id) return
-			const song = songsById().get(id)
+			const song = state.songs[id]
 			if (song) {
-				props.storage.updateSong(id, { data }).catch(console.error)
-			} else if (id === state.currentSong?.id && state.profile?.userId) {
-				const song = {
-					id,
-					meta: {
-						userId: state.profile.userId,
-					},
-					data,
+				if (song.meta.createdAt) {
+					props.storage
+						.updateSong(id, { data })
+						.then(() => {
+							setState('songs', song.id, { ...song, data })
+						})
+						.catch(console.error)
+				} else if (state.profile?.userId) {
+					const newSong = {
+						...song,
+						meta: {
+							...song.meta,
+							userId: state.profile.userId,
+						},
+						data,
+					}
+					props.storage
+						.createSong(newSong)
+						.then(() => {
+							setState('songs', song.id, newSong)
+						})
+						.catch(console.error)
 				}
-				props.storage
-					.createSong(song)
-					// eslint-disable-next-line solid/reactivity
-					.then(() => {
-						setState('songs', [...state.songs, song])
-					})
-					.catch(console.error)
 			}
 		},
-		saveSongMeta: function (id, meta): void {
-			if (!id) return
-			const song = songsById().get(id)
+
+		saveSongMeta(id, meta) {
+			if (!id || !state.profile?.userId) return
+			const song = state.songs[id]
 			if (song) {
-				props.storage.updateSong(id, { meta }).catch(console.error)
-			} else if (id === state.currentSong?.id && state.profile?.userId) {
-				const song = {
-					id,
-					meta: {
-						...meta,
-						userId: state.profile.userId,
-					},
-					data: emptySongData(),
+				const newMeta = { ...song.meta, ...meta }
+				if (song.meta.createdAt) {
+					props.storage
+						.updateSong(id, { meta: newMeta })
+						.then(() => {
+							setState('songs', song.id, 'meta', newMeta)
+						})
+						.catch(console.error)
+				} else if (state.profile?.userId) {
+					const newSong = {
+						...song,
+						meta: {
+							...newMeta,
+							userId: state.profile.userId,
+						},
+					}
+					props.storage
+						.createSong(newSong)
+						.then(() => {
+							setState('songs', newSong.id, newSong)
+						})
+						.catch(console.error)
 				}
-				props.storage
-					.createSong(song)
-					// eslint-disable-next-line solid/reactivity
-					.then(() => {
-						setState('songs', [...state.songs, song])
-					})
-					.catch(console.error)
 			}
 		},
-		deleteSong: function (id): void {
+
+		deleteSong(id) {
 			if (!id) return
-			const song = songsById().get(id)
+			const song = state.songs[id]
 			if (song) {
-				props.storage.deleteSong(id).catch(console.error)
-				setState(
-					'songs',
-					state.songs.filter((s) => s.id !== id),
+				if (song.meta.createdAt) {
+					props.storage.deleteSong(id).catch(console.error)
+				}
+
+				const songs = Object.fromEntries(
+					Object.entries(state.songs).filter(([key]) => key !== id),
 				)
+				setState('songs', songs)
 			}
-			if (state.currentSong?.id === id) {
-				setState('currentSong', null)
+			if (state.currentSongId === id) {
+				setState('currentSongId', null)
 			}
 		},
 	}

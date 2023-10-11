@@ -8,7 +8,7 @@ import { format } from 'date-fns'
 export default function ProfileSongList() {
 	const [state, actions] = useAppState()
 	const songs = () =>
-		[...state.songs].sort((a, b) => {
+		Object.values(state.songs).sort((a, b) => {
 			const res =
 				((a.meta.updatedAt && new Date(a.meta.updatedAt).getTime()) || 0) -
 				((b.meta.updatedAt && new Date(b.meta.updatedAt).getTime()) || 0)
@@ -24,14 +24,15 @@ export default function ProfileSongList() {
 			<ul>
 				<For each={songs()}>
 					{(song) => {
-						const date = new Date(song.meta.updatedAt!)
+						const date = song.meta.updatedAt && new Date(song.meta.updatedAt)
 						return (
 							<li>
 								<button
 									class="font-semibold underline"
 									onClick={() => actions.openSong(song.id)}
 								>
-									{song.meta.title} ({format(date, 'yyyy-MM-dd')})
+									{song.meta.title} ({date ? format(date, 'yyyy-MM-dd') : 'new'}
+									)
 								</button>
 							</li>
 						)

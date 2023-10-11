@@ -13,6 +13,7 @@ interface ButtonProps {
 	type?: 'button' | 'submit' | 'reset'
 	ref?: HTMLButtonElement
 	title?: string
+	disabled?: boolean
 }
 
 const btnColors = {
@@ -23,6 +24,7 @@ const btnColors = {
 }
 
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
+const disabled = tw`opacity-50 cursor-not-allowed`
 
 export const IconButton = (_props: ParentProps<ButtonProps>) => {
 	const props = mergeProps({ color: 'white', type: 'button' } as const, _props)
@@ -34,10 +36,12 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 				btnColors[props.color],
 				btnFocus,
 				props.class,
+				props.disabled && disabled,
 			)}
 			onClick={(e) => props.onClick?.(e)}
 			ref={props.ref}
 			title={props.title}
+			disabled={props.disabled}
 		>
 			{props.children}
 		</button>
@@ -54,10 +58,12 @@ export const Button = (_props: ParentProps<ButtonProps>) => {
 				btnColors[props.color],
 				btnFocus,
 				props.class,
+				props.disabled && disabled,
 			)}
 			onClick={(e) => props.onClick?.(e)}
 			ref={props.ref}
 			title={props.title}
+			disabled={props.disabled}
 		>
 			{props.children}
 		</button>
@@ -88,6 +94,7 @@ export const IconButtonPopover = (
 				class={clsx('m-2 p-2', props.class)}
 				onClick={open}
 				title={props.title}
+				disabled={props.disabled}
 			>
 				{props.buttonElement}
 			</IconButton>

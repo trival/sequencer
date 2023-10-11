@@ -1,4 +1,4 @@
-import { For, createSignal } from 'solid-js'
+import { For, Show, createMemo, createSignal } from 'solid-js'
 import { useAppState } from '@/AppState'
 import { Icon } from 'solid-heroicons'
 import { xMark } from 'solid-heroicons/solid'
@@ -10,10 +10,16 @@ import SongMetaForm from './songMetaForm'
 export default function NavBar() {
 	const [state, actions] = useAppState()
 	const [openMenu, setOpenMenu] = createSignal(false)
+	const openSongs = createMemo(() =>
+		state.openSongIds.map((id) => state.songs[id]),
+	)
+	const currentSong = createMemo(
+		() => (state.currentSongId && state.songs[state.currentSongId]) || null,
+	)
 	return (
 		<nav class="flex">
 			<ul class="flex flex-grow overflow-x-auto">
-				<For each={state.openSongs}>
+				<For each={openSongs()}>
 					{(song) => (
 						<li class="flex">
 							<button
@@ -33,17 +39,20 @@ export default function NavBar() {
 				<Icon path={bars_3} class="h-6 w-6" />
 			</IconButton>
 			<Overlay visible={openMenu()} onClose={() => setOpenMenu(false)}>
-				<SongMetaForm
-					onSubmit={(title, description) => {
-						if (state.currentSong && state.profile?.userId) {
-							actions.saveSongMeta(state.currentSong?.id, {
-								userId: state.profile.userId,
-								title,
-								description,
-							})
-						}
-					}}
-				/>
+				<Show when={state.currentSongId}>
+					<SongMetaForm
+						title={currentSong()!.meta.title || ''}
+						description={currentSong()!.meta.description || ''}
+						onSubmit={(title, description) => {
+							if (currentSong()) {
+								actions.saveSongMeta(currentSong()!.id, {
+									title,
+									description,
+								})
+							}
+						}}
+					/>
+				</Show>
 			</Overlay>
 		</nav>
 	)
