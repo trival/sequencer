@@ -16,7 +16,7 @@ export interface ProcessedTrack {
 	measureSec: number
 }
 
-export function emptyProcessedTrack(): ProcessedTrack {
+export function emptyTrack(): ProcessedTrack {
 	return {
 		duration: {},
 		durationSec: 0,
@@ -52,10 +52,12 @@ function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
 }
 
 export function processSong(song: SongData): ProcessedTrack[] {
+	Tone.Transport.bpm.value = song.bpm
+
 	const tracks: ProcessedTrack[] = []
 
 	for (const trackData of song.tracks) {
-		const track = emptyProcessedTrack()
+		const track = emptyTrack()
 		track.notes = trackData.notes.map((n) => ({
 			midiNotes: n.midiNotes,
 			duration: {},

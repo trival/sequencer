@@ -1,6 +1,7 @@
 import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
 import { TrackNote } from '@/datamodel'
+import { processSong } from '@/utils/processedTrack'
 import { useSongEditor } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
@@ -18,9 +19,9 @@ const initialMelody: TrackNote[] = [
 ]
 
 export default function TestTracksPage() {
-	const { tracks, data, addNote, removeNote, changeDuration } = useSongEditor({
+	const { data, addNote, removeNote, changeDuration } = useSongEditor({
 		bpm: 160,
-		tracks: [initialMelody],
+		tracks: [{ notes: initialMelody, gain: 1, instrument: 0 }],
 	})
 
 	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
@@ -70,6 +71,8 @@ export default function TestTracksPage() {
 		console.log('onDurationChanged', trackIdx, noteIdx)
 		changeDuration(trackIdx, noteIdx, duration)
 	}
+
+	const tracks = () => processSong(data())
 
 	return (
 		<div class="p-10">

@@ -1,4 +1,4 @@
-import { ProcessedTrack } from '@/utils/song'
+import { ProcessedTrack } from '@/utils/processedTrack'
 import clsx from 'clsx'
 import { For } from 'solid-js'
 

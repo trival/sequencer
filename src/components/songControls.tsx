@@ -60,7 +60,7 @@ export function SongControls(_props: SongControlsProps) {
 
 	const activeNote = () =>
 		props.activeNoteIdx
-			? props.song.tracks[props.activeNoteIdx[0]]?.[props.activeNoteIdx[1]]
+			? props.song.tracks[props.activeNoteIdx[0]]?.notes[props.activeNoteIdx[1]]
 			: null
 
 	const activeDuration = () => {

@@ -1,8 +1,9 @@
 import { SongData, TrackNote, SongProperties, Song, Track } from '@/datamodel'
+import { produce } from 'immer'
 import { createSignal } from 'solid-js'
-import * as Tone from 'tone'
 import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
 import * as uuid from 'uuid'
+import { divideAt } from './utils'
 
 export function emptySong(): Song {
 	return {
@@ -12,6 +13,12 @@ export function emptySong(): Song {
 			userId: '',
 		},
 	}
+}
+
+export function songFromMelody(melody: TrackNote[]): Song {
+	const song = emptySong()
+	song.data.tracks[0].notes = melody
+	return song
 }
 
 export function emptyTrack(): Track {
@@ -34,10 +41,6 @@ export function toDurations(duration: TimeObject): Subdivision[] {
 		}
 	}
 	return result
-}
-
-const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
-	return [xs.slice(0, idx), xs.slice(idx)]
 }
 
 export interface SongEditor {
@@ -63,16 +66,18 @@ export const useSongEditor = (data: SongData): SongEditor => {
 	}
 
 	const [song, setSong] = createSignal<SongData>(data)
+	const updateSong = (fn: ((song: SongData) => void) | SongData) => {
+		setSong(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
+	}
 
 	const removeNote = (trackIdx: number, noteIdx: number) => {
-		updateTracks((song) => {
-			const track = song[trackIdx]
+		updateSong((song) => {
+			const track = song.tracks[trackIdx]
 			if (track) {
 				track.notes = track.notes.filter((_, i) => i !== noteIdx)
 				if (!track.notes.length) {
 					track.notes.push(emptyTrack().notes[0])
 				}
-				recalculateTrack(track)
 			}
 		})
 	}
@@ -82,36 +87,23 @@ export const useSongEditor = (data: SongData): SongEditor => {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		updateTracks((song) => {
-			const track = song[trackIdx]
+		updateSong((song) => {
+			const track = song.tracks[trackIdx]
 			if (track) {
 				const note = track.notes[noteIdx]
 				if (note) {
-					note.data.duration = duration
-					recalculateTrack(track)
+					note.duration = duration
 				}
 			}
 		})
 	}
 
 	const addNote = (trackIdx: number, noteIdx: number, noteData: TrackNote) => {
-		updateTracks((song) => {
-			const track = song[trackIdx]
+		updateSong((song) => {
+			const track = song.tracks[trackIdx]
 			if (track) {
 				const [before, after] = divideAt(track.notes, noteIdx)
-
-				track.notes = [
-					...before,
-					{
-						data: noteData,
-						duration: {},
-						durationSec: 0,
-						time: 0,
-					},
-					...after,
-				]
-
-				recalculateTrack(track)
+				track.notes = [...before, noteData, ...after]
 			}
 		})
 	}
@@ -121,30 +113,21 @@ export const useSongEditor = (data: SongData): SongEditor => {
 		noteIdx: number,
 		midiNotes: number[],
 	) => {
-		updateTracks((song) => {
-			const track = song[trackIdx]
+		updateSong((song) => {
+			const track = song.tracks[trackIdx]
 			if (!track) return
 			const note = track.notes[noteIdx]
 			if (!note) return
-			note.data.midiNotes = midiNotes
+			note.midiNotes = midiNotes
 		})
 	}
 
 	const updateProps = (data: Partial<SongProperties>) => {
 		setSong((prev) => ({ ...prev, ...data }))
-		if (data.bpm) {
-			Tone.Transport.bpm.value = data.bpm
-			updateTracks((song) => {
-				for (const track of song) {
-					recalculateTrack(track)
-				}
-			})
-		}
 	}
 
 	return {
-		tracks,
-		data: rawData,
+		data: song,
 		updateProps,
 		removeNote,
 		addNote,

@@ -29,3 +29,7 @@ export const subdivisions: Subdivision[] = [
 	'32n.',
 	'32t',
 ]
+
+export const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
+	return [xs.slice(0, idx), xs.slice(idx)]
+}

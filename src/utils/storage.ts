@@ -1,6 +1,7 @@
-import { Collection, Profile, Song, SongData } from '@/datamodel'
+import { Collection, Profile, Song, Track } from '@/datamodel'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '../../database.types'
+import { emptySong } from './song'
 
 export interface Storage {
 	getProfile(userId: string): Promise<Profile | null>
@@ -211,17 +212,41 @@ export function createSupabaseStorage(
 }
 
 function mapSongResult(res: Database['public']['Tables']['song']['Row']): Song {
-	return {
-		id: res.id,
-		meta: {
-			userId: res.user_id,
-			title: res.title || '',
-			description: res.description || '',
-			collection: res.collection || undefined,
-			basedOn: res.copied_from || undefined,
-			createdAt: res.created_at,
-			updatedAt: res.updated_at,
-		},
-		data: res.data as unknown as SongData,
+	const data: any = res.data
+	const song = emptySong()
+
+	song.id = res.id
+
+	song.meta.userId = res.user_id
+	song.meta.title = res.title || ''
+	song.meta.description = res.description || ''
+	song.meta.collection = res.collection || undefined
+	song.meta.basedOn = res.copied_from || undefined
+	song.meta.createdAt = res.created_at
+	song.meta.updatedAt = res.updated_at
+
+	song.data.bpm = data.bpm
+	song.data.swing = data.swing
+	song.data.swingSubdivision = data.swing_subdivision
+	song.data.timeSignature = data.time_signature
+
+	song.data.instruments = data.instruments
+	song.data.keyboardSettings = data.keyboard_settings
+	song.data.trackSettings = data.track_settings
+
+	if (data.tracks) {
+		song.data.tracks = data.tracks.map((track: any) => {
+			if (Array.isArray(track)) {
+				return {
+					notes: track,
+					gain: 1,
+					instrument: 0,
+				} as Track
+			} else {
+				return track
+			}
+		})
 	}
+
+	return song
 }

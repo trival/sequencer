@@ -1,5 +1,5 @@
 import { SongData, KeyboardSettings } from '@/datamodel'
-import { useSongEditor, ProcessedNote } from '@/utils/song'
+import { useSongEditor } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
@@ -9,6 +9,7 @@ import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Keyboard } from './keyboard'
 import { Track } from './track'
 import { SongControls } from './songControls'
+import { ProcessedNote, processSong } from '@/utils/processedTrack'
 
 interface PlayerProps {
 	song: SongData
@@ -19,7 +20,7 @@ export default function Player(props: PlayerProps) {
 	const synth = useSynth()
 
 	const utils = createMemo(() => useSongEditor(props.song))
-	const tracks = () => utils().tracks()
+	const tracks = () => processSong(utils().data())
 
 	const propsSettings = createMemo(
 		() =>
