@@ -1,5 +1,5 @@
 import { TrackNote } from '@/datamodel'
-import { ProcessedNote, useSong } from '@/utils/song'
+import { ProcessedNote, useSongEditor } from '@/utils/song'
 import { useSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
 import * as Tone from 'tone'
@@ -29,17 +29,17 @@ const melodyData: TrackNote[] = [
 
 export default function SequenceTest() {
 	const synth = useSynth()
-	const { tracks } = useSong({ bpm: 160, tracks: [melodyData] })
+	const { tracks } = useSongEditor({ bpm: 160, tracks: [melodyData] })
 
 	const onClick = async () => {
 		await Tone.start()
 		Tone.Transport.start()
 		Tone.Transport.bpm.value = 160
 
-		let track = tracks()[0]
+		const track = tracks()[0]
 
 		const seq = new Tone.Part((time, note: ProcessedNote) => {
-			synth.play(note.midiNotes, note.duration, time)
+			synth.play(note.data.midiNotes, note.duration, time)
 		}, track.notes)
 
 		seq.loop = 2

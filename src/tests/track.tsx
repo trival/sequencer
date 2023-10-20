@@ -1,7 +1,7 @@
 import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
 import { TrackNote } from '@/datamodel'
-import { useSong } from '@/utils/song'
+import { useSongEditor } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
@@ -17,8 +17,8 @@ const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('G3')], duration: '2n' },
 ]
 
-export default function EditorPage() {
-	const { tracks, data, addNote, removeNote, changeDuration } = useSong({
+export default function TestTracksPage() {
+	const { tracks, data, addNote, removeNote, changeDuration } = useSongEditor({
 		bpm: 160,
 		tracks: [initialMelody],
 	})

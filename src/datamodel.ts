@@ -51,8 +51,19 @@ export interface SongProperties {
 	timeSignature?: number
 }
 
+export interface Track {
+	notes: TrackNote[]
+	gain: number
+	instrument: number
+}
+
+export interface Instrument {
+	color: string
+}
+
 export interface SongData extends SongProperties {
-	tracks: TrackNote[][]
+	tracks: Track[]
+	instruments?: Instrument[]
 	keyboardSettings?: Partial<KeyboardSettings>
 	trackSettings?: Partial<TrackSettings>
 }

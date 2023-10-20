@@ -1,24 +1,8 @@
-import { SongData, TrackNote, SongProperties, Song } from '@/datamodel'
-import { produce } from 'immer'
-import { createEffect, createSignal, onMount } from 'solid-js'
+import { SongData, TrackNote, SongProperties, Song, Track } from '@/datamodel'
+import { createSignal } from 'solid-js'
 import * as Tone from 'tone'
-import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
+import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
 import * as uuid from 'uuid'
-
-export interface ProcessedNote {
-	midiNotes: number[]
-	time: Time
-	duration: TimeObject
-	subdivisions: Subdivision | Subdivision[]
-	durationSec: number
-}
-
-export interface ProcessedTrack {
-	notes: ProcessedNote[]
-	duration: TimeObject
-	durationSec: number
-	measureSec: number
-}
 
 export function emptySong(): Song {
 	return {
@@ -30,82 +14,15 @@ export function emptySong(): Song {
 	}
 }
 
+export function emptyTrack(): Track {
+	return { notes: [{ midiNotes: [], duration: '4n' }], gain: 1, instrument: 0 }
+}
+
 export function emptySongData(): SongData {
 	return {
 		bpm: 120,
-		tracks: [[{ midiNotes: [], duration: '4n' }]],
+		tracks: [emptyTrack()],
 	}
-}
-
-export function emptyTrack(): ProcessedTrack {
-	return {
-		duration: {},
-		durationSec: 0,
-		notes: [
-			{
-				subdivisions: '4n',
-				midiNotes: [],
-				duration: {},
-				durationSec: 0,
-				time: 0,
-			},
-		],
-		measureSec: 0,
-	}
-}
-
-export function processTrack(trackData: TrackNote[]): ProcessedTrack {
-	const track = emptyTrack()
-	track.notes = trackData.map((n) => ({
-		midiNotes: n.midiNotes,
-		subdivisions: n.duration,
-		duration: {},
-		durationSec: 0,
-		time: 0,
-	}))
-
-	recalculateTrack(track)
-
-	return track
-}
-
-export function recalculateTrack(track: ProcessedTrack): void {
-	const subdivisions: Subdivision[] = []
-
-	for (const note of track.notes) {
-		note.duration = collectDurations(note.subdivisions)
-		note.durationSec = Tone.Time(note.duration).toSeconds()
-		note.time = Tone.Time(collectDurations(subdivisions)).toSeconds()
-
-		Array.isArray(note.subdivisions)
-			? subdivisions.push(...note.subdivisions)
-			: subdivisions.push(note.subdivisions)
-	}
-
-	const duration = collectDurations(subdivisions)
-
-	track.duration = duration
-	track.durationSec = Tone.Time(duration).toSeconds()
-	track.measureSec = Tone.Time('1m').toSeconds()
-}
-
-function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
-	if (!Array.isArray(duration)) {
-		duration = [duration]
-	}
-	return duration.reduce(
-		(acc, val) => {
-			if (val) {
-				if (acc[val]) {
-					acc[val]++
-				} else {
-					acc[val] = 1
-				}
-			}
-			return acc
-		},
-		{} as Record<Subdivision, number>,
-	)
 }
 
 export function toDurations(duration: TimeObject): Subdivision[] {
@@ -123,28 +40,29 @@ const divideAt = <T>(xs: T[], idx: number): [T[], T[]] => {
 	return [xs.slice(0, idx), xs.slice(idx)]
 }
 
-export const useSong = (data: SongData) => {
-	const [tracks, setTracks] = createSignal<ProcessedTrack[]>([])
-	const updateTracks = (
-		fn: ((song: ProcessedTrack[]) => void) | ProcessedTrack[],
-	) => {
-		setTracks(typeof fn === 'function' ? produce((draft) => fn(draft)) : fn)
-	}
+export interface SongEditor {
+	data: () => SongData
+	updateProps: (data: Partial<SongProperties>) => void
+	removeNote: (trackIdx: number, noteIdx: number) => void
+	addNote: (trackIdx: number, noteIdx: number, noteData: TrackNote) => void
+	changeDuration: (
+		trackIdx: number,
+		noteIdx: number,
+		duration: Subdivision | Subdivision[],
+	) => void
+	updateNoteTones: (
+		trackIdx: number,
+		noteIdx: number,
+		midiNotes: number[],
+	) => void
+}
 
+export const useSongEditor = (data: SongData): SongEditor => {
 	if (!data.tracks.length) {
 		data.tracks = emptySongData().tracks
 	}
 
-	const [rawData, setRawData] = createSignal<SongData>(data)
-
-	onMount(() => {
-		Tone.Transport.bpm.value = data.bpm
-		updateTracks(
-			data.tracks.map((track) =>
-				processTrack(track.length ? track : emptySongData().tracks[0]),
-			),
-		)
-	})
+	const [song, setSong] = createSignal<SongData>(data)
 
 	const removeNote = (trackIdx: number, noteIdx: number) => {
 		updateTracks((song) => {
@@ -169,7 +87,7 @@ export const useSong = (data: SongData) => {
 			if (track) {
 				const note = track.notes[noteIdx]
 				if (note) {
-					note.subdivisions = duration
+					note.data.duration = duration
 					recalculateTrack(track)
 				}
 			}
@@ -185,8 +103,7 @@ export const useSong = (data: SongData) => {
 				track.notes = [
 					...before,
 					{
-						midiNotes: noteData.midiNotes,
-						subdivisions: noteData.duration,
+						data: noteData,
 						duration: {},
 						durationSec: 0,
 						time: 0,
@@ -209,12 +126,12 @@ export const useSong = (data: SongData) => {
 			if (!track) return
 			const note = track.notes[noteIdx]
 			if (!note) return
-			note.midiNotes = midiNotes
+			note.data.midiNotes = midiNotes
 		})
 	}
 
 	const updateProps = (data: Partial<SongProperties>) => {
-		setRawData((prev) => ({ ...prev, ...data }))
+		setSong((prev) => ({ ...prev, ...data }))
 		if (data.bpm) {
 			Tone.Transport.bpm.value = data.bpm
 			updateTracks((song) => {
@@ -225,22 +142,9 @@ export const useSong = (data: SongData) => {
 		}
 	}
 
-	createEffect(() => {
-		setRawData((prev) => ({
-			...prev,
-			tracks: tracks().map((t) =>
-				t.notes.map((n) => ({
-					midiNotes: n.midiNotes,
-					duration: n.subdivisions,
-				})),
-			),
-		}))
-	})
-
 	return {
 		tracks,
 		data: rawData,
-		updateTracks,
 		updateProps,
 		removeNote,
 		addNote,
