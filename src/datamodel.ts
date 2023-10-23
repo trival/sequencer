@@ -58,7 +58,14 @@ export interface Track {
 }
 
 export interface Instrument {
-	color: string
+	color?: string
+	volume?: number
+	attack?: number
+	decay?: number
+	sustain?: number
+	release?: number
+	vibratoAmount?: number
+	vibratoRate?: number
 }
 
 export interface SongData extends SongProperties {

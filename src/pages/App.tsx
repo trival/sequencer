@@ -5,7 +5,7 @@ import { supabase } from '@/utils/supabase'
 import { Auth } from '@supabase/auth-ui-solid'
 import ProfileSongList from '@/components/profileList'
 import NavBar from '@/components/songNav'
-import Player from '@/components/player'
+import PlayerUI from '@/components/player'
 
 export default function App() {
 	const [state, { updateProfile, saveSong }] = useAppState()
@@ -20,7 +20,7 @@ export default function App() {
 					<>
 						<NavBar />
 						<Show when={currentSong()} fallback={<ProfileSongList />}>
-							<Player
+							<PlayerUI
 								onSave={(songData) => saveSong(currentSong()!.id, songData)}
 								song={currentSong()!.data}
 							/>

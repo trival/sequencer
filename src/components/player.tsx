@@ -1,30 +1,29 @@
 import { SongData, KeyboardSettings } from '@/datamodel'
 import { useSongEditor } from '@/utils/song'
-import { useSynth } from '@/utils/synth'
+import { SynthPlayer } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
 import { createMemo, createSignal } from 'solid-js'
-import * as Tone from 'tone'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { Keyboard } from './keyboard'
 import { Track } from './track'
 import { SongControls } from './songControls'
-import { ProcessedNote, processSong } from '@/utils/processedTrack'
+import { processSong } from '@/utils/processedTrack'
+import { SongPlayer } from '@/utils/songPlayer'
 
 interface PlayerProps {
 	song: SongData
+	synthPlayer: SynthPlayer
+	songPlayer: SongPlayer
 	onSave: (song: SongData) => void
 }
 
 export default function Player(props: PlayerProps) {
-	const synth = useSynth()
-
-	const utils = createMemo(() => useSongEditor(props.song))
-	const tracks = () => processSong(utils().data())
+	const song = createMemo(() => useSongEditor(props.song))
 
 	const propsSettings = createMemo(
 		() =>
-			props.song.keyboardSettings ?? {
+			song().data().keyboardSettings ?? {
 				baseNote: toMidi('C3'),
 				scaleHighlight: ScaleHighlight.Major,
 				toneColorType: ToneColorType.CircleOfFiths,
@@ -40,94 +39,36 @@ export default function Player(props: PlayerProps) {
 	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
 		[number, number] | null
 	>(null)
-	const [isPlaying, setIsPlaying] = createSignal(false)
-	const [playingSequence, setPlayingSequence] = createSignal<
-		Tone.Part<ProcessedNote>[] | null
-	>(null)
-
-	const onPlay = async () => {
-		if (!isPlaying()) {
-			await Tone.start()
-			Tone.Transport.start()
-
-			const seqs = tracks().map((track, i) => {
-				const seq = new Tone.Part((time, note: ProcessedNote) => {
-					synth.play(note.midiNotes, note.duration, time)
-					setActiveNoteIdx([i, track.notes.indexOf(note)])
-				}, track.notes)
-				seq.loop = true
-				seq.loopEnd = track.duration
-				return seq
-			})
-
-			const idx = activeNoteIdx()
-			const note = idx && tracks()[idx[0]]?.notes[idx[1]]
-
-			if (note) {
-				seqs.forEach((seq) => {
-					seq.start(0, note.time)
-				})
-			} else {
-				seqs.forEach((seq) => {
-					seq.start()
-				})
-			}
-
-			setPlayingSequence(seqs)
-			setIsPlaying(true)
-		} else {
-			playingSequence()?.forEach((seq) => {
-				seq.stop()
-			})
-
-			Tone.Transport.stop()
-			setPlayingSequence(null)
-			setIsPlaying(false)
-		}
-	}
-
-	const onStop = () => {
-		playingSequence()?.forEach((seq) => {
-			seq.stop()
-		})
-
-		Tone.Transport.stop()
-		setPlayingSequence(null)
-		setIsPlaying(false)
-		setActiveNoteIdx(null)
-	}
 
 	const onActivateNote = (midi: number) => {
 		const idx = activeNoteIdx()
 		if (idx) {
-			const note = tracks()[idx[0]]?.notes[idx[1]]
+			const track = song().data().tracks[idx[0]]
+			const note = track?.notes[idx[1]]
 			if (!note) return
 			if (!note.midiNotes.includes(midi)) {
 				const newNotes = [...note.midiNotes, midi]
-				utils().updateNoteTones(idx[0], idx[1], newNotes)
-				synth.play(newNotes, note.duration)
-			} else {
-				synth.play(note.midiNotes, note.duration)
+				song().updateNoteTones(idx[0], idx[1], newNotes)
 			}
+			props.songPlayer.playNote(...idx)
 		} else {
-			synth.play([midi])
+			props.synthPlayer.play(0, [midi])
 		}
 	}
 
 	const onDeactivateNote = (midi: number) => {
 		const idx = activeNoteIdx()
 		if (idx) {
-			const note = tracks()[idx[0]]?.notes[idx[1]]
+			const track = song().data().tracks[idx[0]]
+			const note = track?.notes[idx[1]]
 			if (!note) return
 			if (note.midiNotes.includes(midi)) {
 				const newNotes = note.midiNotes.filter((n) => n !== midi)
-				utils().updateNoteTones(idx[0], idx[1], newNotes)
-				synth.play(newNotes, note.duration)
-			} else {
-				synth.play(note.midiNotes, note.duration)
+				song().updateNoteTones(idx[0], idx[1], newNotes)
 			}
+			props.songPlayer.playNote(...idx)
 		} else {
-			synth.stop([midi])
+			props.synthPlayer.stop(0, [midi])
 		}
 	}
 
@@ -137,9 +78,7 @@ export default function Player(props: PlayerProps) {
 			setActiveNoteIdx(null)
 		} else {
 			setActiveNoteIdx([trackIdx, noteIdx])
-			const note = tracks()[trackIdx]?.notes[noteIdx]
-			if (!note) return
-			synth.play(note.midiNotes, note.duration)
+			props.songPlayer.playNote(trackIdx, noteIdx)
 		}
 	}
 
@@ -148,7 +87,7 @@ export default function Player(props: PlayerProps) {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		utils().addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
+		song().addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
 	}
 
 	const onNoteAddedAfter = (
@@ -156,12 +95,12 @@ export default function Player(props: PlayerProps) {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		utils().addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
+		song().addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
 		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
 	const onNoteRemoved = (trackIdx: number, noteIdx: number) => {
-		const track = tracks()[trackIdx]
+		const track = song().data().tracks[trackIdx]
 		if (!track) return
 		if (noteIdx === track.notes.length - 1) {
 			if (track.notes.length > 1) {
@@ -170,7 +109,7 @@ export default function Player(props: PlayerProps) {
 				setActiveNoteIdx(null)
 			}
 		}
-		utils().removeNote(trackIdx, noteIdx)
+		song().removeNote(trackIdx, noteIdx)
 	}
 
 	const onDurationChanged = (
@@ -178,18 +117,19 @@ export default function Player(props: PlayerProps) {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		utils().changeDuration(trackIdx, noteIdx, duration)
+		song().changeDuration(trackIdx, noteIdx, duration)
 	}
 
 	const activeNote = () => {
 		const idx = activeNoteIdx()
-		return idx ? tracks()[idx[0]]?.notes[idx[1]] : null
+		return idx ? song().data().tracks[idx[0]]?.notes[idx[1]] : null
 	}
 
 	const activeMidiNotes = () => {
 		const note = activeNote()
-		return note ? note.midiNotes : synth.playingNotes()
+		return note ? note.midiNotes : props.synthPlayer.playingNotes()
 	}
+
 	return (
 		<div>
 			<div class="relative h-[620px] w-[620px] max-w-full shadow-md">
@@ -206,23 +146,23 @@ export default function Player(props: PlayerProps) {
 			</div>
 			<div class="mt-2">
 				<Track
-					song={tracks()}
+					song={processSong(song().data())}
 					activeNoteIdx={activeNoteIdx()}
 					onNoteClicked={onNoteClicked}
 				/>
 				<SongControls
-					song={utils().data()}
-					isPlaying={isPlaying()}
+					song={song().data()}
+					isPlaying={props.songPlayer.playingNotes().length > 0}
 					activeNoteIdx={activeNoteIdx()}
-					onPropsChanged={(data) => utils().updateProps(data)}
-					onPlay={onPlay}
-					onStop={onStop}
+					onPropsChanged={(data) => song().updateProps(data)}
+					onPlay={() => props.songPlayer.play()}
+					onStop={() => props.songPlayer.stop()}
 					onRemove={onNoteRemoved}
 					onAddBefore={onNoteAddedBefore}
 					onAddAfter={onNoteAddedAfter}
 					onDurationChanged={onDurationChanged}
 					onSave={() =>
-						props.onSave({ ...utils().data(), keyboardSettings: settings() })
+						props.onSave({ ...song().data(), keyboardSettings: settings() })
 					}
 				/>
 			</div>

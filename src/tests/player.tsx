@@ -1,6 +1,6 @@
 import { toMidi } from '@/utils/utils'
 import { TrackNote } from '@/datamodel'
-import Player from '@/components/player'
+import PlayerUI from '@/components/player'
 import { songFromMelody } from '@/utils/song'
 
 const initialMelody: TrackNote[] = [
@@ -19,7 +19,7 @@ export default function PlayerTest() {
 	song.bpm = 160
 
 	return (
-		<Player
+		<PlayerUI
 			song={song}
 			onSave={(song) => {
 				console.log(song)
