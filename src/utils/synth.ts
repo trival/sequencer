@@ -75,7 +75,7 @@ export const useSynth = (instruments?: Instrument[]): SynthPlayer => {
 				newNotes.forEach((note) => current.activeNotes.add(note))
 				setPlayingNotes((ns) => {
 					const res = [...ns]
-					ns[current.idx] = Array.from(current.activeNotes)
+					res[current.idx] = Array.from(current.activeNotes)
 					return res
 				})
 			}
@@ -106,7 +106,7 @@ export const useSynth = (instruments?: Instrument[]): SynthPlayer => {
 
 		setPlayingNotes((ns) => {
 			const res = [...ns]
-			ns[current.idx] = Array.from(current.activeNotes)
+			res[current.idx] = Array.from(current.activeNotes)
 			return res
 		})
 	}

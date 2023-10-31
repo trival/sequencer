@@ -5,7 +5,7 @@ import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
 import { createMemo, createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
-import { Keyboard } from './keyboard'
+import { ActiveNote, Keyboard } from './keyboard'
 import { Track } from './track'
 import { SongControls } from './songControls'
 import { processSong } from '@/utils/processedTrack'
@@ -13,7 +13,7 @@ import { SongPlayer } from '@/utils/songPlayer'
 
 interface PlayerProps {
 	song: SongData
-	synthPlayer: SynthPlayer
+	synth: SynthPlayer
 	songPlayer: SongPlayer
 	onSave: (song: SongData) => void
 }
@@ -52,7 +52,7 @@ export default function Player(props: PlayerProps) {
 			}
 			props.songPlayer.playNote(...idx)
 		} else {
-			props.synthPlayer.play(0, [midi])
+			props.synth.play(0, [midi])
 		}
 	}
 
@@ -68,7 +68,7 @@ export default function Player(props: PlayerProps) {
 			}
 			props.songPlayer.playNote(...idx)
 		} else {
-			props.synthPlayer.stop(0, [midi])
+			props.synth.stop(0, [midi])
 		}
 	}
 
@@ -120,14 +120,27 @@ export default function Player(props: PlayerProps) {
 		song().changeDuration(trackIdx, noteIdx, duration)
 	}
 
-	const activeNote = () => {
-		const idx = activeNoteIdx()
-		return idx ? song().data().tracks[idx[0]]?.notes[idx[1]] : null
-	}
-
 	const activeMidiNotes = () => {
-		const note = activeNote()
-		return note ? note.midiNotes : props.synthPlayer.playingNotes()
+		const idx = activeNoteIdx()
+		const s = song().data()
+		const track = idx ? s.tracks[idx[0]] : null
+		const note = idx ? track?.notes[idx[1]] : null
+		const instrument = track
+			? s.instruments?.[track.instrument]?.color
+			: undefined
+
+		return note
+			? note.midiNotes.map(
+					(note) =>
+						({
+							note,
+							color: instrument,
+						}) as ActiveNote,
+			  )
+			: props.synth.playingNotes().flatMap((notes, i) => {
+					const color = song().data().instruments?.[i].color
+					return notes.map((note) => ({ note, color }))
+			  })
 	}
 
 	return (

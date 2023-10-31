@@ -42,7 +42,7 @@ export default function SequenceTest() {
 		const track = tracks[0]
 
 		const seq = new Tone.Part((time, note: ProcessedNote) => {
-			synth.play(note.midiNotes, note.duration, time)
+			synth.play(0, note.midiNotes, note.duration, time)
 		}, track.notes)
 
 		seq.loop = 2

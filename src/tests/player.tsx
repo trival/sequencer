@@ -2,6 +2,8 @@ import { toMidi } from '@/utils/utils'
 import { TrackNote } from '@/datamodel'
 import PlayerUI from '@/components/player'
 import { songFromMelody } from '@/utils/song'
+import { useSynth } from '@/utils/synth'
+import { createPlayer } from '@/utils/songPlayer'
 
 const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -18,12 +20,17 @@ export default function PlayerTest() {
 	const song = songFromMelody(initialMelody).data
 	song.bpm = 160
 
+	const synth = useSynth()
+	const player = createPlayer(song, synth)
+
 	return (
 		<PlayerUI
 			song={song}
 			onSave={(song) => {
 				console.log(song)
 			}}
+			songPlayer={player}
+			synth={synth}
 		/>
 	)
 }

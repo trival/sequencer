@@ -29,18 +29,95 @@ import {
 	onMount,
 } from 'solid-js'
 import Popover from './Popover'
-import { KeyboardSettings } from '@/datamodel'
+import { ActiveColor, KeyboardSettings } from '@/datamodel'
+import { tw } from '@/styles/tw-utils'
 
 type Mode = 'Record' | 'Play'
 
+export interface ActiveNote {
+	note: number
+	color?: ActiveColor
+}
+
 interface KeyboardProps {
-	activeNotes?: number[]
+	activeNotes?: ActiveNote[]
 	settings: Partial<KeyboardSettings>
 	onNoteActivated?: (midi: number) => void
 	onNoteDeactivated?: (midi: number) => void
 	onSettingsChanged?: (updatedSettings: KeyboardSettings) => void
 	class?: string
 	mode: Mode
+}
+
+function activeBorders(cs: ActiveColor[]): string {
+	if (cs.length === 0) return ''
+
+	console.log(cs)
+
+	const [top, right, bottom, left] =
+		cs.length === 1
+			? [cs[0], cs[0], cs[0], cs[0]]
+			: cs.length === 2
+			? [cs[0], cs[1], cs[0], cs[1]]
+			: cs.length === 3
+			? [cs[0], cs[1], cs[0], cs[2]]
+			: [cs[0], cs[1], cs[2], cs[3]]
+
+	const bt =
+		top === 'magenta'
+			? tw`border-t-fuchsia-400`
+			: top === 'blue'
+			? tw`border-t-blue-400`
+			: top === 'cyan'
+			? tw`border-t-cyan-400`
+			: top === 'green'
+			? tw`border-t-green-400`
+			: top === 'yellow'
+			? tw`border-t-yellow-400`
+			: tw`border-t-red-400`
+
+	const br =
+		right === 'magenta'
+			? tw`border-r-fuchsia-400`
+			: right === 'blue'
+			? tw`border-r-blue-400`
+			: right === 'cyan'
+			? tw`border-r-cyan-400`
+			: right === 'green'
+			? tw`border-r-green-400`
+			: right === 'yellow'
+			? tw`border-r-yellow-400`
+			: tw`border-r-red-400`
+
+	const bb =
+		bottom === 'magenta'
+			? tw`border-b-fuchsia-400`
+			: bottom === 'blue'
+			? tw`border-b-blue-400`
+			: bottom === 'cyan'
+			? tw`border-b-cyan-400`
+			: bottom === 'green'
+			? tw`border-b-green-400`
+			: bottom === 'yellow'
+			? tw`border-b-yellow-400`
+			: tw`border-b-red-400`
+
+	const bl =
+		left === 'magenta'
+			? tw`border-l-fuchsia-400`
+			: left === 'blue'
+			? tw`border-l-blue-400`
+			: left === 'cyan'
+			? tw`border-l-cyan-400`
+			: left === 'green'
+			? tw`border-l-green-400`
+			: left === 'yellow'
+			? tw`border-l-yellow-400`
+			: tw`border-l-red-400`
+
+	const borderBase = tw`border-4 scale-110`
+
+	return `${borderBase} ${bt} ${br} ${bb} ${bl}`
 }
 
 const keyMargin = 3
@@ -81,14 +158,19 @@ export const Keyboard = (_props: KeyboardProps) => {
 	const baseFrequency = () => Tone.Frequency(settings().baseNote, 'midi')
 
 	const notes = () => {
-		return (props.activeNotes as number[]).reduce(
-			(acc, note) => {
-				acc[note] = true
+		return (props.activeNotes as ActiveNote[]).reduce(
+			(acc, { note, color }) => {
+				if (!acc[note]) acc[note] = new Set()
+				acc[note].add(color ?? ActiveColor.Red)
 				return acc
 			},
-			{} as Record<number, boolean>,
+			{} as Record<number, Set<ActiveColor>>,
 		)
 	}
+
+	createEffect(() => {
+		console.log(notes())
+	})
 
 	const toneBg = (tone: ToneValue) =>
 		getToneBgColor(
@@ -243,9 +325,9 @@ export const Keyboard = (_props: KeyboardProps) => {
 									<button
 										class={clsx(
 											'box-border touch-none select-none rounded-md text-gray-700 shadow-sm transition-all',
-											{
-												'scale-110 border-4 border-red-400': notes()[cell.midi],
-											},
+											activeBorders(
+												notes()[cell.midi] ? [...notes()[cell.midi]] : [],
+											),
 										)}
 										style={{
 											'background-color': toneBg(cell.toneColor),
@@ -307,7 +389,7 @@ function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 				type="button"
 				onClick={open}
 				title="Keyboard settings"
-				class="w-12 h-12 rounded-full bg-gray-100/90 shadow-sm shadow-gray-400 -ml-6 -translate-y-1/2 transition-all hover:scale-110 focus:outline-none"
+				class="-ml-6 h-12 w-12 -translate-y-1/2 rounded-full bg-gray-100/90 shadow-sm shadow-gray-400 transition-all hover:scale-110 focus:outline-none"
 			/>
 			<Popover
 				popperOptions={{

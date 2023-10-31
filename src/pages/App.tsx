@@ -6,6 +6,8 @@ import { Auth } from '@supabase/auth-ui-solid'
 import ProfileSongList from '@/components/profileList'
 import NavBar from '@/components/songNav'
 import PlayerUI from '@/components/player'
+import { createPlayer } from '@/utils/songPlayer'
+import { useSynth } from '@/utils/synth'
 
 export default function App() {
 	const [state, { updateProfile, saveSong }] = useAppState()
@@ -13,16 +15,31 @@ export default function App() {
 		() => (state.currentSongId && state.songs[state.currentSongId]) || null,
 	)
 
+	const synth = createMemo(() => {
+		if (!currentSong()) return null
+		return useSynth(currentSong()!.data.instruments)
+	})
+
+	const songPlayer = createMemo(() => {
+		if (!currentSong() || !synth()) return null
+		return createPlayer(currentSong()!.data, synth()!)
+	})
+
 	return (
 		<div class="flex min-h-full flex-col justify-center">
 			{state.profile ? (
 				state.profile.username ? (
 					<>
 						<NavBar />
-						<Show when={currentSong()} fallback={<ProfileSongList />}>
+						<Show
+							when={currentSong() && synth() && songPlayer()}
+							fallback={<ProfileSongList />}
+						>
 							<PlayerUI
 								onSave={(songData) => saveSong(currentSong()!.id, songData)}
 								song={currentSong()!.data}
+								songPlayer={songPlayer()!}
+								synth={synth()!}
 							/>
 						</Show>
 					</>

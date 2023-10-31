@@ -57,8 +57,17 @@ export interface Track {
 	instrument: number
 }
 
+export enum ActiveColor {
+	Red = 'red',
+	Magenta = 'magenta',
+	Blue = 'blue',
+	Cyan = 'cyan',
+	Green = 'green',
+	Yellow = 'yellow',
+}
+
 export interface Instrument {
-	color?: string
+	color?: ActiveColor
 	volume?: number
 	attack?: number
 	decay?: number
