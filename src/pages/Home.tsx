@@ -1,12 +1,12 @@
 import { Keyboard } from '@/components/keyboard'
 import { KeyboardSettings } from '@/datamodel'
-import { useSynth } from '@/utils/synth'
+import { createSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { createEffect, createSignal } from 'solid-js'
+import { createSignal } from 'solid-js'
 
 export default function Home() {
-	const synth = useSynth()
+	const synth = createSynth()
 
 	const onActivateNote = (midi: number) => {
 		synth.play(0, [midi])

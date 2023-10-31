@@ -7,22 +7,23 @@ import ProfileSongList from '@/components/profileList'
 import NavBar from '@/components/songNav'
 import PlayerUI from '@/components/player'
 import { createPlayer } from '@/utils/songPlayer'
-import { useSynth } from '@/utils/synth'
+import { createSynth } from '@/utils/synth'
 
 export default function App() {
 	const [state, { updateProfile, saveSong }] = useAppState()
+
 	const currentSong = createMemo(
 		() => (state.currentSongId && state.songs[state.currentSongId]) || null,
 	)
 
 	const synth = createMemo(() => {
 		if (!currentSong()) return null
-		return useSynth(currentSong()!.data.instruments)
+		return createSynth(currentSong()!.data.instruments)
 	})
 
 	const songPlayer = createMemo(() => {
-		if (!currentSong() || !synth()) return null
-		return createPlayer(currentSong()!.data, synth()!)
+		if (!synth()) return null
+		return createPlayer(synth()!)
 	})
 
 	return (

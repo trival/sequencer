@@ -52,8 +52,6 @@ interface KeyboardProps {
 function activeBorders(cs: ActiveColor[]): string {
 	if (cs.length === 0) return ''
 
-	console.log(cs)
-
 	const [top, right, bottom, left] =
 		cs.length === 1
 			? [cs[0], cs[0], cs[0], cs[0]]
@@ -168,10 +166,6 @@ export const Keyboard = (_props: KeyboardProps) => {
 		)
 	}
 
-	createEffect(() => {
-		console.log(notes())
-	})
-
 	const toneBg = (tone: ToneValue) =>
 		getToneBgColor(
 			tone,
@@ -240,8 +234,6 @@ export const Keyboard = (_props: KeyboardProps) => {
 		if (wrapperRef) {
 			const { width: boxWidth, height: boxHeight } =
 				wrapperRef.getBoundingClientRect()
-
-			// console.log(boxHeight, wrapperRef.clientHeight, wrapperRef.offsetHeight)
 
 			const cols = Math.min(
 				Math.floor((boxWidth - 2 * keyMargin) / keySize()),

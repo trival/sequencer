@@ -3,7 +3,7 @@ import { useSongEditor } from '@/utils/song'
 import { SynthPlayer } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { createMemo, createSignal } from 'solid-js'
+import { createEffect, createMemo, createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { ActiveNote, Keyboard } from './keyboard'
 import { Track } from './track'
@@ -20,6 +20,8 @@ interface PlayerProps {
 
 export default function Player(props: PlayerProps) {
 	const song = createMemo(() => useSongEditor(props.song))
+
+	const isPlaying = createMemo(() => props.songPlayer.playingNotes().length > 0)
 
 	const propsSettings = createMemo(
 		() =>
@@ -50,7 +52,7 @@ export default function Player(props: PlayerProps) {
 				const newNotes = [...note.midiNotes, midi]
 				song().updateNoteTones(idx[0], idx[1], newNotes)
 			}
-			props.songPlayer.playNote(...idx)
+			props.songPlayer.playNote(song().data(), ...idx)
 		} else {
 			props.synth.play(0, [midi])
 		}
@@ -66,7 +68,7 @@ export default function Player(props: PlayerProps) {
 				const newNotes = note.midiNotes.filter((n) => n !== midi)
 				song().updateNoteTones(idx[0], idx[1], newNotes)
 			}
-			props.songPlayer.playNote(...idx)
+			props.songPlayer.playNote(song().data(), ...idx)
 		} else {
 			props.synth.stop(0, [midi])
 		}
@@ -78,7 +80,7 @@ export default function Player(props: PlayerProps) {
 			setActiveNoteIdx(null)
 		} else {
 			setActiveNoteIdx([trackIdx, noteIdx])
-			props.songPlayer.playNote(trackIdx, noteIdx)
+			props.songPlayer.playNote(song().data(), trackIdx, noteIdx)
 		}
 	}
 
@@ -143,6 +145,13 @@ export default function Player(props: PlayerProps) {
 			  })
 	}
 
+	createEffect(() => {
+		console.log(props.songPlayer.playingNotes())
+		props.songPlayer.playingNotes().forEach((notes) => {
+			setActiveNoteIdx(notes)
+		})
+	})
+
 	return (
 		<div>
 			<div class="relative h-[620px] w-[620px] max-w-full shadow-md">
@@ -165,11 +174,21 @@ export default function Player(props: PlayerProps) {
 				/>
 				<SongControls
 					song={song().data()}
-					isPlaying={props.songPlayer.playingNotes().length > 0}
+					isPlaying={isPlaying()}
 					activeNoteIdx={activeNoteIdx()}
 					onPropsChanged={(data) => song().updateProps(data)}
-					onPlay={() => props.songPlayer.play()}
-					onStop={() => props.songPlayer.stop()}
+					onPlay={() => {
+						isPlaying()
+							? props.songPlayer.stop()
+							: props.songPlayer.play(
+									song().data(),
+									activeNoteIdx() ?? undefined,
+							  )
+					}}
+					onStop={() => {
+						props.songPlayer.stop()
+						setActiveNoteIdx(null)
+					}}
 					onRemove={onNoteRemoved}
 					onAddBefore={onNoteAddedBefore}
 					onAddAfter={onNoteAddedAfter}

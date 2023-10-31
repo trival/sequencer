@@ -5,15 +5,17 @@ import { createSignal } from 'solid-js'
 import * as Tone from 'tone'
 
 export interface SongPlayer {
-	play: (offsetSec?: number) => void
-	playNote: (trackIdx: number, noteIdx: number) => void
+	play: (
+		song: SongData,
+		startAt?: [trackIdx: number, noteIdx: number],
+		selectTracks?: number[],
+	) => void
+	playNote: (song: SongData, trackIdx: number, noteIdx: number) => void
 	stop: () => void
 	playingNotes: () => [trackIdx: number, noteIdx: number][]
 }
 
-export function createPlayer(song: SongData, synth: SynthPlayer): SongPlayer {
-	const tracks = processSong(song)
-
+export function createPlayer(synth: SynthPlayer): SongPlayer {
 	const [playingNotes, setPlayingNotes] = createSignal<
 		[trackIdx: number, noteIdx: number][]
 	>([])
@@ -22,21 +24,39 @@ export function createPlayer(song: SongData, synth: SynthPlayer): SongPlayer {
 		Tone.Part<ProcessedNote>[] | null
 	>(null)
 
-	const play = async (offset?: number) => {
+	const play = async (song: SongData, startNoteIdx?: [number, number]) => {
 		Tone.Transport.start()
+
+		const tracks = processSong(song)
+
+		let offset = 0
+		if (startNoteIdx !== undefined) {
+			const [tIdx, nIdx] = startNoteIdx
+			offset = tracks[tIdx]?.notes[nIdx]?.startTimeSec || 0
+		}
 
 		const seqs = tracks.map((track, trackIdx) => {
 			const trackData = song.tracks[trackIdx]
-			const seq = new Tone.Part((time, note: ProcessedNote) => {
-				synth.play(trackData.instrument, note.midiNotes, note.duration, time)
-				setPlayingNotes((ns) =>
-					ns
-						.filter((n) => n[0] !== trackIdx)
-						.concat([trackIdx, track.notes.indexOf(note)]),
-				)
-			}, track.notes)
+			const seq = new Tone.Part(
+				(time, note: ProcessedNote) => {
+					synth.play(trackData.instrument, note.midiNotes, note.duration, time)
+					setPlayingNotes((ns) =>
+						ns
+							.filter((n) => n[0] !== trackIdx)
+							.concat([
+								[
+									trackIdx,
+									track.notes.findIndex(
+										(n) => n.startTimeSec === note.startTimeSec,
+									),
+								],
+							]),
+					)
+				},
+				track.notes.map((n) => ({ ...n, time: n.startTimeSec })),
+			)
 			seq.loop = true
-			seq.loopEnd = track.duration
+			seq.loopEnd = track.durationSec
 			return seq
 		})
 
@@ -60,11 +80,13 @@ export function createPlayer(song: SongData, synth: SynthPlayer): SongPlayer {
 		})
 
 		Tone.Transport.stop()
+		Tone.Transport.cancel()
 		setPlayingSequences(null)
 		setPlayingNotes([])
 	}
 
-	const playNote = (trackIdx: number, noteIdx: number) => {
+	const playNote = (song: SongData, trackIdx: number, noteIdx: number) => {
+		const tracks = processSong(song)
 		const track = tracks[trackIdx]
 		const note = track.notes[noteIdx]
 		synth.play(song.tracks[trackIdx].instrument, note.midiNotes, note.duration)

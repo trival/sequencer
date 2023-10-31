@@ -27,6 +27,7 @@ export interface KeyboardSettings {
 
 export interface TrackSettings {
 	pxPerBeat: number
+	defaultNoteDuration: Subdivision
 }
 
 export interface TrackNote {

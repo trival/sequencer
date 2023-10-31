@@ -24,7 +24,7 @@ interface ActiveSynth {
 
 let started = false
 
-export const useSynth = (instruments?: Instrument[]): SynthPlayer => {
+export const createSynth = (instruments?: Instrument[]): SynthPlayer => {
 	if (!instruments?.length) {
 		instruments = [{}]
 	}
@@ -38,7 +38,7 @@ export const useSynth = (instruments?: Instrument[]): SynthPlayer => {
 				release: instrument.release ?? 1,
 			},
 		})
-		synth.volume.value = Tone.gainToDb(instrument.volume || 1)
+		synth.volume.value = Tone.gainToDb(instrument.volume || 0.5)
 		synth.toDestination()
 
 		return {

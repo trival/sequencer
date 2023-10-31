@@ -1,10 +1,10 @@
 import * as Tone from 'tone'
-import { Subdivision, Time, TimeObject } from 'tone/build/esm/core/type/Units'
+import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
 import { SongData } from '@/datamodel'
 
 export interface ProcessedNote {
 	midiNotes: number[]
-	time: Time
+	startTimeSec: number
 	duration: TimeObject
 	durationSec: number
 }
@@ -25,7 +25,7 @@ export function emptyTrack(): ProcessedTrack {
 				midiNotes: [],
 				duration: {},
 				durationSec: 0,
-				time: 0,
+				startTimeSec: 0,
 			},
 		],
 		measureSec: 0,
@@ -62,7 +62,7 @@ export function processSong(song: SongData): ProcessedTrack[] {
 			midiNotes: n.midiNotes,
 			duration: {},
 			durationSec: 0,
-			time: 0,
+			startTimeSec: 0,
 		}))
 
 		const subdivisions: Subdivision[] = []
@@ -71,7 +71,7 @@ export function processSong(song: SongData): ProcessedTrack[] {
 			const noteData = trackData.notes[i]
 			note.duration = collectDurations(noteData.duration)
 			note.durationSec = Tone.Time(note.duration).toSeconds()
-			note.time = Tone.Time(collectDurations(subdivisions)).toSeconds()
+			note.startTimeSec = Tone.Time(collectDurations(subdivisions)).toSeconds()
 
 			Array.isArray(noteData.duration)
 				? subdivisions.push(...noteData.duration)
