@@ -181,7 +181,7 @@ export function SongControls(props: SongControlsProps) {
 						class="m-10 max-h-[90vh] overflow-y-auto rounded-lg bg-slate-100 p-10 shadow-lg"
 					>
 						<pre>
-							<code class="mono text-xs">
+							<code class="mono select-text text-xs">
 								{JSON.stringify(props.song, null, '  ')}
 							</code>
 						</pre>
