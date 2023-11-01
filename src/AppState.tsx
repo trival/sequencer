@@ -164,7 +164,7 @@ export const AppStateProvider = (
 		saveSong(id, data) {
 			const song = state.songs[id]
 			if (song) {
-				if (song.meta.createdAt) {
+				if (song.meta.createdAt && state.profile?.userId === song.meta.userId) {
 					props.storage
 						.updateSong(id, data)
 						.then(() => {
