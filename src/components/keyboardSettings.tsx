@@ -3,7 +3,7 @@ import {
 	arrowSmallLeft,
 	arrowSmallRight,
 	arrowSmallUp,
-	bars_3,
+	adjustmentsVertical,
 } from 'solid-heroicons/outline'
 import { IconButton } from './buttons'
 import { Input, Select } from './Input'
@@ -16,6 +16,7 @@ import { KeyboardSettingsState } from '@/utils/settings'
 
 type KeyboardSettingsProps = {
 	state: KeyboardSettingsState
+	class?: string
 }
 
 export function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
@@ -26,9 +27,15 @@ export function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 	let btnRef: HTMLButtonElement | undefined
 
 	return (
-		<div class="absolute left-0 top-0">
-			<IconButton ref={btnRef} onClick={open} title="Keyboard settings">
-				<Icon path={bars_3} class="h-6 w-6 rotate-90" />
+		<>
+			<IconButton
+				ref={btnRef}
+				onClick={open}
+				class={props.class}
+				color="custom"
+				title="Keyboard settings"
+			>
+				<Icon path={adjustmentsVertical} class="h-6 w-6" />
 			</IconButton>
 			<Popover
 				popperOptions={{
@@ -42,7 +49,7 @@ export function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 			>
 				<KeyboardSettingsEditor state={props.state} />
 			</Popover>
-		</div>
+		</>
 	)
 }
 

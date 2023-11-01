@@ -4,4 +4,15 @@
 
 body {
 	@apply touch-none select-none bg-gray-100;
+	font-family: 'Fira Sans', sans-serif;
+}
+
+body,
+html,
+#root {
+	@apply h-full w-full;
+}
+
+#root {
+	overflow-y: auto;
 }

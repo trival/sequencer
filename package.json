@@ -20,6 +20,7 @@
     "supabase:typegen": ". ./.env && npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > database.types.ts "
   },
   "dependencies": {
+    "@fontsource/fira-sans": "^5.0.17",
     "@motionone/solid": "^10.16.2",
     "@popperjs/core": "^2.11.8",
     "@solidjs/router": "^0.8.3",

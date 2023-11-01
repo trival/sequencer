@@ -1,37 +1,27 @@
-import { Keyboard } from '@/components/keyboard'
-import { createKeyboardSettingState } from '@/utils/settings'
-import { createSynth } from '@/utils/synth'
-import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
-import { toMidi } from '@/utils/utils'
+import Logo from '@/components/icons/logo'
+import { A } from '@solidjs/router'
 
-export default function Home() {
-	const synth = createSynth()
-
-	const onActivateNote = (midi: number) => {
-		synth.play(0, [midi])
-	}
-
-	const onDeactivateNote = (midi: number) => {
-		synth.stop(0, [midi])
-	}
-
-	const settings = createKeyboardSettingState({
-		baseNote: toMidi('C3'),
-		scaleHighlight: ScaleHighlight.Major,
-		toneColorType: ToneColorType.CircleOfFiths,
-	})
-
+export default function HomePage() {
 	return (
-		<div class="relative h-screen max-w-full">
-			<Keyboard
-				activeNotes={synth
-					.playingNotes()
-					.flatMap((n) => n.map((note) => ({ note })))}
-				onNoteActivated={onActivateNote}
-				onNoteDeactivated={onDeactivateNote}
-				settings={settings.data()}
-				mode="Play"
-			/>
+		<div class="flex h-full w-full items-center justify-center overflow-y-auto">
+			<main class="text-center">
+				<header class="flex items-center">
+					<Logo class="mr-3 inline-block h-8 w-8 sm:h-10 sm:w-10" />
+					<h1 class="text-3xl font-thin uppercase sm:text-4xl">
+						trival sequencer
+					</h1>
+				</header>
+				<nav class="mt-8 text-xl text-cyan-700">
+					<ul>
+						<li class="my-3">
+							<A href="/keyboard">Keyboard</A>
+						</li>
+						<li>
+							<A href="/app">My Songs</A>
+						</li>
+					</ul>
+				</nav>
+			</main>
 		</div>
 	)
 }

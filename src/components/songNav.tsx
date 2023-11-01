@@ -6,6 +6,8 @@ import { bars_3 } from 'solid-heroicons/outline'
 import { Overlay } from './Popover'
 import SongMetaForm from './songMetaForm'
 import { SongEntity, SongMeta } from '@/datamodel'
+import { A } from '@solidjs/router'
+import Logo from './icons/logo'
 
 export interface SongNavProps {
 	openSongs: SongEntity[]
@@ -19,6 +21,9 @@ export default function NavBar(props: SongNavProps) {
 	const [openMenu, setOpenMenu] = createSignal(false)
 	return (
 		<nav class="flex">
+			<A href="/" class="font-semibold underline">
+				<Logo class="mx-3 h-6 w-6" />
+			</A>
 			<ul class="flex flex-grow overflow-x-auto">
 				<For each={props.openSongs}>
 					{(song) => (

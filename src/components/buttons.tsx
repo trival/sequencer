@@ -21,6 +21,7 @@ const btnColors = {
 	rose: tw`bg-rose-600 hover:bg-rose-500 focus-visible:outline-rose-600 text-white`,
 	teal: tw`bg-teal-600 hover:bg-teal-500 focus-visible:outline-teal-600 text-white`,
 	white: tw`bg-white border border-slate-400 text-slate-500 hover:border-indigo-500 hover:text-indigo-500 focus-visible:outline-indigo-500`,
+	custom: tw`focus-visible:outline-indigo-500`,
 }
 
 const btnFocus = tw`focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`
@@ -32,7 +33,7 @@ export const IconButton = (_props: ParentProps<ButtonProps>) => {
 		<button
 			type={props.type}
 			class={clsx(
-				'rounded-full shadow-sm shadow-slate-300',
+				props.color !== 'custom' && 'rounded-full shadow-sm shadow-slate-300',
 				btnColors[props.color],
 				btnFocus,
 				props.class,
