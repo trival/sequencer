@@ -1,11 +1,5 @@
 import { ParentProps, createContext, createEffect, useContext } from 'solid-js'
-import {
-	Collection,
-	Profile,
-	SongEntity,
-	SongData,
-	SongMeta,
-} from './datamodel'
+import { Collection, Profile, SongEntity } from './datamodel'
 import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
 import { Session } from './utils/session'
@@ -29,8 +23,7 @@ export interface AppActions {
 
 	closeSong(id: string): void
 
-	saveSong(id: string, data: SongData): void
-	saveSongMeta(id: string, meta: Partial<SongMeta>): void
+	saveSong(id: string, song: SongEntity): void
 	deleteSong(id: string): void
 }
 
@@ -169,59 +162,27 @@ export const AppStateProvider = (
 		},
 
 		saveSong(id, data) {
-			if (!id) return
 			const song = state.songs[id]
 			if (song) {
 				if (song.meta.createdAt) {
 					props.storage
-						.updateSong(id, { data })
+						.updateSong(id, data)
 						.then(() => {
-							setState('songs', song.id, { ...song, data })
+							setState('songs', song.id, data)
 						})
 						.catch(console.error)
 				} else if (state.profile?.userId) {
 					const newSong = {
-						...song,
+						...data,
 						meta: {
-							...song.meta,
+							...data.meta,
 							userId: state.profile.userId,
 						},
-						data,
 					}
 					props.storage
 						.createSong(newSong)
 						.then(() => {
 							setState('songs', song.id, newSong)
-						})
-						.catch(console.error)
-				}
-			}
-		},
-
-		saveSongMeta(id, meta) {
-			if (!id || !state.profile?.userId) return
-			const song = state.songs[id]
-			if (song) {
-				const newMeta = { ...song.meta, ...meta }
-				if (song.meta.createdAt) {
-					props.storage
-						.updateSong(id, { meta: newMeta })
-						.then(() => {
-							setState('songs', song.id, 'meta', newMeta)
-						})
-						.catch(console.error)
-				} else if (state.profile?.userId) {
-					const newSong = {
-						...song,
-						meta: {
-							...newMeta,
-							userId: state.profile.userId,
-						},
-					}
-					props.storage
-						.createSong(newSong)
-						.then(() => {
-							setState('songs', newSong.id, newSong)
 						})
 						.catch(console.error)
 				}

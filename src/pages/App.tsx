@@ -13,9 +13,11 @@ import {
 	createEditorSettingState,
 	createKeyboardSettingState,
 } from '@/utils/settings'
+import { SongMeta } from '@/datamodel'
 
 export default function App() {
-	const [state, { updateProfile, saveSong }] = useAppState()
+	const [state, { updateProfile, saveSong, closeSong, openSong }] =
+		useAppState()
 
 	const currentSong = createMemo(
 		() => (state.currentSongId && state.songs[state.currentSongId]) || null,
@@ -42,15 +44,48 @@ export default function App() {
 		return createSongState(song.data.song, editorState().data())
 	})
 
+	const openSongs = createMemo(() =>
+		state.openSongIds.map((id) => state.songs[id]),
+	)
+
+	function saveSongMeta(id: string, meta: Partial<SongMeta>) {
+		const song = state.songs[id]
+		if (song) {
+			const updatedSong = {
+				...song,
+				meta: { ...song.meta, ...meta },
+			}
+			if (song.id === currentSong()?.id) {
+				updatedSong.data = {
+					song: songState().data(),
+					editorSettings: editorState().data(),
+					keyboardSettings: keyboardState().data(),
+				}
+			}
+			saveSong(id, updatedSong)
+		}
+	}
+
 	return (
 		<div class="flex min-h-full flex-col justify-center">
 			{state.profile ? (
 				state.profile.username ? (
 					<>
-						<NavBar />
+						<NavBar
+							currentSong={currentSong()}
+							openSongs={openSongs()}
+							onCloseSong={(id) => closeSong(id)}
+							onOpenSong={(id) => openSong(id)}
+							onUpdateSongMeta={(id, meta) => {
+								saveSongMeta(id, meta)
+							}}
+						/>
 						<Show when={currentSong()} fallback={<ProfileSongList />}>
 							<PlayerUI
-								onSave={(songData) => saveSong(currentSong()!.id, songData)}
+								onSave={(songData) => {
+									const song = currentSong()!
+									saveSong(song.id, { ...song, data: songData })
+								}}
 								song={songState()}
 								songPlayer={player()}
 								synth={synth()}
