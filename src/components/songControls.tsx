@@ -18,8 +18,9 @@ import {
 import { stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
 import { Icon } from 'solid-heroicons'
-import { SongData, SongProperties } from '@/datamodel'
+import { Song, SongProperties } from '@/datamodel'
 import { Overlay } from './Popover'
+import * as Tone from 'tone'
 
 const durationOptions = subdivisions.map((s) => ({
 	value: s,
@@ -27,10 +28,10 @@ const durationOptions = subdivisions.map((s) => ({
 }))
 
 interface SongControlsProps {
-	song: SongData
+	song: Song
 	isPlaying?: boolean
 	activeNoteIdx?: [number, number] | null
-	defaultDuration?: Subdivision
+	defaultDuration: Subdivision
 	onAddAfter?: (
 		trackIdx: number,
 		noteIdx: number,
@@ -53,9 +54,7 @@ interface SongControlsProps {
 	onSave?: () => void
 }
 
-export function SongControls(_props: SongControlsProps) {
-	const props = mergeProps({ defaultDuration: '4n' as Subdivision }, _props)
-
+export function SongControls(props: SongControlsProps) {
 	const [isDataOverlayOpen, setDataOverlayOpen] = createSignal(false)
 
 	const activeNote = () =>
@@ -161,8 +160,9 @@ export function SongControls(_props: SongControlsProps) {
 								type="number"
 								value={props.song.bpm}
 								onChange={(val) => {
-									props.onStop && props.onStop()
-									props.onPropsChanged!({ bpm: parseInt(val as string) })
+									const bpm = parseInt(val as string)
+									Tone.Transport.bpm.value = bpm
+									props.onPropsChanged!({ bpm })
 								}}
 							/>
 						</label>

@@ -1,13 +1,28 @@
-import { SongData, TrackNote, SongProperties, Song, Track } from '@/datamodel'
+import {
+	TrackNote,
+	SongProperties,
+	SongEntity,
+	Track,
+	Song,
+	EditorSettings,
+} from '@/datamodel'
 import { createSignal } from 'solid-js'
 import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
 import * as uuid from 'uuid'
 import { divideAt } from './utils'
+import { defaultEditorSettings } from './settings'
 
-export function emptySong(): Song {
+export function emptySong(defaultNoteDuration: Subdivision = '4n'): Song {
+	return {
+		bpm: 120,
+		tracks: [emptyTrack(defaultNoteDuration)],
+	}
+}
+
+export function emptySongEntity(): SongEntity {
 	return {
 		id: uuid.v4(),
-		data: emptySongData(),
+		data: { song: emptySong() },
 		meta: {
 			userId: '',
 		},
@@ -16,18 +31,14 @@ export function emptySong(): Song {
 
 export function songFromMelody(melody: TrackNote[]): Song {
 	const song = emptySong()
-	song.data.tracks[0].notes = melody
+	song.tracks[0].notes = melody
 	return song
 }
 
-export function emptyTrack(): Track {
-	return { notes: [{ midiNotes: [], duration: '4n' }], gain: 1, instrument: 0 }
-}
-
-export function emptySongData(): SongData {
+export function emptyTrack(defaultNoteDuration: Subdivision = '4n'): Track {
 	return {
-		bpm: 120,
-		tracks: [emptyTrack()],
+		notes: [{ midiNotes: [], duration: defaultNoteDuration }],
+		instrument: 0,
 	}
 }
 
@@ -42,8 +53,8 @@ export function toDurations(duration: TimeObject): Subdivision[] {
 	return result
 }
 
-export interface SongEditor {
-	data: () => SongData
+export interface SongState {
+	data: () => Song
 	updateProps: (data: Partial<SongProperties>) => void
 	removeNote: (trackIdx: number, noteIdx: number) => void
 	addNote: (trackIdx: number, noteIdx: number, noteData: TrackNote) => void
@@ -59,12 +70,15 @@ export interface SongEditor {
 	) => void
 }
 
-export const useSongEditor = (data: SongData): SongEditor => {
+export const createSongState = (
+	data: Song,
+	editorSetting: EditorSettings = defaultEditorSettings,
+): SongState => {
 	if (!data.tracks.length) {
-		data.tracks = emptySongData().tracks
+		data.tracks = emptySong(editorSetting.defaultNoteDuration).tracks
 	}
 
-	const [song, setSong] = createSignal<SongData>(data)
+	const [song, setSong] = createSignal<Song>(data)
 
 	const removeNote = (trackIdx: number, noteIdx: number) => {
 		setSong((song) => {
@@ -73,7 +87,7 @@ export const useSongEditor = (data: SongData): SongEditor => {
 			if (track) {
 				let newNotes = track.notes.filter((_, i) => i !== noteIdx)
 				if (!newNotes.length) {
-					newNotes = emptyTrack().notes
+					newNotes = emptyTrack(editorSetting.defaultNoteDuration).notes
 				}
 				tracks[trackIdx] = { ...track, notes: newNotes }
 				return { ...song, tracks }

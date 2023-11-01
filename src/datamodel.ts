@@ -25,7 +25,7 @@ export interface KeyboardSettings {
 	toneColorType: ToneColorType
 }
 
-export interface TrackSettings {
+export interface EditorSettings {
 	pxPerBeat: number
 	defaultNoteDuration: Subdivision
 }
@@ -48,13 +48,11 @@ export interface SongMeta {
 export interface SongProperties {
 	bpm: number
 	swing?: number
-	swingSubdivision?: Subdivision
 	timeSignature?: number
 }
 
 export interface Track {
 	notes: TrackNote[]
-	gain: number
 	instrument: number
 }
 
@@ -74,18 +72,20 @@ export interface Instrument {
 	decay?: number
 	sustain?: number
 	release?: number
-	vibratoAmount?: number
-	vibratoRate?: number
 }
 
-export interface SongData extends SongProperties {
+export interface Song extends SongProperties {
 	tracks: Track[]
 	instruments?: Instrument[]
-	keyboardSettings?: Partial<KeyboardSettings>
-	trackSettings?: Partial<TrackSettings>
 }
 
-export interface Song {
+export interface SongData {
+	song: Song
+	keyboardSettings?: Partial<KeyboardSettings>
+	editorSettings?: Partial<EditorSettings>
+}
+
+export interface SongEntity {
 	id: string
 	meta: SongMeta
 	data: SongData

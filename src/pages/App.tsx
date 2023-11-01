@@ -8,6 +8,11 @@ import NavBar from '@/components/songNav'
 import PlayerUI from '@/components/player'
 import { createPlayer } from '@/utils/songPlayer'
 import { createSynth } from '@/utils/synth'
+import { emptySongEntity, createSongState } from '@/utils/song'
+import {
+	createEditorSettingState,
+	createKeyboardSettingState,
+} from '@/utils/settings'
 
 export default function App() {
 	const [state, { updateProfile, saveSong }] = useAppState()
@@ -17,13 +22,24 @@ export default function App() {
 	)
 
 	const synth = createMemo(() => {
-		if (!currentSong()) return null
-		return createSynth(currentSong()!.data.instruments)
+		return createSynth(currentSong()?.data.song.instruments)
 	})
 
-	const songPlayer = createMemo(() => {
-		if (!synth()) return null
-		return createPlayer(synth()!)
+	const player = createMemo(() => {
+		return createPlayer(synth())
+	})
+
+	const keyboardState = createMemo(() => {
+		return createKeyboardSettingState(currentSong()?.data.keyboardSettings)
+	})
+
+	const editorState = createMemo(() => {
+		return createEditorSettingState(currentSong()?.data.editorSettings)
+	})
+
+	const songState = createMemo(() => {
+		const song = currentSong() || emptySongEntity()
+		return createSongState(song.data.song, editorState().data())
 	})
 
 	return (
@@ -32,15 +48,14 @@ export default function App() {
 				state.profile.username ? (
 					<>
 						<NavBar />
-						<Show
-							when={currentSong() && synth() && songPlayer()}
-							fallback={<ProfileSongList />}
-						>
+						<Show when={currentSong()} fallback={<ProfileSongList />}>
 							<PlayerUI
 								onSave={(songData) => saveSong(currentSong()!.id, songData)}
-								song={currentSong()!.data}
-								songPlayer={songPlayer()!}
-								synth={synth()!}
+								song={songState()}
+								songPlayer={player()}
+								synth={synth()}
+								editorSettings={editorState().data()}
+								keyboardSettings={keyboardState().data()}
 							/>
 						</Show>
 					</>

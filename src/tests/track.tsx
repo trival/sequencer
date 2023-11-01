@@ -2,7 +2,7 @@ import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
 import { TrackNote } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
-import { useSongEditor } from '@/utils/song'
+import { createSongState } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 import { Subdivision } from 'tone/build/esm/core/type/Units'
@@ -19,9 +19,9 @@ const initialMelody: TrackNote[] = [
 ]
 
 export default function TestTracksPage() {
-	const { data, addNote, removeNote, changeDuration } = useSongEditor({
+	const { data, addNote, removeNote, changeDuration } = createSongState({
 		bpm: 160,
-		tracks: [{ notes: initialMelody, gain: 1, instrument: 0 }],
+		tracks: [{ notes: initialMelody, instrument: 0 }],
 	})
 
 	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
@@ -78,12 +78,13 @@ export default function TestTracksPage() {
 		<div class="p-10">
 			<h1>Track test</h1>
 			<Track
-				song={tracks()}
+				tracks={tracks()}
 				activeNoteIdx={activeNoteIdx()}
 				onNoteClicked={onNoteClicked}
 			/>
 			<SongControls
 				song={data()}
+				defaultDuration="4n"
 				isPlaying={isPlaying()}
 				onPlay={() => setIsPlaying(!isPlaying())}
 				onStop={() => {

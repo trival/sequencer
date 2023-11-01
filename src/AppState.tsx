@@ -1,18 +1,23 @@
 import { ParentProps, createContext, createEffect, useContext } from 'solid-js'
-import { Collection, Profile, Song, SongData, SongMeta } from './datamodel'
+import {
+	Collection,
+	Profile,
+	SongEntity,
+	SongData,
+	SongMeta,
+} from './datamodel'
 import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
 import { Session } from './utils/session'
-import { emptySong } from './utils/song'
+import { emptySongEntity } from './utils/song'
 
 export interface AppState {
 	profile: Profile | null
 	collections: { [id: string]: Collection }
-	songs: { [id: string]: Song }
+	songs: { [id: string]: SongEntity }
 
 	openSongIds: string[]
 	currentSongId: string | null
-	playingSongId: string | null
 }
 
 export interface AppActions {
@@ -36,7 +41,6 @@ function emptyAppState(): AppState {
 		songs: {},
 		openSongIds: [],
 		currentSongId: null,
-		playingSongId: null,
 	}
 }
 
@@ -67,7 +71,7 @@ export const AppStateProvider = (
 						const collections = await props.storage.collectionsByUser(userId)
 						const songs = await props.storage.songsByUser(userId)
 
-						const songsById: { [id: string]: Song } = {}
+						const songsById: { [id: string]: SongEntity } = {}
 						songs.forEach((s) => {
 							songsById[s.id] = s
 						})
@@ -87,7 +91,6 @@ export const AppStateProvider = (
 				songs: {},
 				openSongIds: [],
 				currentSongId: null,
-				playingSongId: null,
 			})
 		}
 	})
@@ -134,7 +137,7 @@ export const AppStateProvider = (
 		},
 
 		openNewSong() {
-			const newSong = emptySong()
+			const newSong = emptySongEntity()
 			setState('songs', newSong.id, newSong)
 			setState('currentSongId', newSong.id)
 		},
@@ -142,11 +145,11 @@ export const AppStateProvider = (
 		openSongCopy(id) {
 			const song = state.songs[id]
 			if (song) {
-				const newSong = emptySong()
+				const newSong = emptySongEntity()
 				setState('currentSongId', newSong.id)
 				setState('songs', newSong.id, {
 					...song,
-					id: emptySong().id,
+					id: emptySongEntity().id,
 					meta: {
 						...song.meta,
 						title: (song.meta.title || '') + ' (copy)',

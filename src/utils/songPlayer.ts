@@ -1,4 +1,4 @@
-import { SongData } from '@/datamodel'
+import { Song } from '@/datamodel'
 import { ProcessedNote, processSong } from './processedTrack'
 import { SynthPlayer } from './synth'
 import { createSignal } from 'solid-js'
@@ -6,11 +6,11 @@ import * as Tone from 'tone'
 
 export interface SongPlayer {
 	play: (
-		song: SongData,
+		song: Song,
 		startAt?: [trackIdx: number, noteIdx: number],
 		selectTracks?: number[],
 	) => void
-	playNote: (song: SongData, trackIdx: number, noteIdx: number) => void
+	playNote: (song: Song, trackIdx: number, noteIdx: number) => void
 	stop: () => void
 	playingNotes: () => [trackIdx: number, noteIdx: number][]
 }
@@ -24,10 +24,14 @@ export function createPlayer(synth: SynthPlayer): SongPlayer {
 		Tone.Part<ProcessedNote>[] | null
 	>(null)
 
-	const play = async (song: SongData, startNoteIdx?: [number, number]) => {
+	const play = async (song: Song, startNoteIdx?: [number, number]) => {
+		Tone.Transport.stop()
+		Tone.Transport.cancel()
 		Tone.Transport.start()
 
 		const tracks = processSong(song)
+
+		Tone.Transport.bpm.value = song.bpm
 
 		let offset = 0
 		if (startNoteIdx !== undefined) {
@@ -75,6 +79,7 @@ export function createPlayer(synth: SynthPlayer): SongPlayer {
 	}
 
 	const stop = () => {
+		console.log('called stop!')
 		playingSequences()?.forEach((seq) => {
 			seq.stop()
 		})
@@ -85,7 +90,7 @@ export function createPlayer(synth: SynthPlayer): SongPlayer {
 		setPlayingNotes([])
 	}
 
-	const playNote = (song: SongData, trackIdx: number, noteIdx: number) => {
+	const playNote = (song: Song, trackIdx: number, noteIdx: number) => {
 		const tracks = processSong(song)
 		const track = tracks[trackIdx]
 		const note = track.notes[noteIdx]

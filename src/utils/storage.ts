@@ -1,7 +1,7 @@
-import { Collection, Profile, Song, Track } from '@/datamodel'
+import { Collection, Profile, SongEntity } from '@/datamodel'
 import { SupabaseClient } from '@supabase/supabase-js'
 import { Database } from '../../database.types'
-import { emptySong } from './song'
+import { emptySongEntity } from './song'
 
 export interface Storage {
 	getProfile(userId: string): Promise<Profile | null>
@@ -11,13 +11,13 @@ export interface Storage {
 		profile: Partial<Omit<Profile, 'userId'>>,
 	): Promise<void>
 
-	songsByUser(userId: string): Promise<Song[]>
-	songsByCollection(collectionId: string): Promise<Song[]>
-	songsByLatest(): Promise<Song[]>
-	songById(id: string): Promise<Song>
+	songsByUser(userId: string): Promise<SongEntity[]>
+	songsByCollection(collectionId: string): Promise<SongEntity[]>
+	songsByLatest(): Promise<SongEntity[]>
+	songById(id: string): Promise<SongEntity>
 
-	createSong(song: Song): Promise<void>
-	updateSong(id: string, song: Partial<Song>): Promise<void>
+	createSong(song: SongEntity): Promise<void>
+	updateSong(id: string, song: Partial<SongEntity>): Promise<void>
 	deleteSong(id: string): Promise<void>
 
 	collectionsByUser(userId: string): Promise<Collection[]>
@@ -211,9 +211,11 @@ export function createSupabaseStorage(
 	return storage
 }
 
-function mapSongResult(res: Database['public']['Tables']['song']['Row']): Song {
+function mapSongResult(
+	res: Database['public']['Tables']['song']['Row'],
+): SongEntity {
 	const data: any = res.data
-	const song = emptySong()
+	const song = emptySongEntity()
 
 	song.id = res.id
 
@@ -225,28 +227,15 @@ function mapSongResult(res: Database['public']['Tables']['song']['Row']): Song {
 	song.meta.createdAt = res.created_at
 	song.meta.updatedAt = res.updated_at
 
-	song.data.bpm = data.bpm
-	song.data.swing = data.swing
-	song.data.swingSubdivision = data.swing_subdivision
-	song.data.timeSignature = data.time_signature
+	song.data.song.bpm = data.song.bpm
+	song.data.song.swing = data.song.swing
+	song.data.song.timeSignature = data.song.timeSignature
 
-	song.data.instruments = data.instruments
-	song.data.keyboardSettings = data.keyboard_settings
-	song.data.trackSettings = data.track_settings
+	song.data.song.instruments = data.song.instruments
+	song.data.keyboardSettings = data.keyboardSettings
+	song.data.editorSettings = data.trackSettings
 
-	if (data.tracks) {
-		song.data.tracks = data.tracks.map((track: any) => {
-			if (Array.isArray(track)) {
-				return {
-					notes: track,
-					gain: 1,
-					instrument: 0,
-				} as Track
-			} else {
-				return track
-			}
-		})
-	}
+	song.data.song.tracks = data.song.tracks
 
 	return song
 }

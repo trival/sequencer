@@ -1,6 +1,6 @@
 import * as Tone from 'tone'
 import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
-import { SongData } from '@/datamodel'
+import { Song } from '@/datamodel'
 
 export interface ProcessedNote {
 	midiNotes: number[]
@@ -51,7 +51,8 @@ function collectDurations(duration: Subdivision | Subdivision[]): TimeObject {
 	)
 }
 
-export function processSong(song: SongData): ProcessedTrack[] {
+export function processSong(song: Song): ProcessedTrack[] {
+	const currentBpm = Tone.Transport.bpm.value
 	Tone.Transport.bpm.value = song.bpm
 
 	const tracks: ProcessedTrack[] = []
@@ -86,6 +87,8 @@ export function processSong(song: SongData): ProcessedTrack[] {
 
 		tracks.push(track)
 	}
+
+	Tone.Transport.bpm.value = currentBpm
 
 	return tracks
 }

@@ -1,9 +1,8 @@
 import { Keyboard } from '@/components/keyboard'
-import { KeyboardSettings } from '@/datamodel'
+import { createKeyboardSettingState } from '@/utils/settings'
 import { createSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
-import { createSignal } from 'solid-js'
 
 export default function Home() {
 	const synth = createSynth()
@@ -16,7 +15,7 @@ export default function Home() {
 		synth.stop(0, [midi])
 	}
 
-	const [settings, setSettings] = createSignal<Partial<KeyboardSettings>>({
+	const settings = createKeyboardSettingState({
 		baseNote: toMidi('C3'),
 		scaleHighlight: ScaleHighlight.Major,
 		toneColorType: ToneColorType.CircleOfFiths,
@@ -30,8 +29,7 @@ export default function Home() {
 					.flatMap((n) => n.map((note) => ({ note })))}
 				onNoteActivated={onActivateNote}
 				onNoteDeactivated={onDeactivateNote}
-				onSettingsChanged={setSettings}
-				settings={settings()}
+				settings={settings.data()}
 				mode="Play"
 			/>
 		</div>

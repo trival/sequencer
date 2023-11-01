@@ -36,21 +36,21 @@ export const Note = (props: NoteProps) => {
 }
 
 interface TrackProps {
-	song: ProcessedTrack[]
+	tracks: ProcessedTrack[]
 	activeNoteIdx?: [number, number] | null
 	onNoteClicked?: (trackIdx: number, noteIdx: number) => void
 }
 
 export const Track = (props: TrackProps) => {
 	const trackCountMeasures = () =>
-		props.song.map((track) =>
+		props.tracks.map((track) =>
 			track.measureSec
 				? Math.floor(track.durationSec / track.measureSec) + 1
 				: 0,
 		)
 	const countMeasures = () =>
 		trackCountMeasures().reduce((a, b) => Math.max(a, b), 0)
-	const measureSec = () => props.song[0]?.measureSec ?? 0
+	const measureSec = () => props.tracks[0]?.measureSec ?? 0
 
 	return (
 		<div class="relative w-full overflow-x-auto pb-2">
@@ -65,7 +65,7 @@ export const Track = (props: TrackProps) => {
 						)}
 					</For>
 				</div>
-				<For each={props.song}>
+				<For each={props.tracks}>
 					{(track, i) => (
 						<div class="flex h-12 items-center">
 							<For each={track.notes}>
