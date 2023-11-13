@@ -136,7 +136,7 @@ export default function Player(props: PlayerProps) {
 	})
 
 	return (
-		<div>
+		<div class="m-0 md:mx-8">
 			<div class="relative h-[620px] max-h-[80vh] w-[620px] max-w-full shadow-md">
 				<div class="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
 					<Keyboard

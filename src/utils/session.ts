@@ -3,11 +3,13 @@ import { createSignal } from 'solid-js'
 
 export interface Session {
 	userId: () => string | null
+	logout: () => void
 }
 
 export function createLocalSession(): Session {
 	return {
 		userId: () => null,
+		logout: () => {},
 	}
 }
 
@@ -25,5 +27,5 @@ export function createSupabaseSession(supabase: SupabaseClient): Session {
 		setUserId(session?.user.id ?? null)
 	})
 
-	return { userId: userId }
+	return { userId: userId, logout: () => supabase.auth.signOut() }
 }

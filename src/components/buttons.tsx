@@ -1,7 +1,7 @@
 import { tw } from '@/styles/tw-utils'
 import { Icon } from 'solid-heroicons'
 import { plus, play, pause } from 'solid-heroicons/solid'
-import { trash, pencilSquare } from 'solid-heroicons/outline'
+import { trash, pencilSquare, power } from 'solid-heroicons/outline'
 import clsx from 'clsx'
 import { JSX, ParentProps, createSignal, mergeProps } from 'solid-js'
 import Popover from './Popover'
@@ -81,9 +81,6 @@ export const IconButtonPopover = (
 
 	const [isOpen, setOpen] = createSignal(false)
 
-	const close = () => setOpen(false)
-	const open = () => setOpen(true)
-
 	let btnRef: HTMLButtonElement | undefined
 
 	return (
@@ -93,7 +90,7 @@ export const IconButtonPopover = (
 				type="button"
 				color={props.color}
 				class={clsx('m-2 p-2', props.class)}
-				onClick={open}
+				onClick={() => setOpen(!isOpen())}
 				title={props.title}
 				disabled={props.disabled}
 			>
@@ -101,7 +98,7 @@ export const IconButtonPopover = (
 			</IconButton>
 			<Popover
 				referenceElement={btnRef as HTMLButtonElement}
-				onClose={close}
+				onClose={() => setOpen(false)}
 				visible={isOpen()}
 				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
 				popperOptions={{
@@ -109,7 +106,7 @@ export const IconButtonPopover = (
 					modifiers: [{ name: 'offset', options: { offset: [0, 10] } }],
 				}}
 			>
-				{props.children(close)}
+				{props.children(() => setOpen(false))}
 			</Popover>
 		</div>
 	)
@@ -195,5 +192,33 @@ export const PlayButton = (props: PlayButtonProps) => {
 				<Icon path={play} class="h-6 w-6" />
 			)}
 		</button>
+	)
+}
+
+interface LogoutButtonProps {
+	onLogout: () => void
+	class?: string
+}
+
+export const LogoutButton = (props: LogoutButtonProps) => {
+	return (
+		<IconButtonPopover
+			color="custom"
+			class={clsx('m-0', props.class)}
+			buttonElement={<Icon path={power} class="h-5 w-5" aria-hidden="true" />}
+			title="Logout"
+		>
+			{(close) => (
+				<Button
+					color="rose"
+					onClick={() => {
+						close()
+						props.onLogout()
+					}}
+				>
+					Logout
+				</Button>
+			)}
+		</IconButtonPopover>
 	)
 }

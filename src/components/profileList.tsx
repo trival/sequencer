@@ -5,7 +5,11 @@ import { Icon } from 'solid-heroicons'
 import { documentPlus } from 'solid-heroicons/outline'
 import { format } from 'date-fns'
 
-export default function ProfileSongList() {
+interface Props {
+	onSelectSong?: (id: string) => void
+}
+
+export default function ProfileSongList(props: Props) {
 	const [state, actions] = useAppState()
 	const songs = () =>
 		Object.values(state.songs).sort((a, b) => {
@@ -29,7 +33,10 @@ export default function ProfileSongList() {
 							<li>
 								<button
 									class="font-semibold underline"
-									onClick={() => actions.openSong(song.id)}
+									onClick={() => {
+										actions.openSong(song.id)
+										props.onSelectSong?.(song.id)
+									}}
 								>
 									{song.meta.title} ({date ? format(date, 'yyyy-MM-dd') : 'new'}
 									)

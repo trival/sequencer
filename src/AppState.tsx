@@ -16,6 +16,7 @@ export interface AppState {
 
 export interface AppActions {
 	updateProfile: (profile: Partial<Profile>) => void
+	logout: () => void
 
 	openSong(id: string): void
 	openNewSong(): void
@@ -78,13 +79,7 @@ export const AppStateProvider = (
 					}
 				})
 		} else {
-			setState({
-				profile: null,
-				collections: {},
-				songs: {},
-				openSongIds: [],
-				currentSongId: null,
-			})
+			setState(emptyAppState())
 		}
 	})
 
@@ -120,6 +115,11 @@ export const AppStateProvider = (
 				username: profile.username,
 				color: profile.color,
 			})
+		},
+
+		logout() {
+			props.session.logout()
+			setState(emptyAppState())
 		},
 
 		openSong(id) {

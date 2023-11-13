@@ -14,9 +14,11 @@ import {
 	createKeyboardSettingState,
 } from '@/utils/settings'
 import { SongMeta } from '@/datamodel'
+import { Subpage } from '@/components/shared/SimpleSubpage'
+import { LogoutButton } from '@/components/buttons'
 
 export default function App() {
-	const [state, { updateProfile, saveSong, closeSong, openSong }] =
+	const [state, { updateProfile, saveSong, closeSong, openSong, logout }] =
 		useAppState()
 
 	const currentSong = createMemo(
@@ -67,34 +69,44 @@ export default function App() {
 	}
 
 	return (
-		<div class="flex min-h-full flex-col justify-center">
-			{state.profile ? (
-				state.profile.username ? (
-					<>
-						<NavBar
-							currentSong={currentSong()}
-							openSongs={openSongs()}
-							onCloseSong={(id) => closeSong(id)}
-							onOpenSong={(id) => openSong(id)}
-							onUpdateSongMeta={(id, meta) => {
-								saveSongMeta(id, meta)
+		<Show
+			when={state.profile}
+			fallback={
+				<Subpage>
+					<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
+						<Auth supabaseClient={supabase} />
+					</div>
+				</Subpage>
+			}
+		>
+			{state.profile?.username ? (
+				<>
+					<NavBar
+						currentSong={currentSong()}
+						onCloseSong={(id) => closeSong(id)}
+						onOpenSong={(id) => openSong(id)}
+						onUpdateSongMeta={(id, meta) => {
+							saveSongMeta(id, meta)
+						}}
+						onLogout={() => logout()}
+						keyboardState={currentSong() ? keyboardState() : undefined}
+					/>
+					<Show when={currentSong()} fallback={<ProfileSongList />}>
+						<PlayerUI
+							onSave={(songData) => {
+								const song = currentSong()!
+								saveSong(song.id, { ...song, data: songData })
 							}}
+							song={songState()}
+							songPlayer={player()}
+							synth={synth()}
+							editorSettings={editorState().data()}
+							keyboardSettings={keyboardState().data()}
 						/>
-						<Show when={currentSong()} fallback={<ProfileSongList />}>
-							<PlayerUI
-								onSave={(songData) => {
-									const song = currentSong()!
-									saveSong(song.id, { ...song, data: songData })
-								}}
-								song={songState()}
-								songPlayer={player()}
-								synth={synth()}
-								editorSettings={editorState().data()}
-								keyboardSettings={keyboardState().data()}
-							/>
-						</Show>
-					</>
-				) : (
+					</Show>
+				</>
+			) : (
+				<Subpage navOpts={<LogoutButton onLogout={() => logout()} />}>
 					<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
 						<ProfileForm
 							username=""
@@ -103,12 +115,8 @@ export default function App() {
 							}}
 						/>
 					</div>
-				)
-			) : (
-				<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
-					<Auth supabaseClient={supabase} />
-				</div>
+				</Subpage>
 			)}
-		</div>
+		</Show>
 	)
 }
