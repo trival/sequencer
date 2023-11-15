@@ -14,9 +14,7 @@ import clsx from 'clsx'
 
 export interface SongNavProps {
 	currentSong?: SongEntity | null
-	onOpenSong: (id: string) => void
-	onCloseSong: (id: string) => void
-	onUpdateSongMeta: (id: string, meta: Partial<SongMeta>) => void
+	onUpdateSongMeta?: (id: string, meta: Partial<SongMeta>) => void
 	onLogout: () => void
 	keyboardState?: KeyboardSettingsState
 }
@@ -43,44 +41,36 @@ export default function NavBar(props: SongNavProps) {
 			<span class="flex-grow" />
 
 			<Show when={props.currentSong}>
-				<h3
-					class="ml-4 font-semibold"
-					onClick={() => props.onOpenSong(props.currentSong!.id)}
-				>
-					{props.currentSong!.meta.title}
-				</h3>
+				<h3 class="ml-4 font-semibold">{props.currentSong!.meta.title}</h3>
+				<Show when={props.onUpdateSongMeta}>
+					<IconButtonPopover
+						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
+						color="custom"
+						class="m-0 ml-2"
+					>
+						{(close) => (
+							<div class="w-64">
+								<SongMetaForm
+									title={props.currentSong!.meta.title || ''}
+									description={props.currentSong!.meta.description || ''}
+									onSubmit={(title, description) => {
+										if (props.currentSong) {
+											props.onUpdateSongMeta!(props.currentSong.id, {
+												title,
+												description,
+											})
+										}
+										close()
+									}}
+								/>
+							</div>
+						)}
+					</IconButtonPopover>
+				</Show>
 
-				<IconButtonPopover
-					buttonElement={<Icon path={pencil} class="h-5 w-5" />}
-					color="custom"
-					class="m-0 ml-2"
-				>
-					{(close) => (
-						<div class="w-64">
-							<SongMetaForm
-								title={props.currentSong!.meta.title || ''}
-								description={props.currentSong!.meta.description || ''}
-								onSubmit={(title, description) => {
-									if (props.currentSong) {
-										props.onUpdateSongMeta(props.currentSong.id, {
-											title,
-											description,
-										})
-									}
-									close()
-								}}
-							/>
-						</div>
-					)}
-				</IconButtonPopover>
-
-				<IconButton
-					color="custom"
-					class="m-0 mr-2"
-					onClick={() => props.onCloseSong(props.currentSong!.id)}
-				>
+				<A color="custom" class="m-0 mr-2" href="/songs">
 					<Icon path={xMark} class="h-6 w-6" />
-				</IconButton>
+				</A>
 			</Show>
 
 			<span class="flex-grow" />
@@ -106,19 +96,21 @@ export default function NavBar(props: SongNavProps) {
 						'fixed bottom-0 right-0 top-0 z-10 max-w-[80vw] bg-white px-2 py-1 shadow-md transition-transform duration-300',
 						openMenu() ? 'translate-x-0' : 'translate-x-full',
 					)}
-					onClick={(e) => {
-						e.stopImmediatePropagation()
-						e.stopPropagation()
-					}}
 				>
-					<div class="flex">
+					<div
+						class="flex"
+						onClick={(e) => {
+							e.stopPropagation()
+							e.stopImmediatePropagation()
+						}}
+					>
 						<LogoutButton onLogout={() => props.onLogout()} />
 						<span class="flex-grow" />
 						<IconButton color="custom" class="m-0 mr-2" onClick={() => close()}>
 							<Icon path={xMark} class="h-6 w-6" />
 						</IconButton>
 					</div>
-					<ProfileSongList onSelectSong={() => close()} />
+					<ProfileSongList class="mt-2 p-3" />
 				</nav>
 			</Show>
 		</nav>

@@ -3,7 +3,6 @@ import { useAppState } from '@/AppState'
 import ProfileForm from '@/components/profileForm'
 import { supabase } from '@/utils/supabase'
 import { Auth } from '@supabase/auth-ui-solid'
-import ProfileSongList from '@/components/profileList'
 import NavBar from '@/components/songNav'
 import PlayerUI from '@/components/player'
 import { createPlayer } from '@/utils/songPlayer'
@@ -16,13 +15,14 @@ import {
 import { SongMeta } from '@/datamodel'
 import { Subpage } from '@/components/shared/SimpleSubpage'
 import { LogoutButton } from '@/components/buttons'
+import { useParams } from '@solidjs/router'
 
 export default function App() {
-	const [state, { updateProfile, saveSong, closeSong, openSong, logout }] =
-		useAppState()
+	const params = useParams()
+	const [state, { updateProfile, saveSong, logout }] = useAppState()
 
 	const currentSong = createMemo(
-		() => (state.currentSongId && state.songs[state.currentSongId]) || null,
+		() => (params.id && state.songs[params.id]) || null,
 	)
 
 	const synth = createMemo(() => {
@@ -45,10 +45,6 @@ export default function App() {
 		const song = currentSong() || emptySongEntity()
 		return createSongState(song.data.song, editorState().data())
 	})
-
-	const openSongs = createMemo(() =>
-		state.openSongIds.map((id) => state.songs[id]),
-	)
 
 	function saveSongMeta(id: string, meta: Partial<SongMeta>) {
 		const song = state.songs[id]
@@ -73,7 +69,7 @@ export default function App() {
 			when={state.profile}
 			fallback={
 				<Subpage>
-					<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
+					<div class="m-auto my-4 w-full max-w-[420px] rounded-lg bg-white p-6 shadow sm:p-12 md:my-16">
 						<Auth supabaseClient={supabase} />
 					</div>
 				</Subpage>
@@ -83,15 +79,13 @@ export default function App() {
 				<>
 					<NavBar
 						currentSong={currentSong()}
-						onCloseSong={(id) => closeSong(id)}
-						onOpenSong={(id) => openSong(id)}
 						onUpdateSongMeta={(id, meta) => {
 							saveSongMeta(id, meta)
 						}}
 						onLogout={() => logout()}
 						keyboardState={currentSong() ? keyboardState() : undefined}
 					/>
-					<Show when={currentSong()} fallback={<ProfileSongList />}>
+					<Show when={currentSong()}>
 						<PlayerUI
 							onSave={(songData) => {
 								const song = currentSong()!

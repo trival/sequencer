@@ -4,25 +4,20 @@ import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
 import { Session } from './utils/session'
 import { emptySongEntity } from './utils/song'
+import { useNavigate } from '@solidjs/router'
 
 export interface AppState {
 	profile: Profile | null
 	collections: { [id: string]: Collection }
 	songs: { [id: string]: SongEntity }
-
-	openSongIds: string[]
-	currentSongId: string | null
 }
 
 export interface AppActions {
 	updateProfile: (profile: Partial<Profile>) => void
 	logout: () => void
 
-	openSong(id: string): void
 	openNewSong(): void
 	openSongCopy(id: string): void
-
-	closeSong(id: string): void
 
 	saveSong(id: string, song: SongEntity): void
 	deleteSong(id: string): void
@@ -33,8 +28,6 @@ function emptyAppState(): AppState {
 		profile: null,
 		collections: {},
 		songs: {},
-		openSongIds: [],
-		currentSongId: null,
 	}
 }
 
@@ -46,6 +39,7 @@ export const AppStateProvider = (
 	props: ParentProps<{ storage: Storage; session: Session }>,
 ) => {
 	const [state, setState] = createStore<AppState>(emptyAppState())
+	const navigate = useNavigate()
 
 	createEffect(() => {
 		const userId = props.session.userId()
@@ -122,24 +116,16 @@ export const AppStateProvider = (
 			setState(emptyAppState())
 		},
 
-		openSong(id) {
-			setState('currentSongId', state.songs[id] ? id : null)
-			const openSongs = new Set(state.openSongIds)
-			openSongs.add(id)
-			setState('openSongIds', [...openSongs])
-		},
-
 		openNewSong() {
 			const newSong = emptySongEntity()
 			setState('songs', newSong.id, newSong)
-			setState('currentSongId', newSong.id)
+			navigate(`/songs/${newSong.id}`)
 		},
 
 		openSongCopy(id) {
 			const song = state.songs[id]
 			if (song) {
 				const newSong = emptySongEntity()
-				setState('currentSongId', newSong.id)
 				setState('songs', newSong.id, {
 					...song,
 					id: emptySongEntity().id,
@@ -148,17 +134,8 @@ export const AppStateProvider = (
 						title: (song.meta.title || '') + ' (copy)',
 					},
 				})
+				navigate(`/songs/${newSong.id}`)
 			}
-		},
-
-		closeSong(id) {
-			if (state.currentSongId === id) {
-				setState('currentSongId', null)
-			}
-			setState(
-				'openSongIds',
-				state.openSongIds.filter((openId) => openId !== id),
-			)
 		},
 
 		saveSong(id, data) {
@@ -201,9 +178,6 @@ export const AppStateProvider = (
 					Object.entries(state.songs).filter(([key]) => key !== id),
 				)
 				setState('songs', songs)
-			}
-			if (state.currentSongId === id) {
-				setState('currentSongId', null)
 			}
 		},
 	}

@@ -17,7 +17,7 @@ export default function HomePage() {
 							<A href="/keyboard">Keyboard</A>
 						</li>
 						<li>
-							<A href="/app">My Songs</A>
+							<A href="/songs">My Songs</A>
 						</li>
 					</ul>
 				</nav>

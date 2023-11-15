@@ -31,40 +31,53 @@ const root = document.getElementById('root')
 const storage = createSupabaseStorage(supabase)
 const session = createSupabaseSession(supabase)
 
+const tests = (
+	<>
+		<Route
+			path="/tests/colors"
+			component={lazy(() => import('@/tests/colors'))}
+		/>
+		<Route
+			path="/tests/melody"
+			component={lazy(() => import('@/tests/melody'))}
+		/>
+		<Route
+			path="/tests/player"
+			component={lazy(() => import('@/tests/player'))}
+		/>
+		<Route
+			path="/tests/popover"
+			component={lazy(() => import('@/tests/popover'))}
+		/>
+		<Route
+			path="/tests/track"
+			component={lazy(() => import('@/tests/track'))}
+		/>
+	</>
+)
+
 render(
 	() => (
-		<AppStateProvider storage={storage} session={session}>
-			<Router>
+		<Router>
+			<AppStateProvider storage={storage} session={session}>
 				<Routes>
 					<Route path="/" component={lazy(() => import('@/pages/Home'))} />
 					<Route
 						path="/keyboard"
 						component={lazy(() => import('@/pages/Keyboard'))}
 					/>
-					<Route path="/app" component={lazy(() => import('@/pages/App'))} />
 					<Route
-						path="/tests/colors"
-						component={lazy(() => import('@/tests/colors'))}
+						path="/songs"
+						component={lazy(() => import('@/pages/Songs'))}
 					/>
 					<Route
-						path="/tests/melody"
-						component={lazy(() => import('@/tests/melody'))}
+						path="/songs/:id"
+						component={lazy(() => import('@/pages/Song'))}
 					/>
-					<Route
-						path="/tests/player"
-						component={lazy(() => import('@/tests/player'))}
-					/>
-					<Route
-						path="/tests/popover"
-						component={lazy(() => import('@/tests/popover'))}
-					/>
-					<Route
-						path="/tests/track"
-						component={lazy(() => import('@/tests/track'))}
-					/>
+					{tests}
 				</Routes>
-			</Router>
-		</AppStateProvider>
+			</AppStateProvider>
+		</Router>
 	),
 	root!,
 )

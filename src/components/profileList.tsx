@@ -1,12 +1,13 @@
-import { For } from 'solid-js'
+import { For, Show } from 'solid-js'
 import { useAppState } from '@/AppState'
 import { Button } from './buttons'
 import { Icon } from 'solid-heroicons'
 import { documentPlus } from 'solid-heroicons/outline'
 import { format } from 'date-fns'
+import { A } from '@solidjs/router'
 
 interface Props {
-	onSelectSong?: (id: string) => void
+	class?: string
 }
 
 export default function ProfileSongList(props: Props) {
@@ -24,30 +25,37 @@ export default function ProfileSongList(props: Props) {
 		})
 
 	return (
-		<div>
+		<div class={props.class}>
 			<ul>
 				<For each={songs()}>
 					{(song) => {
 						const date = song.meta.updatedAt && new Date(song.meta.updatedAt)
 						return (
-							<li>
-								<button
+							<li class="mb-2">
+								<A
+									href={`/songs/${song.id}`}
+									activeClass="text-indigo-600"
 									class="font-semibold underline"
-									onClick={() => {
-										actions.openSong(song.id)
-										props.onSelectSong?.(song.id)
-									}}
 								>
 									{song.meta.title} ({date ? format(date, 'yyyy-MM-dd') : 'new'}
 									)
-								</button>
+									<Show when={song.meta.description}>
+										<span class="ml-2 block text-sm text-gray-500">
+											{song.meta.description}
+										</span>
+									</Show>
+								</A>
 							</li>
 						)
 					}}
 				</For>
 			</ul>
-			<Button class="flex" onClick={() => actions.openNewSong()}>
-				<Icon path={documentPlus} class="inline-block h-6 w-6" />
+			<Button
+				color="indigo"
+				class="mt-8 flex items-center"
+				onClick={() => actions.openNewSong()}
+			>
+				<Icon path={documentPlus} class="mr-3 inline-block h-6 w-6" />
 				New Song
 			</Button>
 		</div>
