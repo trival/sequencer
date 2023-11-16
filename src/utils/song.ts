@@ -68,6 +68,7 @@ export interface SongState {
 		noteIdx: number,
 		midiNotes: number[],
 	) => void
+	addTrack: (trackIdx?: number) => void
 }
 
 export const createSongState = (
@@ -85,11 +86,12 @@ export const createSongState = (
 			const tracks = [...song.tracks]
 			const track = tracks[trackIdx]
 			if (track) {
-				let newNotes = track.notes.filter((_, i) => i !== noteIdx)
+				const newNotes = track.notes.filter((_, i) => i !== noteIdx)
 				if (!newNotes.length) {
-					newNotes = emptyTrack(editorSetting.defaultNoteDuration).notes
+					tracks.splice(trackIdx, 1)
+				} else {
+					tracks[trackIdx] = { ...track, notes: newNotes }
 				}
-				tracks[trackIdx] = { ...track, notes: newNotes }
 				return { ...song, tracks }
 			}
 			return song
@@ -153,6 +155,19 @@ export const createSongState = (
 		setSong((prev) => ({ ...prev, ...data }))
 	}
 
+	const addTrack = (trackIdx?: number) => {
+		setSong((song) => {
+			const tracks = [...song.tracks]
+			const newTrack = emptyTrack(editorSetting.defaultNoteDuration)
+			if (trackIdx === undefined) {
+				tracks.push(newTrack)
+			} else {
+				tracks.splice(trackIdx, 0, newTrack)
+			}
+			return { ...song, tracks }
+		})
+	}
+
 	return {
 		data: song,
 		updateProps,
@@ -160,5 +175,6 @@ export const createSongState = (
 		addNote,
 		changeDuration,
 		updateNoteTones,
+		addTrack,
 	}
 }

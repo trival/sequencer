@@ -1,6 +1,9 @@
 import { ProcessedTrack } from '@/utils/processedTrack'
 import clsx from 'clsx'
-import { For } from 'solid-js'
+import { For, Show } from 'solid-js'
+import { IconButton } from './buttons'
+import { Icon } from 'solid-heroicons'
+import { plus } from 'solid-heroicons/outline'
 
 const secondWidthFactor = 60
 
@@ -39,6 +42,8 @@ interface TrackProps {
 	tracks: ProcessedTrack[]
 	activeNoteIdx?: [number, number] | null
 	onNoteClicked?: (trackIdx: number, noteIdx: number) => void
+	onAddNote?: (trackIdx: number) => void
+	onTrackAdded?: () => void
 }
 
 export const Track = (props: TrackProps) => {
@@ -53,7 +58,7 @@ export const Track = (props: TrackProps) => {
 	const measureSec = () => props.tracks[0]?.measureSec ?? 0
 
 	return (
-		<div class="relative w-full overflow-x-auto pb-2">
+		<div class="relative w-full overflow-x-auto">
 			<div class="relative w-fit px-2">
 				<div class="absolute h-full">
 					<For each={[...Array(countMeasures())].map((_, i) => i)}>
@@ -78,10 +83,29 @@ export const Track = (props: TrackProps) => {
 									/>
 								)}
 							</For>
+
+							<Show when={props.onAddNote}>
+								<IconButton
+									color="custom"
+									class="m-0 ml-2 mt-1 p-0 text-gray-500"
+									onClick={() => props.onAddNote!(i())}
+								>
+									<Icon path={plus} class="h-6 w-6" />
+								</IconButton>
+							</Show>
 						</div>
 					)}
 				</For>
 			</div>
+			<Show when={props.onTrackAdded}>
+				<IconButton
+					color="custom"
+					class="m-0 ml-2 mt-1 p-0 text-gray-500"
+					onClick={() => props.onTrackAdded?.()}
+				>
+					<Icon path={plus} class="h-6 w-6" />
+				</IconButton>
+			</Show>
 		</div>
 	)
 }

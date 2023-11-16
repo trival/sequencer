@@ -27,7 +27,7 @@ export default function Player(props: PlayerProps) {
 
 	const onActivateNote = (midi: number) => {
 		const idx = activeNoteIdx()
-		if (idx) {
+		if (idx && !isPlaying()) {
 			const track = props.song.data().tracks[idx[0]]
 			const note = track?.notes[idx[1]]
 			if (!note) return
@@ -43,7 +43,7 @@ export default function Player(props: PlayerProps) {
 
 	const onDeactivateNote = (midi: number) => {
 		const idx = activeNoteIdx()
-		if (idx) {
+		if (idx && !isPlaying()) {
 			const track = props.song.data().tracks[idx[0]]
 			const note = track?.notes[idx[1]]
 			if (!note) return
@@ -84,6 +84,18 @@ export default function Player(props: PlayerProps) {
 		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
+	const onNoteAdded = (trackIdx: number) => {
+		const track = props.song.data().tracks[trackIdx]
+		if (track) {
+			const noteIdx = track.notes.length
+			props.song.addNote(trackIdx, noteIdx, {
+				duration: props.editorSettings.defaultNoteDuration,
+				midiNotes: [],
+			})
+			onNoteClicked(trackIdx, noteIdx)
+		}
+	}
+
 	const onNoteRemoved = (trackIdx: number, noteIdx: number) => {
 		const track = props.song.data().tracks[trackIdx]
 		if (!track) return
@@ -114,18 +126,27 @@ export default function Player(props: PlayerProps) {
 			? s.instruments?.[track.instrument]?.color
 			: undefined
 
-		return note
-			? note.midiNotes.map(
-					(note) =>
-						({
-							note,
-							color: instrument,
-						}) as ActiveNote,
-			  )
-			: props.synth.playingNotes().flatMap((notes, i) => {
-					const color = props.song.data().instruments?.[i].color
-					return notes.map((note) => ({ note, color }))
-			  })
+		let notes: ActiveNote[] = ([] as ActiveNote[]).concat(
+			props.synth.playingNotes().flatMap((notes, i) => {
+				const color = props.song.data().instruments?.[i].color
+				return notes.map((note) => ({ note, color }))
+			}),
+		)
+
+		if (note) {
+			notes = notes.concat(
+				note.midiNotes.map((note) => ({
+					note,
+					color: instrument,
+				})),
+			)
+		}
+
+		return notes
+	}
+
+	const onTrackAdded = () => {
+		props.song.addTrack()
 	}
 
 	createEffect(() => {
@@ -144,7 +165,7 @@ export default function Player(props: PlayerProps) {
 						onNoteActivated={onActivateNote}
 						onNoteDeactivated={onDeactivateNote}
 						settings={props.keyboardSettings}
-						mode={activeNoteIdx() !== null ? 'Record' : 'Play'}
+						mode={activeNoteIdx() !== null && !isPlaying() ? 'Record' : 'Play'}
 					/>
 				</div>
 			</div>
@@ -153,6 +174,8 @@ export default function Player(props: PlayerProps) {
 					tracks={processSong(props.song.data())}
 					activeNoteIdx={activeNoteIdx()}
 					onNoteClicked={onNoteClicked}
+					onAddNote={(trackIdx) => onNoteAdded(trackIdx)}
+					onTrackAdded={onTrackAdded}
 				/>
 				<SongControls
 					song={props.song.data()}
