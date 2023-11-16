@@ -34,6 +34,7 @@ interface KeyboardProps {
 	onNoteDeactivated?: (midi: number) => void
 	class?: string
 	mode: Mode
+	maxVHeight?: number
 }
 
 function activeBorders(cs: ActiveColor[]): string {
@@ -113,6 +114,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 			activeNotes: [],
 			onNoteActivated: () => {},
 			onNoteDeactivated: () => {},
+			maxVHeight: 100,
 		} as const,
 		_props,
 	)
@@ -263,11 +265,12 @@ export const Keyboard = (_props: KeyboardProps) => {
 			ref={wrapperRef}
 			class={clsx(
 				props.class,
-				'relative flex max-h-full max-w-full items-center justify-evenly overflow-hidden bg-white',
+				'relative flex max-w-full items-center justify-evenly overflow-hidden bg-white',
 			)}
 			style={{
 				height: `${props.settings.maxRows * keySize() + 2 * keyMargin}px`,
 				width: `${props.settings.maxCols * keySize() + 2 * keyMargin}px`,
+				'max-height': `${props.maxVHeight}vh`,
 			}}
 		>
 			<div class="flex h-full w-full flex-col justify-evenly">

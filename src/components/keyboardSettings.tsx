@@ -143,6 +143,34 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					}
 				/>
 			</div>
+			<div class="mx-2 mb-2 flex justify-center">
+				<label>
+					w
+					<Input
+						type="number"
+						class="ml-2 w-20 px-2"
+						value={props.state.data().maxCols}
+						onChange={(value) =>
+							props.state.update({
+								maxCols: parseInt(value as string),
+							})
+						}
+					/>
+				</label>
+				<label class="ml-6">
+					h
+					<Input
+						type="number"
+						class="ml-2 w-20 px-2"
+						value={props.state.data().maxRows}
+						onChange={(value) =>
+							props.state.update({
+								maxRows: parseInt(value as string),
+							})
+						}
+					/>
+				</label>
+			</div>
 		</div>
 	)
 }

@@ -1,10 +1,9 @@
 - [x] basic app navigation
 - [x] fast add note button
 - [x] no keyboard edit mode when playing, just playalong
+- [x] add/delete additional tracks
+- [x] change max keyboard size
 
-- [ ] change max keyboard size
-
-- [ ] add/delete additional tracks
 - [ ] select and copy multiple notes
 - [ ] toast to indicate remote action status
 - [ ] import/edit track json data

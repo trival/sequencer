@@ -162,17 +162,15 @@ export default function Player(props: PlayerProps) {
 
 	return (
 		<div class="m-0 md:mx-8">
-			<div class="relative h-[620px] max-h-[80vh] w-[620px] max-w-full shadow-md">
-				<div class="absolute bottom-0 left-0 right-0 top-0 overflow-scroll">
-					<Keyboard
-						activeNotes={activeMidiNotes()}
-						onNoteActivated={onActivateNote}
-						onNoteDeactivated={onDeactivateNote}
-						settings={props.keyboardSettings}
-						mode={activeNoteIds() !== null && !isPlaying() ? 'Record' : 'Play'}
-					/>
-				</div>
-			</div>
+			<Keyboard
+				class="shadow-md"
+				maxVHeight={80}
+				activeNotes={activeMidiNotes()}
+				onNoteActivated={onActivateNote}
+				onNoteDeactivated={onDeactivateNote}
+				settings={props.keyboardSettings}
+				mode={activeNoteIds().length === 1 && !isPlaying() ? 'Record' : 'Play'}
+			/>
 			<div class="mt-2">
 				<Track
 					tracks={processSong(props.song.data())}
