@@ -30,7 +30,7 @@ const durationOptions = subdivisions.map((s) => ({
 interface SongControlsProps {
 	song: Song
 	isPlaying?: boolean
-	activeNoteIdx?: [number, number] | null
+	activeNoteIds?: [number, number][]
 	defaultDuration: Subdivision
 	onAddAfter?: (
 		trackIdx: number,
@@ -57,10 +57,16 @@ interface SongControlsProps {
 export function SongControls(props: SongControlsProps) {
 	const [isDataOverlayOpen, setDataOverlayOpen] = createSignal(false)
 
-	const activeNote = () =>
-		props.activeNoteIdx
-			? props.song.tracks[props.activeNoteIdx[0]]?.notes[props.activeNoteIdx[1]]
-			: null
+	const singleActiveIdx = () => {
+		const ids = props.activeNoteIds
+		if (ids?.length !== 1) return null
+		return ids[0]
+	}
+
+	const activeNote = () => {
+		const idx = singleActiveIdx()
+		return idx ? props.song.tracks[idx[0]]?.notes[idx[1]] : null
+	}
 
 	const activeDuration = () => {
 		const note = activeNote()
@@ -85,7 +91,7 @@ export function SongControls(props: SongControlsProps) {
 				</Button>
 			)}
 
-			{props.activeNoteIdx && !props.isPlaying ? (
+			{singleActiveIdx() && !props.isPlaying ? (
 				<div class="relative flex w-fit">
 					{props.onAddBefore && (
 						<AddButton>
@@ -95,8 +101,8 @@ export function SongControls(props: SongControlsProps) {
 									onSelect={(durations) => {
 										close()
 										props.onAddBefore?.(
-											props.activeNoteIdx![0],
-											props.activeNoteIdx![1],
+											singleActiveIdx()![0],
+											singleActiveIdx()![1],
 											durations,
 										)
 									}}
@@ -113,8 +119,8 @@ export function SongControls(props: SongControlsProps) {
 									onSelect={(durations) => {
 										close()
 										props.onDurationChanged!(
-											props.activeNoteIdx![0],
-											props.activeNoteIdx![1],
+											singleActiveIdx()![0],
+											singleActiveIdx()![1],
 											durations,
 										)
 									}}
@@ -125,10 +131,7 @@ export function SongControls(props: SongControlsProps) {
 					{props.onRemove && (
 						<DeleteButton
 							onConfirm={() =>
-								props.onRemove!(
-									props.activeNoteIdx![0],
-									props.activeNoteIdx![1],
-								)
+								props.onRemove!(singleActiveIdx()![0], singleActiveIdx()![1])
 							}
 						/>
 					)}
@@ -140,8 +143,8 @@ export function SongControls(props: SongControlsProps) {
 									onSelect={(durations) => {
 										close()
 										props.onAddAfter!(
-											props.activeNoteIdx![0],
-											props.activeNoteIdx![1],
+											singleActiveIdx()![0],
+											singleActiveIdx()![1],
 											durations,
 										)
 									}}

@@ -73,13 +73,20 @@ export default function TestTracksPage() {
 	}
 
 	const tracks = () => processSong(data())
+	const activeNotes = () => {
+		const idx = activeNoteIdx()
+		if (idx) {
+			return [idx]
+		}
+		return []
+	}
 
 	return (
 		<div class="p-10">
 			<h1>Track test</h1>
 			<Track
 				tracks={tracks()}
-				activeNoteIdx={activeNoteIdx()}
+				activeNoteIds={activeNotes()}
 				onNoteClicked={onNoteClicked}
 			/>
 			<SongControls
@@ -91,7 +98,7 @@ export default function TestTracksPage() {
 					setIsPlaying(false)
 					setActiveNoteIdx(null)
 				}}
-				activeNoteIdx={activeNoteIdx()}
+				activeNoteIds={activeNotes()}
 				onRemove={onNoteRemoved}
 				onAddBefore={onNoteAddedBefore}
 				onAddAfter={onNoteAddedAfter}

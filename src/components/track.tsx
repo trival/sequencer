@@ -1,6 +1,6 @@
 import { ProcessedTrack } from '@/utils/processedTrack'
 import clsx from 'clsx'
-import { For, Show } from 'solid-js'
+import { For, Show, createEffect } from 'solid-js'
 import { IconButton } from './buttons'
 import { Icon } from 'solid-heroicons'
 import { plus } from 'solid-heroicons/outline'
@@ -40,7 +40,7 @@ export const Note = (props: NoteProps) => {
 
 interface TrackProps {
 	tracks: ProcessedTrack[]
-	activeNoteIdx?: [number, number] | null
+	activeNoteIds?: [number, number][]
 	onNoteClicked?: (trackIdx: number, noteIdx: number) => void
 	onAddNote?: (trackIdx: number) => void
 	onTrackAdded?: () => void
@@ -56,6 +56,8 @@ export const Track = (props: TrackProps) => {
 	const countMeasures = () =>
 		trackCountMeasures().reduce((a, b) => Math.max(a, b), 0)
 	const measureSec = () => props.tracks[0]?.measureSec ?? 0
+
+	createEffect(() => console.log('track', props.activeNoteIds))
 
 	return (
 		<div class="relative w-full overflow-x-auto">
@@ -77,7 +79,11 @@ export const Track = (props: TrackProps) => {
 								{(note, j) => (
 									<Note
 										durationSec={note.durationSec}
-										isActive={props.activeNoteIdx?.[1] === j()}
+										isActive={
+											!!props.activeNoteIds?.find(
+												([t, n]) => t === i() && n === j(),
+											)
+										}
 										isEmpty={note.midiNotes.length === 0}
 										onSelected={() => props.onNoteClicked?.(i(), j())}
 									/>
