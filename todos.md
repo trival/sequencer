@@ -4,11 +4,14 @@
 - [x] add/delete additional tracks
 - [x] change max keyboard size
 
-- [ ] select and copy multiple notes
+- [ ] select and copy/delete multiple notes
+- [ ] duplicate a track
 - [ ] toast to indicate remote action status
 - [ ] import/edit track json data
+- [ ] mute/unmute tracks, solo tracks
+- [ ] indicate notes present on other tracks on at the same time on the keyboard
+      when editing a note
 
-- [ ] no keyboard edit mode when playing, just playalong
 - [ ] general track settings with
   - [ ] default note duration
   - [ ] size per second
