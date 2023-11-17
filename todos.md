@@ -11,6 +11,7 @@
 - [ ] mute/unmute tracks, solo tracks
 - [ ] indicate notes present on other tracks on at the same time on the keyboard
       when editing a note
+- [ ] add track collections, improve track organization
 
 - [ ] general track settings with
   - [ ] default note duration
