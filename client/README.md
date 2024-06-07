@@ -1,6 +1,7 @@
-# trival sequencer
+# trival sequencer client
 
-a little scetchbook for melodies and harmonies with a mobile friendly interface.
+Web frontend for the little scetchbook for melodies and harmonies with a mobile
+friendly interface. Implemented with Solid.js and Tone.js.
 
 ## Developmet
 
