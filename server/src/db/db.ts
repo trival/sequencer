@@ -17,3 +17,5 @@ export const db = drizzle(connection, {
 		collections,
 	},
 })
+
+export type Db = typeof db

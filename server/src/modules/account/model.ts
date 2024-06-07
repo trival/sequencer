@@ -1,5 +1,5 @@
 export interface Profile {
-	userId: string
+	id: string
 	username: string
 
 	isPublic: boolean

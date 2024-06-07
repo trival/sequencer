@@ -15,3 +15,6 @@ export const users = sqliteTable(
 		usernameIdx: index('username_idx').on(table.username),
 	}),
 )
+
+export type UserDbInsert = typeof users.$inferInsert
+export type UserDb = typeof users.$inferSelect
