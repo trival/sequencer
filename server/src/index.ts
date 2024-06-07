@@ -1,47 +1,41 @@
-/**
- * This is the API-handler of your app that contains all your API routes.
- * On a bigger app, you will probably want to split this file up into multiple files.
- */
-import { initTRPC } from "@trpc/server";
-import { createHTTPServer } from "@trpc/server/adapters/standalone";
-import cors from "cors";
-import { z } from "zod";
+import cors from 'cors'
+import express from 'express'
+import * as config from './config'
+import { trpcRouter } from './trpc-router'
+import { createExpressMiddleware } from '@trpc/server/adapters/express'
+import session from 'express-session'
 
-const t = initTRPC.create();
+async function main() {
+	// express implementation
+	const app = express()
 
-const publicProcedure = t.procedure;
-const router = t.router;
-
-const appRouter = router({
-	greeting: publicProcedure
-		// This is the input schema of your procedure
-		// 💡 Tip: Try changing this and see type errors on the client straight away
-		.input(
-			z
-				.object({
-					name: z.string().nullish(),
-				})
-				.nullish(),
-		)
-		.query(({ input }) => {
-			// This is what you're returning to your client
-			return {
-				text: `hello ${input?.name ?? "world"}`,
-				// 💡 Tip: Try adding a new property here and see it propagate to the client straight-away
-			};
+	app.use(
+		session({
+			secret: config.sessionSecret,
+			resave: false,
+			saveUninitialized: false,
 		}),
-});
+	)
 
-// export only the type definition of the API
-// None of the actual implementation is exposed to the client
-export type AppRouter = typeof appRouter;
+	app.use((req, _res, next) => {
+		// request logger
+		console.log('⬅️ ', req.method, req.path, req.body ?? req.query)
+		next()
+	})
 
-// create server
-createHTTPServer({
-	middleware: cors(),
-	router: appRouter,
-	createContext() {
-		console.log("context 3");
-		return {};
-	},
-}).listen(2022);
+	app.use(
+		'/trpc',
+		createExpressMiddleware({
+			router: trpcRouter,
+			createContext: ({ req, res }) => ({}),
+		}),
+	)
+
+	app.get('/', (_req, res) => res.send('trival sequencer api'))
+
+	app.listen(config.port, () => {
+		console.log('listening on port 2021')
+	})
+}
+
+void main()

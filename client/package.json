@@ -19,6 +19,8 @@
     "@motionone/solid": "^10.16.2",
     "@popperjs/core": "^2.11.8",
     "@solidjs/router": "^0.13.5",
+    "@trpc/client": "^11.0.0-rc.394",
+    "@trpc/server": "^11.0.0-rc.394",
     "date-fns": "^3.6.0",
     "serve": "^14.2.1",
     "solid-heroicons": "^3.2.4",
