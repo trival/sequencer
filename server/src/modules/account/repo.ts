@@ -1,11 +1,10 @@
-import { TRPCError } from '@trpc/server'
-import type { Opt } from '../../lib/types'
-import type { Account } from './model'
-import type { Db } from '../../db/db'
 import { eq, sql } from 'drizzle-orm'
+import type { Db } from '../../db/db'
 import { users, type UserDb } from '../../db/schema/users'
 import { apiError } from '../../lib/errors'
+import type { Opt } from '../../lib/types'
 import { changes } from '../../lib/utils'
+import type { Account } from './model'
 
 export interface AccountRepository {
 	byId: (id: string) => Promise<Account>
