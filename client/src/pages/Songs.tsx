@@ -1,8 +1,6 @@
 import { Show } from 'solid-js'
 import { useAppState } from '@/AppState'
 import ProfileForm from '@/components/profileForm'
-import { supabase } from '@/utils/supabase'
-import { Auth } from '@supabase/auth-ui-solid'
 import ProfileSongList from '@/components/profileList'
 import NavBar from '@/components/songNav'
 import { Subpage } from '@/components/shared/SimpleSubpage'
@@ -17,7 +15,7 @@ export default function App() {
 			fallback={
 				<Subpage>
 					<div class="m-auto my-4 w-full max-w-[420px] rounded-lg bg-white p-6 shadow sm:p-12 md:my-16">
-						<Auth supabaseClient={supabase} />
+						TODO: Login/Register form
 					</div>
 				</Subpage>
 			}

@@ -18,18 +18,16 @@ import '@fontsource/fira-sans/800.css'
 import '@fontsource/fira-sans/900.css'
 import './styles/globals.css'
 
-import { Route, Router, Routes } from '@solidjs/router'
+import { Route, Router } from '@solidjs/router'
 import { render } from 'solid-js/web'
 import { AppStateProvider } from './AppState'
-import { createSupabaseSession } from './utils/session'
-import { createSupabaseStorage } from './utils/storage'
-import { supabase } from './utils/supabase'
 import { lazy } from 'solid-js'
+import { createLocalSession } from './utils/session'
+import { createLocalStorage } from './utils/storage'
 
 const root = document.getElementById('root')
-
-const storage = createSupabaseStorage(supabase)
-const session = createSupabaseSession(supabase)
+const session = createLocalSession()
+const storage = createLocalStorage()
 
 const tests = (
 	<>
@@ -59,24 +57,26 @@ const tests = (
 render(
 	() => (
 		<Router>
-			<AppStateProvider storage={storage} session={session}>
-				<Routes>
-					<Route path="/" component={lazy(() => import('@/pages/Home'))} />
-					<Route
-						path="/keyboard"
-						component={lazy(() => import('@/pages/Keyboard'))}
-					/>
-					<Route
-						path="/songs"
-						component={lazy(() => import('@/pages/Songs'))}
-					/>
-					<Route
-						path="/songs/:id"
-						component={lazy(() => import('@/pages/Song'))}
-					/>
-					{tests}
-				</Routes>
-			</AppStateProvider>
+			<Route
+				path="/"
+				component={(props) => (
+					<AppStateProvider storage={storage} session={session}>
+						{props.children}
+					</AppStateProvider>
+				)}
+			>
+				<Route path="/" component={lazy(() => import('@/pages/Home'))} />
+				<Route
+					path="/keyboard"
+					component={lazy(() => import('@/pages/Keyboard'))}
+				/>
+				<Route path="/songs" component={lazy(() => import('@/pages/Songs'))} />
+				<Route
+					path="/songs/:id"
+					component={lazy(() => import('@/pages/Song'))}
+				/>
+				{tests}
+			</Route>
 		</Router>
 	),
 	root!,
