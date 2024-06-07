@@ -27,7 +27,9 @@ async function main() {
 		'/trpc',
 		createExpressMiddleware({
 			router: trpcRouter,
-			createContext: ({ req, res }) => ({}),
+			createContext: ({ req, res }) => ({
+				session: req.session,
+			}),
 		}),
 	)
 
