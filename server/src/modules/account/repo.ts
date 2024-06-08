@@ -50,11 +50,15 @@ export const createAccountDbRepository = (db: Db): AccountRepository => {
 	repo.save = async (account) => {
 		const res = await byIdQuery.execute({ id: account.id })
 		if (!res) {
-			await db.insert(users).values(account).execute()
+			await db.insert(users).values(userDataToDb(account)).execute()
 		} else {
 			const old = userDbToData(res)
 			const diff = changes(old, account, ['id'])
-			await db.update(users).set(diff).where(eq(users.id, account.id)).execute()
+			await db
+				.update(users)
+				.set(userDiffToDb(diff))
+				.where(eq(users.id, account.id))
+				.execute()
 		}
 	}
 
@@ -71,8 +75,29 @@ const userDbToData = (user: UserDb): Account => {
 	return {
 		id: user.id,
 		username: user.username,
-		password: user.password,
+		passwordHash: user.password,
 		isPublic: !!user.isPublic,
 		color: user.color ?? '',
 	}
+}
+
+const userDataToDb = (user: Account): UserDb => {
+	return {
+		id: user.id,
+		username: user.username,
+		password: user.passwordHash,
+		isPublic: !!user.isPublic,
+		color: user.color,
+	}
+}
+
+const userDiffToDb = (diff: Partial<Account>): Partial<UserDb> => {
+	const res: Partial<UserDb> = {}
+
+	if ('username' in diff) res.username = diff.username
+	if ('passwordHash' in diff) res.password = diff.passwordHash
+	if ('isPublic' in diff) res.isPublic = diff.isPublic
+	if ('color' in diff) res.color = diff.color
+
+	return res
 }

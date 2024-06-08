@@ -29,6 +29,7 @@ async function main() {
 			router: trpcRouter,
 			createContext: ({ req, res }) => ({
 				session: req.session,
+				services: {} as any,
 			}),
 		}),
 	)

@@ -7,5 +7,5 @@ export interface Profile {
 }
 
 export interface Account extends Profile {
-	password: string
+	passwordHash: string
 }
