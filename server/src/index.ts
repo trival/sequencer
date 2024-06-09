@@ -25,9 +25,10 @@ async function main() {
 
 	app.use(
 		'/trpc',
+		cors(),
 		createExpressMiddleware({
 			router: trpcRouter,
-			createContext: ({ req, res }) => ({
+			createContext: ({ req }) => ({
 				session: req.session,
 				services: {} as any,
 			}),
