@@ -1,5 +1,6 @@
 export interface Profile {
 	id: string
+	createdAt: number
 	username: string
 
 	isPublic: boolean

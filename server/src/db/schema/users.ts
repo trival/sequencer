@@ -4,6 +4,8 @@ export const users = sqliteTable(
 	'users',
 	{
 		id: text('id').primaryKey(),
+		createdAt: integer('created_at').notNull(),
+
 		username: text('username').notNull(),
 		password: text('password').notNull(),
 

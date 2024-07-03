@@ -4,6 +4,7 @@ import { collections } from './collections'
 
 export const songs = sqliteTable('songs', {
 	id: text('id').primaryKey(),
+	createdAt: integer('created_at'),
 	updatedAt: integer('updated_at'),
 	isPublic: integer('is_public', { mode: 'boolean' }).default(true),
 

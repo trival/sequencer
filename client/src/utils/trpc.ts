@@ -12,7 +12,7 @@ const trpc = createTRPCClient<TrpcRouter>({
 })
 
 export function testServer() {
-	trpc.greeting.query({ name: 'world' }).then((res) => {
-		console.log(res.text)
+	trpc.test.query({ name: 'world' }).then((res) => {
+		console.log(res)
 	})
 }

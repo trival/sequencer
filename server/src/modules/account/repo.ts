@@ -74,6 +74,7 @@ export const createAccountDbRepository = (db: Db): AccountRepository => {
 const userDbToData = (user: UserDb): Account => {
 	return {
 		id: user.id,
+		createdAt: user.createdAt,
 		username: user.username,
 		passwordHash: user.password,
 		isPublic: !!user.isPublic,
@@ -84,6 +85,7 @@ const userDbToData = (user: UserDb): Account => {
 const userDataToDb = (user: Account): UserDb => {
 	return {
 		id: user.id,
+		createdAt: user.createdAt,
 		username: user.username,
 		password: user.passwordHash,
 		isPublic: !!user.isPublic,

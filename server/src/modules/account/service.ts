@@ -38,6 +38,7 @@ export const createAccountService = (
 
 		const account: Account = {
 			id: crypto.randomUUID(),
+			createdAt: Date.now(),
 			username,
 			passwordHash: await Bun.password.hash(password),
 			isPublic: true,
@@ -81,6 +82,7 @@ export const createAccountService = (
 
 		return {
 			id: account.id,
+			createdAt: account.createdAt,
 			username: account.username,
 			isPublic: account.isPublic,
 			color: account.color,
