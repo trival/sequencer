@@ -82,7 +82,7 @@ export const createAccountDbRepository = (db: Db): AccountRepository => {
 function userDbToData(user: UserDb): Account {
 	return {
 		id: user.id,
-		createdAt: user.createdAt,
+		createdAt: new Date(user.createdAt),
 		username: user.username,
 		email: user.email,
 		passwordHash: user.passwordHash,
@@ -94,7 +94,7 @@ function userDbToData(user: UserDb): Account {
 function userDataToDb(user: Account): UserDbInsert {
 	return {
 		id: user.id,
-		createdAt: user.createdAt,
+		createdAt: user.createdAt.getTime(),
 		username: user.username,
 		email: user.email,
 		passwordHash: user.passwordHash,

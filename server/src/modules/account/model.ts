@@ -1,11 +1,11 @@
 export interface PublicProfile {
 	id: string
-	createdAt: number
 	username: string
 	color: string
 }
 
 export interface Profile extends PublicProfile {
+	createdAt: Date
 	email: string
 	isPublic: boolean
 }

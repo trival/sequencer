@@ -45,15 +45,10 @@ export const createAccountService = (
 
 		const account: Account = {
 			id: crypto.randomUUID(),
-<<<<<<< HEAD
-			createdAt: Date.now(),
-			username,
-			passwordHash: await Bun.password.hash(password),
-=======
+			createdAt: new Date(),
 			username: input.username,
 			email: input.email,
 			passwordHash: await Bun.password.hash(input.password),
->>>>>>> 942d577 (add song repo)
 			isPublic: true,
 			color: randomColor(),
 		}

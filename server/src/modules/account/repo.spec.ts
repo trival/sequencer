@@ -19,6 +19,7 @@ describe('AccountRepo', () => {
 	it('can save and retrieve an account', async () => {
 		const a1: Account = {
 			id: '1',
+			createdAt: new Date(),
 			email: 'foo@bar.de',
 			username: 'test',
 			passwordHash: 'abc',
@@ -34,6 +35,7 @@ describe('AccountRepo', () => {
 
 		const a2: Account = {
 			id: '1',
+			createdAt: new Date(),
 			email: 'fuu@bar.de',
 			username: 'test2',
 			passwordHash: 'xyz',
@@ -57,6 +59,7 @@ describe('AccountRepo', () => {
 
 		const a3: Account = {
 			id: '2',
+			createdAt: new Date(),
 			email: 'foo@baz.de',
 			username: 'test',
 			passwordHash: 'abc',
