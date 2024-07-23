@@ -6,15 +6,12 @@ export const accountRouter = trpc.router({
 		.input(
 			z.object({
 				username: z.string().min(3),
+				email: z.string().email(),
 				password: z.string().min(8),
 			}),
 		)
 		.mutation(({ input, ctx }) =>
-			ctx.services.account.register(
-				ctx.session,
-				input.username,
-				input.password,
-			),
+			ctx.services.account.register(ctx.session, input),
 		),
 
 	login: trpc.procedure
