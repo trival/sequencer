@@ -1,19 +1,24 @@
-import type { Opt } from '../../lib/types'
-import type { Account, Profile } from './model'
-import type { AccountRepository } from './repo'
 import { apiError } from '../../lib/errors'
 import type { Session } from '../../lib/session'
+import type { Opt } from '../../lib/types'
+import type { Account, Profile, PublicProfile } from './model'
+import type { AccountRepository } from './repo'
+
+export interface RegisterInput {
+	email: string
+	username: string
+	password: string
+}
 
 export interface AccountService {
-	register: (
-		session: Session,
-		username: string,
-		password: string,
-	) => Promise<void>
+	register: (session: Session, input: RegisterInput) => Promise<void>
 	login: (session: Session, username: string, password: string) => Promise<void>
 	logout: (session: Session) => Promise<void>
 
-	profile: (session: Session, userId?: string) => Promise<Opt<Profile>>
+	profile: (
+		session: Session,
+		userId?: string,
+	) => Promise<Opt<Profile | PublicProfile>>
 	update: (session: Session, profile: Partial<Profile>) => Promise<void>
 	delete: (session: Session, password: string) => Promise<void>
 }
@@ -30,17 +35,25 @@ export const createAccountService = (
 
 	const service = {} as AccountService
 
-	service.register = async (session, username, password) => {
-		const existing = await repo.byUsername(username)
-		if (existing) {
-			throw apiError('CONFLICT', 'Username already exists')
+	service.register = async (session, input) => {
+		if (await repo.byUsername(input.username)) {
+			throw apiError('CONFLICT', 'Account already exists')
+		}
+		if (await repo.byEmail(input.email)) {
+			throw apiError('CONFLICT', 'Account already exists')
 		}
 
 		const account: Account = {
 			id: crypto.randomUUID(),
+<<<<<<< HEAD
 			createdAt: Date.now(),
 			username,
 			passwordHash: await Bun.password.hash(password),
+=======
+			username: input.username,
+			email: input.email,
+			passwordHash: await Bun.password.hash(input.password),
+>>>>>>> 942d577 (add song repo)
 			isPublic: true,
 			color: randomColor(),
 		}
@@ -75,6 +88,9 @@ export const createAccountService = (
 		}
 
 		const account = await repo.byId(id)
+		if (!account) {
+			return null
+		}
 
 		if (userId && userId !== session.userId && !account.isPublic) {
 			return null
@@ -95,6 +111,10 @@ export const createAccountService = (
 		}
 
 		const account = await repo.byId(session.userId)
+
+		if (!account) {
+			throw apiError('NOT_FOUND')
+		}
 
 		if (profile.username) {
 			const existingAccount = await repo.byUsername(profile.username)
@@ -118,6 +138,9 @@ export const createAccountService = (
 		}
 
 		const account = await repo.byId(session.userId)
+		if (!account) {
+			throw apiError('NOT_FOUND')
+		}
 
 		const valid = await Bun.password.verify(account.passwordHash, password)
 		if (!valid) {

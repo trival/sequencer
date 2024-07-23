@@ -1,45 +1,48 @@
 import { eq, sql } from 'drizzle-orm'
 import type { Db } from '../../db/db'
-import { users, type UserDb } from '../../db/schema/users'
-import { apiError } from '../../lib/errors'
+import { user, type UserDb, type UserDbInsert } from '../../db/schema/user'
 import type { Opt } from '../../lib/types'
 import { changes } from '../../lib/utils'
 import type { Account } from './model'
 
 export interface AccountRepository {
-	byId: (id: string) => Promise<Account>
+	byId: (id: string) => Promise<Opt<Account>>
 	byUsername: (username: string) => Promise<Opt<Account>>
+	byEmail: (email: string) => Promise<Opt<Account>>
 
 	save: (account: Account) => Promise<void>
 	delete: (id: string) => Promise<void>
 }
 
 export const createAccountDbRepository = (db: Db): AccountRepository => {
-	const byIdQuery = db.query.users
+	const byIdQuery = db.query.user
 		.findFirst({
-			where: eq(users.id, sql.placeholder('id')),
+			where: eq(user.id, sql.placeholder('id')),
 		})
 		.prepare()
 
-	const byUsernameQuery = db.query.users
+	const byUsernameQuery = db.query.user
 		.findFirst({
-			where: eq(users.username, sql.placeholder('username')),
+			where: eq(user.username, sql.placeholder('username')),
+		})
+		.prepare()
+
+	const byEmailQuery = db.query.user
+		.findFirst({
+			where: eq(user.email, sql.placeholder('email')),
 		})
 		.prepare()
 
 	const deleteQuery = db
-		.delete(users)
-		.where(eq(users.id, sql.placeholder('id')))
+		.delete(user)
+		.where(eq(user.id, sql.placeholder('id')))
 		.prepare()
 
 	const repo = {} as AccountRepository
 
 	repo.byId = async (id) => {
 		const res = await byIdQuery.execute({ id })
-		if (!res) {
-			throw apiError('NOT_FOUND', 'User not found')
-		}
-		return userDbToData(res)
+		return res ? userDbToData(res) : null
 	}
 
 	repo.byUsername = async (username) => {
@@ -47,17 +50,22 @@ export const createAccountDbRepository = (db: Db): AccountRepository => {
 		return res ? userDbToData(res) : null
 	}
 
+	repo.byEmail = async (email) => {
+		const res = await byEmailQuery.execute({ email })
+		return res ? userDbToData(res) : null
+	}
+
 	repo.save = async (account) => {
 		const res = await byIdQuery.execute({ id: account.id })
 		if (!res) {
-			await db.insert(users).values(userDataToDb(account)).execute()
+			await db.insert(user).values(userDataToDb(account)).execute()
 		} else {
 			const old = userDbToData(res)
 			const diff = changes(old, account, ['id'])
 			await db
-				.update(users)
+				.update(user)
 				.set(userDiffToDb(diff))
-				.where(eq(users.id, account.id))
+				.where(eq(user.id, account.id))
 				.execute()
 		}
 	}
@@ -71,33 +79,36 @@ export const createAccountDbRepository = (db: Db): AccountRepository => {
 
 // mappers
 
-const userDbToData = (user: UserDb): Account => {
+function userDbToData(user: UserDb): Account {
 	return {
 		id: user.id,
 		createdAt: user.createdAt,
 		username: user.username,
-		passwordHash: user.password,
+		email: user.email,
+		passwordHash: user.passwordHash,
 		isPublic: !!user.isPublic,
 		color: user.color ?? '',
 	}
 }
 
-const userDataToDb = (user: Account): UserDb => {
+function userDataToDb(user: Account): UserDbInsert {
 	return {
 		id: user.id,
 		createdAt: user.createdAt,
 		username: user.username,
-		password: user.passwordHash,
-		isPublic: !!user.isPublic,
+		email: user.email,
+		passwordHash: user.passwordHash,
+		isPublic: user.isPublic,
 		color: user.color,
 	}
 }
 
-const userDiffToDb = (diff: Partial<Account>): Partial<UserDb> => {
+function userDiffToDb(diff: Partial<Account>): Partial<UserDb> {
 	const res: Partial<UserDb> = {}
 
 	if ('username' in diff) res.username = diff.username
-	if ('passwordHash' in diff) res.password = diff.passwordHash
+	if ('email' in diff) res.email = diff.email
+	if ('passwordHash' in diff) res.passwordHash = diff.passwordHash
 	if ('isPublic' in diff) res.isPublic = diff.isPublic
 	if ('color' in diff) res.color = diff.color
 

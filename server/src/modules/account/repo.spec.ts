@@ -1,10 +1,10 @@
-import { describe, it, expect, afterEach } from 'bun:test'
 import { Database } from 'bun:sqlite'
-import { getDb, setupAndMigrateDb } from '../../db/db'
-import { createAccountDbRepository } from './repo'
-import type { Account } from './model'
-import { users } from '../../db/schema/users'
+import { afterEach, describe, expect, it } from 'bun:test'
 import { checkErrorCode } from '../../../test/lib/utils'
+import { getDb, setupAndMigrateDb } from '../../db/db'
+import { user } from '../../db/schema/user'
+import type { Account } from './model'
+import { createAccountDbRepository } from './repo'
 
 describe('AccountRepo', () => {
 	const db = getDb(new Database(':memory:'))
@@ -13,12 +13,13 @@ describe('AccountRepo', () => {
 	const repo = createAccountDbRepository(db)
 
 	afterEach(async () => {
-		await db.delete(users).execute()
+		await db.delete(user).execute()
 	})
 
 	it('can save and retrieve an account', async () => {
 		const a1: Account = {
 			id: '1',
+			email: 'foo@bar.de',
 			username: 'test',
 			passwordHash: 'abc',
 			isPublic: true,
@@ -33,6 +34,7 @@ describe('AccountRepo', () => {
 
 		const a2: Account = {
 			id: '1',
+			email: 'fuu@bar.de',
 			username: 'test2',
 			passwordHash: 'xyz',
 			isPublic: false,
@@ -55,6 +57,7 @@ describe('AccountRepo', () => {
 
 		const a3: Account = {
 			id: '2',
+			email: 'foo@baz.de',
 			username: 'test',
 			passwordHash: 'abc',
 			isPublic: true,

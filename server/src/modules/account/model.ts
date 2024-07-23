@@ -1,10 +1,13 @@
-export interface Profile {
+export interface PublicProfile {
 	id: string
 	createdAt: number
 	username: string
-
-	isPublic: boolean
 	color: string
+}
+
+export interface Profile extends PublicProfile {
+	email: string
+	isPublic: boolean
 }
 
 export interface Account extends Profile {

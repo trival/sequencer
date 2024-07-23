@@ -1,11 +1,11 @@
-import { drizzle } from 'drizzle-orm/bun-sqlite'
-import { dbLocation } from '../config'
 import { Database } from 'bun:sqlite'
-import { users } from './schema/users'
-import { songs } from './schema/songs'
-import { collections } from './schema/collections'
+import { drizzle } from 'drizzle-orm/bun-sqlite'
 import { migrate } from 'drizzle-orm/bun-sqlite/migrator'
 import * as path from 'node:path'
+import { dbLocation } from '../config'
+import { collection } from './schema/collection'
+import { song } from './schema/song'
+import { user } from './schema/user'
 
 export const getDefaultConnection = () => {
 	const connection = new Database(dbLocation)
@@ -19,9 +19,9 @@ export const getDefaultConnection = () => {
 export const getDb = (connection: Database) =>
 	drizzle(connection, {
 		schema: {
-			users,
-			songs,
-			collections,
+			user,
+			song,
+			collection,
 		},
 	})
 

@@ -1,11 +1,12 @@
+import type { Session } from '../../lib/session'
 import type { Song } from './model'
 
 export interface SongService {
-	byId: (id: string) => Promise<Song>
-	listByUser: (userId: string) => Promise<Song[]>
-	listByCollection: (collectionId: string) => Promise<Song[]>
-	listByLatest: () => Promise<Song[]>
+	byId: (session: Session, id: string) => Promise<Song>
+	listByUser: (session: Session, userId: string) => Promise<Song[]>
+	listByCollection: (session: Session, collectionId: string) => Promise<Song[]>
+	listByLatest: (session: Session) => Promise<Song[]>
 
-	save: (song: Song) => Promise<void>
-	delete: (id: string) => Promise<void>
+	save: (session: Session, song: Song) => Promise<void>
+	delete: (session: Session, id: string) => Promise<void>
 }
