@@ -31,8 +31,6 @@ function randomColor() {
 export const createAccountService = (
 	repo: AccountRepository,
 ): AccountService => {
-	const crypto = new Crypto()
-
 	const service = {} as AccountService
 
 	service.register = async (session, input) => {
@@ -55,7 +53,7 @@ export const createAccountService = (
 
 		await repo.save(account)
 
-		await regenerateAndSave(session, account.id)
+		await session.saveUser(account.id)
 	}
 
 	service.login = async (session, username, password) => {
@@ -69,11 +67,11 @@ export const createAccountService = (
 			throw apiError('UNAUTHORIZED', 'Invalid username or password')
 		}
 
-		await regenerateAndSave(session, account.id)
+		await session.saveUser(account.id)
 	}
 
 	service.logout = async (session) => {
-		await saveAndRegenerate(session, null)
+		await session.reset()
 	}
 
 	service.profile = async (session, userId) => {
@@ -144,59 +142,8 @@ export const createAccountService = (
 
 		await repo.delete(session.userId)
 
-		await saveAndRegenerate(session, null)
+		await session.reset()
 	}
 
 	return service
-}
-
-function regenerateAndSave(
-	session: Session,
-	userId?: string | null,
-): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
-		session.regenerate((err) => {
-			if (err) {
-				console.error('Failed to regenerate session', err)
-				reject(apiError('INTERNAL_SERVER_ERROR'))
-			}
-
-			// store user information in session
-			session.userId = userId
-
-			session.save((err) => {
-				if (err) {
-					console.error('Failed to save session', err)
-					reject(apiError('INTERNAL_SERVER_ERROR'))
-				}
-
-				resolve()
-			})
-		})
-	})
-}
-
-function saveAndRegenerate(
-	session: Session,
-	userId?: string | null,
-): Promise<void> {
-	return new Promise<void>((resolve, reject) => {
-		session.userId = userId
-
-		session.save((err) => {
-			if (err) {
-				console.error('Failed to save session', err)
-				reject(apiError('INTERNAL_SERVER_ERROR'))
-			}
-
-			session.regenerate((err) => {
-				if (err) {
-					console.error('Failed to regenerate session', err)
-					reject(apiError('INTERNAL_SERVER_ERROR'))
-				}
-
-				resolve()
-			})
-		})
-	})
 }

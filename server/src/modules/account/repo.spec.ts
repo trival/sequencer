@@ -47,11 +47,11 @@ describe('AccountRepo', () => {
 
 		const res2 = await repo.byId('1')
 
-		expect(res2).toEqual(a2)
+		expect(res2).toEqual({ ...a2, createdAt: a1.createdAt })
 
 		const res3 = await repo.byUsername('test2')
 
-		expect(res3).toEqual(a2)
+		expect(res3).toEqual({ ...a2, createdAt: a1.createdAt })
 
 		const res4 = await repo.byUsername('test')
 
@@ -75,6 +75,7 @@ describe('AccountRepo', () => {
 
 		await repo.delete('1')
 
-		await checkErrorCode('NOT_FOUND', () => repo.byId('1'))
+		const res6 = await repo.byId('1')
+		expect(res6).toBeNull()
 	})
 })

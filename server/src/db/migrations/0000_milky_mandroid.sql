@@ -21,6 +21,7 @@ CREATE TABLE `song` (
 --> statement-breakpoint
 CREATE TABLE `user` (
 	`id` text PRIMARY KEY NOT NULL,
+	`created_at` integer NOT NULL,
 	`username` text NOT NULL,
 	`email` text NOT NULL,
 	`password_hash` text NOT NULL,

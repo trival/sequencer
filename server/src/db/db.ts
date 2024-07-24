@@ -14,6 +14,8 @@ export const getDefaultConnection = () => {
 	if (dbLocation !== ':memory:') {
 		connection.exec('PRAGMA journal_modej = WAL;')
 	}
+
+	return connection
 }
 
 export const getDb = (connection: Database) =>
