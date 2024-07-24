@@ -3,8 +3,6 @@ import type { TrpcRouter } from '../../src/trpc-router'
 import * as config from '../../src/config'
 
 export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
-	let sid = ''
-
 	const url = baseUrl || `http://localhost:${config.port}`
 
 	console.log('Using trpc base url:', url)
@@ -14,6 +12,8 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 			method: 'POST',
 		})
 	}
+
+	let sid = ''
 
 	const client = createTRPCClient<TrpcRouter>({
 		links: [
