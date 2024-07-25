@@ -1,18 +1,20 @@
-import { createTRPCClient, unstable_httpBatchStreamLink } from '@trpc/client'
+import { createTRPCClient, httpBatchLink } from '@trpc/client'
 
-import type { TrpcRouter } from '../../../server/src/trpc-router'
+import type { TrpcSchema } from '../../../server/src/trpc-router'
+import SuperJSON from 'superjson'
 
 // Initialize the tRPC client
-const trpc = createTRPCClient<TrpcRouter>({
+export const trpc = createTRPCClient<TrpcSchema>({
 	links: [
-		unstable_httpBatchStreamLink({
+		httpBatchLink({
 			url: import.meta.env.VITE_TRPC_SERVER_URL + '/trpc',
+			transformer: SuperJSON,
+			fetch(input, init) {
+				return fetch(input, {
+					...init,
+					credentials: 'include',
+				})
+			},
 		}),
 	],
 })
-
-export function testServer() {
-	trpc.test.query({ name: 'world' }).then((res) => {
-		console.log(res)
-	})
-}

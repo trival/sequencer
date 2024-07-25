@@ -4,7 +4,7 @@ import { uuid } from '../../src/lib/utils'
 
 describe('song api', () => {
 	const { client, resetTestServer } = getTrpcClient()
-	const { client: client2 } = getTrpcClient()
+	// const { client: client2 } = getTrpcClient()
 
 	beforeAll(async () => {
 		await resetTestServer()

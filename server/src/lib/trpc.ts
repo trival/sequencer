@@ -1,6 +1,5 @@
 import { initTRPC } from '@trpc/server'
-import type { Session } from './session'
-import type { Services } from '../context'
+import type { Services, Session } from '../context'
 import SuperJSON from 'superjson'
 
 export interface Context {

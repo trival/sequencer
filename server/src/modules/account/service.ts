@@ -1,5 +1,5 @@
+import type { Session } from '../../context'
 import { apiError } from '../../lib/errors'
-import type { Session } from '../../lib/session'
 import type { Opt } from '../../lib/types'
 import { uuid } from '../../lib/utils'
 import type {

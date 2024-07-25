@@ -4,12 +4,12 @@ import { checkErrorCode } from '../../../test/lib/utils'
 import { getDb, setupAndMigrateDb } from '../../db/db'
 import { song } from '../../db/schema/song'
 import { user } from '../../db/schema/user'
-import type { Session } from '../../lib/session'
 import { uuid, wait } from '../../lib/utils'
 import type { Account } from '../account/model'
 import { createAccountDbRepository } from '../account/repo'
 import { createSongDbRepository } from './repo'
 import { createSongService } from './service'
+import type { Session } from '../../context'
 
 describe('song service', () => {
 	const db = getDb(new Database(':memory:'), { debug: false })

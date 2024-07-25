@@ -15,39 +15,39 @@
     "types": "tsc --noEmit"
   },
   "dependencies": {
-    "@fontsource/fira-sans": "^5.0.17",
-    "@motionone/solid": "^10.16.2",
+    "@fontsource/fira-sans": "^5.0.20",
     "@popperjs/core": "^2.11.8",
-    "@solidjs/router": "^0.13.5",
-    "@trpc/client": "^11.0.0-rc.394",
-    "@trpc/server": "^11.0.0-rc.394",
+    "@solidjs/router": "0.14.1",
+    "@trpc/client": "^11.0.0-rc.467",
     "date-fns": "^3.6.0",
-    "serve": "^14.2.1",
+    "serve": "^14.2.3",
     "solid-heroicons": "^3.2.4",
-    "solid-js": "^1.7.11",
-    "tone": "^14.7.77",
-    "uuid": "^9.0.1"
+    "solid-js": "^1.8.19",
+    "solid-motionone": "^1.0.0",
+    "superjson": "^2.2.1",
+    "tone": "^14.9.17",
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
-    "@tailwindcss/forms": "^0.5.3",
-    "@types/node": "^20.14.2",
-    "@types/uuid": "^9.0.4",
-    "@typescript-eslint/eslint-plugin": "^7.12.0",
-    "@typescript-eslint/parser": "^7.12.0",
-    "autoprefixer": "^10.4.15",
-    "clsx": "^2.0.0",
-    "eslint": "^8.40.0",
-    "eslint-plugin-prettier": "^5.0.0",
-    "eslint-plugin-solid": "^0.14.0",
-    "postcss": "^8.4.29",
-    "prettier": "^3.0.3",
-    "prettier-plugin-tailwindcss": "^0.6.1",
-    "tailwindcss": "^3.3.2",
-    "typescript": "^5.2.2",
-    "vite": "^5.2.12",
-    "vite-plugin-solid": "^2.7.0"
+    "@tailwindcss/forms": "^0.5.7",
+    "@types/express-session": "^1.18.0",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "autoprefixer": "^10.4.19",
+    "clsx": "^2.1.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-solid": "^0.14.1",
+    "postcss": "^8.4.40",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5",
+    "vite-plugin-solid": "^2.10.2"
   },
   "engines": {
-    "node": "18.*"
+    "node": "20.*"
   }
 }

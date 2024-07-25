@@ -1,6 +1,5 @@
 import { Database } from 'bun:sqlite'
 import { afterEach, describe, expect, it } from 'bun:test'
-import { checkErrorCode } from '../../../test/lib/utils'
 import { getDb, setupAndMigrateDb } from '../../db/db'
 import { user } from '../../db/schema/user'
 import type { Account } from './model'

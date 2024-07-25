@@ -1,19 +1,11 @@
 import type { Request } from 'express'
-import type { Session as ExpressSession, SessionData } from 'express-session'
 import { apiError } from './errors'
+import type { Session } from '../context'
 
 declare module 'express-session' {
 	interface SessionData {
 		userId?: string | null
 	}
-}
-
-type ESession = ExpressSession & SessionData
-
-export interface Session {
-	userId: string | null
-	saveUser(userId: string): Promise<void>
-	reset(): Promise<void>
 }
 
 export function createSession(req: Request): Session {

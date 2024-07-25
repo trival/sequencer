@@ -1,17 +1,22 @@
 {
   "compilerOptions": {
-    "strict": true,
-    "target": "ES2022",
-    "module": "ES2022",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
+    "lib": ["ESNext", "DOM"],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "isolatedModules": true,
+
+    "allowJs": true,
+    "types": ["vite/client"],
+    "paths": { "@/*": ["./src/*"] },
+
     "jsx": "preserve",
     "jsxImportSource": "solid-js",
-    "types": ["vite/client"],
+
+    "strict": true,
+    "skipLibCheck": true,
     "noEmit": true,
-    "isolatedModules": true,
-    "paths": { "@/*": ["./src/*"] },
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "noFallthroughCasesInSwitch": true
   }
 }

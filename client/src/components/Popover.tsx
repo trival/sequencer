@@ -1,4 +1,3 @@
-import { Motion, Presence } from '@motionone/solid'
 import {
 	Instance,
 	Modifier,
@@ -6,6 +5,7 @@ import {
 	createPopper,
 } from '@popperjs/core'
 import { ParentProps, Show, createEffect } from 'solid-js'
+import { Motion, Presence } from 'solid-motionone'
 
 interface PopoverProps {
 	referenceElement: HTMLElement

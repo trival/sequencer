@@ -13,6 +13,12 @@ import {
 } from './modules/songs/repo'
 import { createSongService, type SongService } from './modules/songs/service'
 
+export interface Session {
+	userId: string | null
+	saveUser(userId: string): Promise<void>
+	reset(): Promise<void>
+}
+
 export interface Repositories {
 	account: AccountRepository
 	song: SongReporitory
