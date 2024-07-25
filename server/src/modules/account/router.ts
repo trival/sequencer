@@ -31,12 +31,14 @@ export const accountRouter = trpc.router({
 
 	profile: trpc.procedure
 		.input(
-			z.object({
-				userId: z.string().optional(),
-			}),
+			z
+				.object({
+					userId: z.string().optional(),
+				})
+				.optional(),
 		)
 		.query(({ input, ctx }) =>
-			ctx.services.account.profile(ctx.session, input.userId),
+			ctx.services.account.profile(ctx.session, input?.userId),
 		),
 
 	update: trpc.procedure
@@ -45,6 +47,7 @@ export const accountRouter = trpc.router({
 				username: z.string().optional(),
 				isPublic: z.boolean().optional(),
 				color: z.string().optional(),
+				email: z.string().email().optional(),
 			}),
 		)
 		.mutation(({ input, ctx }) =>

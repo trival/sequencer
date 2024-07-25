@@ -1,6 +1,7 @@
 import { createTRPCClient, httpBatchLink, type HTTPHeaders } from '@trpc/client'
 import type { TrpcRouter } from '../../src/trpc-router'
 import * as config from '../../src/config'
+import SuperJSON from 'superjson'
 
 export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 	const url = baseUrl || `http://localhost:${config.port}`
@@ -19,6 +20,7 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 		links: [
 			httpBatchLink({
 				url: url + '/trpc',
+				transformer: SuperJSON,
 
 				headers() {
 					// set session id cookie

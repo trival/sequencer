@@ -24,7 +24,10 @@ export interface AccountService {
 }
 
 function randomColor() {
-	const randomHex = () => Math.floor(Math.random() * 256).toString(16)
+	const randomHex = () =>
+		Math.floor(Math.random() * 256)
+			.toString(16)
+			.padStart(2, '0')
 	return '#' + randomHex() + randomHex() + randomHex()
 }
 
@@ -62,7 +65,7 @@ export const createAccountService = (
 			throw apiError('UNAUTHORIZED', 'Invalid username or password')
 		}
 
-		const valid = await Bun.password.verify(account.passwordHash, password)
+		const valid = await Bun.password.verify(password, account.passwordHash)
 		if (!valid) {
 			throw apiError('UNAUTHORIZED', 'Invalid username or password')
 		}
@@ -85,17 +88,25 @@ export const createAccountService = (
 			return null
 		}
 
-		if (userId && userId !== session.userId && !account.isPublic) {
-			return null
+		if (userId && userId !== session.userId) {
+			if (!account.isPublic) {
+				return null
+			}
+			return {
+				id: account.id,
+				username: account.username,
+				color: account.color,
+			} satisfies PublicProfile
 		}
 
 		return {
 			id: account.id,
+			email: account.email,
 			createdAt: account.createdAt,
 			username: account.username,
 			isPublic: account.isPublic,
 			color: account.color,
-		}
+		} satisfies Profile
 	}
 
 	service.update = async (session, profile) => {
@@ -116,7 +127,15 @@ export const createAccountService = (
 			}
 		}
 
+		if (profile.email) {
+			const existingAccount = await repo.byEmail(profile.email)
+			if (existingAccount && existingAccount.id !== account.id) {
+				throw apiError('CONFLICT', 'Email already exists')
+			}
+		}
+
 		const updated: Partial<Account> = {
+			email: profile.email ?? account.email,
 			username: profile.username ?? account.username,
 			isPublic: profile.isPublic ?? account.isPublic,
 			color: profile.color ?? account.color,
@@ -135,7 +154,7 @@ export const createAccountService = (
 			throw apiError('NOT_FOUND')
 		}
 
-		const valid = await Bun.password.verify(account.passwordHash, password)
+		const valid = await Bun.password.verify(password, account.passwordHash)
 		if (!valid) {
 			throw apiError('UNAUTHORIZED', 'Invalid password')
 		}
