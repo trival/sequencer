@@ -1,15 +1,10 @@
 import { z } from 'zod'
 import { trpc } from '../../lib/trpc'
+import { profileUpdateInputSchema, registerInputSchema } from './model'
 
 export const accountRouter = trpc.router({
 	register: trpc.procedure
-		.input(
-			z.object({
-				username: z.string().min(3),
-				email: z.string().email(),
-				password: z.string().min(8),
-			}),
-		)
+		.input(registerInputSchema)
 		.mutation(({ input, ctx }) =>
 			ctx.services.account.register(ctx.session, input),
 		),
@@ -42,14 +37,7 @@ export const accountRouter = trpc.router({
 		),
 
 	update: trpc.procedure
-		.input(
-			z.object({
-				username: z.string().optional(),
-				isPublic: z.boolean().optional(),
-				color: z.string().optional(),
-				email: z.string().email().optional(),
-			}),
-		)
+		.input(profileUpdateInputSchema)
 		.mutation(({ input, ctx }) =>
 			ctx.services.account.update(ctx.session, input),
 		),

@@ -1,5 +1,5 @@
 import { createTRPCClient, httpBatchLink, type HTTPHeaders } from '@trpc/client'
-import type { TrpcRouter } from '../../src/trpc-router'
+import type { TrpcSchema } from '../../src/trpc-router'
 import * as config from '../../src/config'
 import SuperJSON from 'superjson'
 
@@ -16,7 +16,7 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 
 	let sid = ''
 
-	const client = createTRPCClient<TrpcRouter>({
+	const client = createTRPCClient<TrpcSchema>({
 		links: [
 			httpBatchLink({
 				url: url + '/trpc',

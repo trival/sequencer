@@ -4,11 +4,11 @@
   "scripts": {
     "start": "bun src/index.ts",
     "dev": "bun --watch src/index.ts",
-    "types": "tsc --noEmit",
-    "migration:run": "cd src/db/ && drizzle-kit generate",
     "test": "NODE_ENV=test bun test",
     "test:watch": "NODE_ENV=test bun test --env-file=\".env.test\" --watch",
     "test:server": "DEBUG=express-session NODE_ENV=test bun --watch src/index.ts",
+    "test:types": "tsc --noEmit",
+    "migration:run": "cd src/db/ && drizzle-kit generate",
     "lint": "eslint --cache --ext \".js,.ts,.tsx\" index.ts"
   },
   "dependencies": {

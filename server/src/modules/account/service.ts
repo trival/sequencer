@@ -1,7 +1,13 @@
 import { apiError } from '../../lib/errors'
 import type { Session } from '../../lib/session'
 import type { Opt } from '../../lib/types'
-import type { Account, Profile, PublicProfile } from './model'
+import { uuid } from '../../lib/utils'
+import type {
+	Account,
+	Profile,
+	ProfileUpdateInput,
+	PublicProfile,
+} from './model'
 import type { AccountRepository } from './repo'
 
 export interface RegisterInput {
@@ -19,7 +25,7 @@ export interface AccountService {
 		session: Session,
 		userId?: string,
 	) => Promise<Opt<Profile | PublicProfile>>
-	update: (session: Session, profile: Partial<Profile>) => Promise<void>
+	update: (session: Session, profile: ProfileUpdateInput) => Promise<void>
 	delete: (session: Session, password: string) => Promise<void>
 }
 
@@ -45,7 +51,7 @@ export const createAccountService = (
 		}
 
 		const account: Account = {
-			id: crypto.randomUUID(),
+			id: uuid(),
 			createdAt: new Date(),
 			username: input.username,
 			email: input.email,

@@ -1,4 +1,4 @@
-import { eq, sql } from 'drizzle-orm'
+import { desc, eq, or, sql } from 'drizzle-orm'
 import type { Db } from '../../db/db'
 import { song, type SongDb, type SongDbInsert } from '../../db/schema/song'
 import {
@@ -9,10 +9,12 @@ import {
 import type { Opt } from '../../lib/types'
 import { changes } from '../../lib/utils'
 import type { Song } from './model'
+import { user } from '../../db/schema/user'
 
 export interface SongQueryFilter {
 	userId?: string
 	collectionId?: string
+	currentUser?: string
 }
 
 export interface SongReporitory {
@@ -21,8 +23,10 @@ export interface SongReporitory {
 		params?: RepositoryQueryParams<SongQueryFilter>,
 	): Promise<QueryResultList<Song>>
 
-	save(song: Song): Promise<void>
+	save(song: Partial<Song> & { id: string }): Promise<void>
 	delete(id: string): Promise<void>
+
+	isUserPublic(userId: string): Promise<boolean>
 }
 
 function mapFilterKeyToDb(
@@ -37,6 +41,12 @@ function mapFilterKeyToDb(
 			return eq(song.userId, val)
 		case 'collectionId':
 			return eq(song.collectionId, val)
+		case 'currentUser':
+			return or(
+				eq(song.userId, val),
+				eq(song.isPublic, true),
+				sql`EXISTS (select 1 from ${user} where ${user.id} = ${song.userId} and (${user.isPublic} = ${true} OR ${user.id} = ${val}))`,
+			)
 	}
 }
 
@@ -45,6 +55,12 @@ export const createSongDbRepository = (db: Db): SongReporitory => {
 		.findFirst({
 			where: eq(song.id, sql.placeholder('id')),
 		})
+		.prepare()
+
+	const isUserPublicQuery = db
+		.select({ isPublic: user.isPublic })
+		.from(user)
+		.where(eq(user.id, sql.placeholder('userId')))
 		.prepare()
 
 	const deleteQuery = db
@@ -66,7 +82,10 @@ export const createSongDbRepository = (db: Db): SongReporitory => {
 	}
 
 	repo.query = async (params) => {
-		return query(params).then((res) => ({
+		return query({
+			...params,
+			orderBy: desc(song.updatedAt),
+		}).then((res) => ({
 			list: res.list.map(songDbToData),
 			totalCount: res.totalCount,
 		}))
@@ -75,19 +94,17 @@ export const createSongDbRepository = (db: Db): SongReporitory => {
 	repo.save = async (data) => {
 		const res = await byIdQuery.execute({ id: data.id })
 		if (!res) {
-			await db.insert(song).values(songDataToDb(data)).execute()
+			await db
+				.insert(song)
+				.values(songDataToDb(data as Song))
+				.execute()
 		} else {
 			const old = songDbToData(res)
-			const diff = changes(old, data, [
-				'id',
-				'updatedAt',
-				'userId',
-				'forkedFromId',
-			])
+			const diff = changes(old, data, ['id', 'updatedAt'])
 			if (Object.keys(diff).length > 0) {
 				await db
 					.update(song)
-					.set({ ...songDiffToDb(diff), updatedAt: Date.now() })
+					.set({ ...songDiffToDb(diff) })
 					.where(eq(song.id, data.id))
 					.execute()
 			}
@@ -96,6 +113,11 @@ export const createSongDbRepository = (db: Db): SongReporitory => {
 
 	repo.delete = async (id) => {
 		await deleteQuery.execute({ id })
+	}
+
+	repo.isUserPublic = async (userId) => {
+		const res = await isUserPublicQuery.execute({ userId })
+		return !!res?.[0]?.isPublic
 	}
 
 	return repo
@@ -112,7 +134,7 @@ function songDbToData(db: SongDb): Song {
 		isPublic: !!db.isPublic,
 		collectionId: db.collectionId || null,
 
-		data: db.data ? db.data.toString() : '',
+		data: db.data ? Buffer.from(db.data).toString('utf8') : '',
 	}
 }
 
@@ -142,6 +164,9 @@ function songDiffToDb(diff: Partial<Song>): Partial<SongDb> {
 	}
 	if ('isPublic' in diff) {
 		res.isPublic = diff.isPublic
+	}
+	if ('updatedAt' in diff) {
+		res.updatedAt = diff.updatedAt?.getTime() ?? Date.now()
 	}
 
 	return res
