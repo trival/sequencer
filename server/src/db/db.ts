@@ -18,8 +18,12 @@ export const getDefaultConnection = () => {
 	return connection
 }
 
-export const getDb = (connection: Database) =>
+export const getDb = (
+	connection: Database,
+	{ debug }: { debug?: boolean } = {},
+) =>
 	drizzle(connection, {
+		logger: debug,
 		schema: {
 			user,
 			song,

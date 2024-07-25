@@ -1,3 +1,6 @@
+export const wait = (ms: number) =>
+	new Promise((resolve) => setTimeout(resolve, ms))
+
 export const uuid = () => crypto.randomUUID()
 
 export function changes<T>(oldT: T, newT: T, skip?: (keyof T)[]): Partial<T> {

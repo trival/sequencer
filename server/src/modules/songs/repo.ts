@@ -1,4 +1,4 @@
-import { desc, eq, or, sql } from 'drizzle-orm'
+import { and, desc, eq, or, sql } from 'drizzle-orm'
 import type { Db } from '../../db/db'
 import { song, type SongDb, type SongDbInsert } from '../../db/schema/song'
 import {
@@ -44,8 +44,10 @@ function mapFilterKeyToDb(
 		case 'currentUser':
 			return or(
 				eq(song.userId, val),
-				eq(song.isPublic, true),
-				sql`EXISTS (select 1 from ${user} where ${user.id} = ${song.userId} and (${user.isPublic} = ${true} OR ${user.id} = ${val}))`,
+				and(
+					eq(song.isPublic, true),
+					sql`EXISTS (select 1 from ${user} where ${user.id} = ${song.userId} and (${user.isPublic} = 1 OR ${user.id} = ${val}))`,
+				),
 			)
 	}
 }
@@ -104,7 +106,7 @@ export const createSongDbRepository = (db: Db): SongReporitory => {
 			if (Object.keys(diff).length > 0) {
 				await db
 					.update(song)
-					.set({ ...songDiffToDb(diff) })
+					.set(songDiffToDb({ ...diff, updatedAt: data.updatedAt }))
 					.where(eq(song.id, data.id))
 					.execute()
 			}
