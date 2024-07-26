@@ -98,6 +98,12 @@ export const createSongService = (repo: SongReporitory): SongService => {
 		if (!existing) {
 			songData.userId = session.userId
 			songData.isPublic = song.isPublic ?? true
+			if (song.forkedFromId) {
+				const forkedFrom = await repo.byId(song.forkedFromId)
+				if (forkedFrom) {
+					songData.forkedFromId = forkedFrom.id
+				}
+			}
 		} else if (existing.userId !== session.userId) {
 			songData.id = uuid()
 			songData.userId = session.userId

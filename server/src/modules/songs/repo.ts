@@ -133,6 +133,9 @@ function songDbToData(db: SongDb): Song {
 		userId: db.userId,
 		forkedFromId: db.forkedFromId,
 
+		title: db.title,
+		description: db.description,
+
 		isPublic: !!db.isPublic,
 		collectionId: db.collectionId || null,
 
@@ -147,6 +150,9 @@ function songDataToDb(data: Song): SongDbInsert {
 
 		userId: data.userId,
 		forkedFromId: data.forkedFromId,
+
+		title: data.title || '',
+		description: data.description,
 
 		isPublic: data.isPublic,
 		collectionId: data.collectionId || null,
@@ -169,6 +175,12 @@ function songDiffToDb(diff: Partial<Song>): Partial<SongDb> {
 	}
 	if ('updatedAt' in diff) {
 		res.updatedAt = diff.updatedAt?.getTime() ?? Date.now()
+	}
+	if ('title' in diff) {
+		res.title = diff.title
+	}
+	if ('description' in diff) {
+		res.description = diff.description
 	}
 
 	return res

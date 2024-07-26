@@ -28,6 +28,7 @@ describe('song api', () => {
 			song: {
 				id,
 				data: 'song data',
+				title: 'song title',
 			},
 		})
 

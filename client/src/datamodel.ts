@@ -67,6 +67,8 @@ export type EditorSettings = z.infer<typeof editorSettingsSchema>
 
 export const songMetaSchema = z.object({
 	userId: z.string(),
+	title: z.string(),
+	description: z.string().optional(),
 	collection: z.string().optional(),
 	basedOn: z.string().optional(),
 	isPublic: z.boolean().optional(),
@@ -129,8 +131,6 @@ export const songSchema = songPropertiesSchema.merge(
 export type Song = z.infer<typeof songSchema>
 
 export const songDataSchema = z.object({
-	title: z.string(),
-	description: z.string().optional(),
 	song: songSchema,
 	keyboardSettings: keyboardSettingsSchema.partial().optional(),
 	editorSettings: editorSettingsSchema.partial().optional(),

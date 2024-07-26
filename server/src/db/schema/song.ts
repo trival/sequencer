@@ -25,6 +25,9 @@ export const song = sqliteTable(
 			{ onDelete: 'set null' },
 		),
 
+		title: text('title').notNull(),
+		description: text('description'),
+
 		isPublic: integer('is_public', { mode: 'boolean' }).notNull().default(true),
 		collectionId: text('collection_id').references(() => collection.id, {
 			onDelete: 'set null',

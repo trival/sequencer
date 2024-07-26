@@ -41,7 +41,7 @@ export default function NavBar(props: SongNavProps) {
 			<span class="flex-grow" />
 
 			<Show when={props.currentSong}>
-				<h3 class="ml-4 font-semibold">{props.currentSong!.data.title}</h3>
+				<h3 class="ml-4 font-semibold">{props.currentSong!.meta.title}</h3>
 				<Show when={props.onUpdateSongMeta}>
 					<IconButtonPopover
 						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
@@ -51,8 +51,8 @@ export default function NavBar(props: SongNavProps) {
 						{(close) => (
 							<div class="w-64">
 								<SongMetaForm
-									title={props.currentSong!.data.title || ''}
-									description={props.currentSong!.data.description || ''}
+									title={props.currentSong!.meta.title || ''}
+									description={props.currentSong!.meta.description || ''}
 									onSubmit={(title, description) => {
 										if (props.currentSong) {
 											props.onUpdateSongMeta!(props.currentSong.id, {

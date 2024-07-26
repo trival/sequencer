@@ -62,6 +62,8 @@ function mapApiSongToLocal(song: ApiSong): SongEntity {
 		id: song.id,
 
 		meta: {
+			title: song.title,
+			description: song.description ?? undefined,
 			userId: song.userId,
 			collection: song.collectionId ?? undefined,
 			basedOn: song.forkedFromId ?? undefined,

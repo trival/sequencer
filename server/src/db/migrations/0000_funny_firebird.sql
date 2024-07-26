@@ -11,6 +11,8 @@ CREATE TABLE `song` (
 	`updated_at` integer NOT NULL,
 	`user_id` text NOT NULL,
 	`forked_from_id` text,
+	`title` text NOT NULL,
+	`description` text,
 	`is_public` integer DEFAULT true NOT NULL,
 	`collection_id` text,
 	`data` blob,

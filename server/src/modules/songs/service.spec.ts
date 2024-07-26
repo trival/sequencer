@@ -10,6 +10,15 @@ import { createAccountDbRepository } from '../account/repo'
 import { createSongDbRepository } from './repo'
 import { createSongService } from './service'
 import type { Session } from '../../context'
+import type { SongInput } from './model'
+
+const makeSong = (song?: Partial<SongInput>): SongInput =>
+	({
+		id: uuid(),
+		data: 'data',
+		title: 'title',
+		...song,
+	}) as SongInput
 
 describe('song service', () => {
 	const db = getDb(new Database(':memory:'), { debug: false })
@@ -58,8 +67,8 @@ describe('song service', () => {
 	})
 
 	it('should save a song', async () => {
-		const id = uuid()
-		const songData = { id, data: 'song data' }
+		const songData = makeSong()
+		const id = songData.id
 
 		await checkErrorCode('UNAUTHORIZED', () => service.save(sesX, songData))
 
@@ -102,15 +111,17 @@ describe('song service', () => {
 	})
 
 	it('should respect song visibility', async () => {
-		const s1 = await service.save(ses1, {
-			id: uuid(),
-			data: 'data1',
-			isPublic: false,
-		})
+		const s1 = await service.save(
+			ses1,
+			makeSong({
+				data: 'data1',
+				isPublic: false,
+			}),
+		)
 		await wait(2)
-		const s2 = await service.save(ses2, { id: uuid(), data: 'data2' })
+		const s2 = await service.save(ses2, makeSong({ data: 'data2' }))
 		await wait(2)
-		const s3 = await service.save(ses1, { id: uuid(), data: 'data3' })
+		const s3 = await service.save(ses1, makeSong({ data: 'data3' }))
 
 		let res1 = await service.byId(ses1, s1.id)
 		expect(res1).toEqual(s1)
@@ -161,8 +172,8 @@ describe('song service', () => {
 	})
 
 	it('can delete a song', async () => {
-		const s1 = await service.save(ses1, { id: uuid(), data: 'data1' })
-		const s2 = await service.save(ses2, { id: uuid(), data: 'data2' })
+		const s1 = await service.save(ses1, makeSong())
+		const s2 = await service.save(ses2, makeSong())
 
 		await checkErrorCode('UNAUTHORIZED', () => service.delete(sesX, s1.id))
 		await checkErrorCode('UNAUTHORIZED', () => service.delete(ses2, s1.id))

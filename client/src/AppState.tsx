@@ -108,11 +108,9 @@ export const AppStateProvider = (
 					meta: {
 						...newSong.meta,
 						basedOn: song.id,
+						title: `${song.meta.title} (copy)`,
 					},
-					data: {
-						...song.data,
-						title: `${song.data.title} (copy)`,
-					},
+					data: { ...song.data },
 				})
 				navigate(`/songs/${newSong.id}`)
 			}

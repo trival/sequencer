@@ -23,9 +23,10 @@ export function emptySong(defaultNoteDuration: Subdivision = '4n'): Song {
 export function emptySongEntity(): SongEntity {
 	return {
 		id: uuid.v4(),
-		data: { song: emptySong(), title: '' },
+		data: { song: emptySong() },
 		meta: {
 			userId: '',
+			title: '',
 		},
 	}
 }
