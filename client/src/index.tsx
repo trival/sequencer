@@ -22,12 +22,12 @@ import { Route, Router } from '@solidjs/router'
 import { render } from 'solid-js/web'
 import { AppStateProvider } from './AppState'
 import { lazy } from 'solid-js'
-import { createLocalSession } from './utils/session'
-import { createLocalStorage } from './utils/storage'
+import { createDummySession } from './utils/session'
+import { createDummyStorage } from './utils/storage'
 
 const root = document.getElementById('root')
-const session = createLocalSession()
-const storage = createLocalStorage()
+const session = createDummySession()
+const storage = createDummyStorage()
 
 const tests = (
 	<>

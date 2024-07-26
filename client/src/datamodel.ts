@@ -1,60 +1,93 @@
-import { Subdivision } from 'tone/build/esm/core/type/Units'
+import { Subdivision as ToneSubdivision } from 'tone/build/esm/core/type/Units'
 import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
+import { z } from 'zod'
 
-export interface Profile {
-	userId: string
-	username: string
-	color: string
-}
+export const collectionSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	title: z.string(),
+	description: z.string().optional(),
+})
 
-export interface Collection {
-	id: string
-	userId: string
-	title: string
-	description?: string
-}
+export type Collection = z.infer<typeof collectionSchema>
 
-export interface KeyboardSettings {
-	baseNote: number
-	offsetX: number
-	offsetY: number
-	maxRows: number
-	maxCols: number
-	keyLength: number
-	scaleHighlight: ScaleHighlight
-	toneColorType: ToneColorType
-}
+export const keyboardSettingsSchema = z.object({
+	baseNote: z.number(),
+	offsetX: z.number(),
+	offsetY: z.number(),
+	maxRows: z.number(),
+	maxCols: z.number(),
+	keyLength: z.number(),
+	scaleHighlight: z.nativeEnum(ScaleHighlight),
+	toneColorType: z.nativeEnum(ToneColorType),
+})
 
-export interface EditorSettings {
-	pxPerBeat: number
-	defaultNoteDuration: Subdivision
-}
+export type KeyboardSettings = z.infer<typeof keyboardSettingsSchema>
 
-export interface TrackNote {
-	midiNotes: number[]
-	duration: Subdivision | Subdivision[]
-}
+// export interface EditorSettings {
+// 	pxPerBeat: number
+// 	defaultNoteDuration: Subdivision
+// }
 
-export interface SongMeta {
-	userId: string
-	title?: string
-	description?: string
-	collection?: string
-	basedOn?: string
-	createdAt?: string
-	updatedAt?: string
-}
+const subdivisionValues = [
+	'0',
+	'1m',
+	'1n',
+	'1n.',
+	'2n',
+	'2n.',
+	'2t',
+	'4n',
+	'4n.',
+	'4t',
+	'8n',
+	'8n.',
+	'8t',
+	'16n',
+	'16n.',
+	'16t',
+	'32n',
+	'32n.',
+	'32t',
+	'64n',
+	'64n.',
+	'64t',
+] as const satisfies ToneSubdivision[]
 
-export interface SongProperties {
-	bpm: number
-	swing?: number
-	timeSignature?: number
-}
+const subdivisionSchema = z.enum(subdivisionValues)
 
-export interface Track {
-	notes: TrackNote[]
-	instrument: number
-}
+export type Subdivision = z.infer<typeof subdivisionSchema>
+
+export const editorSettingsSchema = z.object({
+	pxPerBeat: z.number(),
+	defaultNoteDuration: subdivisionSchema,
+})
+
+export type EditorSettings = z.infer<typeof editorSettingsSchema>
+
+export const songMetaSchema = z.object({
+	userId: z.string(),
+	collection: z.string().optional(),
+	basedOn: z.string().optional(),
+	isPublic: z.boolean().optional(),
+	updatedAt: z.date().optional(),
+})
+
+export type SongMeta = z.infer<typeof songMetaSchema>
+
+export const trackNoteSchema = z.object({
+	midiNotes: z.array(z.number()),
+	duration: z.union([subdivisionSchema, z.array(subdivisionSchema)]),
+})
+
+export type TrackNote = z.infer<typeof trackNoteSchema>
+
+export const trackSchema = z.object({
+	notes: z.array(trackNoteSchema),
+	instrument: z.number(),
+})
+
+export type Track = z.infer<typeof trackSchema>
 
 export enum ActiveColor {
 	Red = 'red',
@@ -65,25 +98,45 @@ export enum ActiveColor {
 	Yellow = 'yellow',
 }
 
-export interface Instrument {
-	color?: ActiveColor
-	volume?: number
-	attack?: number
-	decay?: number
-	sustain?: number
-	release?: number
-}
+export const instrumentSchema = z
+	.object({
+		color: z.nativeEnum(ActiveColor),
+		volume: z.number(),
+		attack: z.number(),
+		decay: z.number(),
+		sustain: z.number(),
+		release: z.number(),
+	})
+	.partial()
 
-export interface Song extends SongProperties {
-	tracks: Track[]
-	instruments?: Instrument[]
-}
+export type Instrument = z.infer<typeof instrumentSchema>
 
-export interface SongData {
-	song: Song
-	keyboardSettings?: Partial<KeyboardSettings>
-	editorSettings?: Partial<EditorSettings>
-}
+export const songPropertiesSchema = z.object({
+	bpm: z.number(),
+	swing: z.number().optional(),
+	timeSignature: z.number().optional(),
+})
+
+export type SongProperties = z.infer<typeof songPropertiesSchema>
+
+export const songSchema = songPropertiesSchema.merge(
+	z.object({
+		tracks: z.array(trackSchema),
+		instruments: z.array(instrumentSchema).optional(),
+	}),
+)
+
+export type Song = z.infer<typeof songSchema>
+
+export const songDataSchema = z.object({
+	title: z.string(),
+	description: z.string().optional(),
+	song: songSchema,
+	keyboardSettings: keyboardSettingsSchema.partial().optional(),
+	editorSettings: editorSettingsSchema.partial().optional(),
+})
+
+export type SongData = z.infer<typeof songDataSchema>
 
 export interface SongEntity {
 	id: string

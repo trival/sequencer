@@ -1,16 +1,17 @@
 import {
-	TrackNote,
-	SongProperties,
-	SongEntity,
-	Track,
-	Song,
 	EditorSettings,
+	Song,
+	SongEntity,
+	SongProperties,
+	Subdivision,
+	Track,
+	TrackNote,
 } from '@/datamodel'
 import { createSignal } from 'solid-js'
-import { Subdivision, TimeObject } from 'tone/build/esm/core/type/Units'
+import { TimeObject } from 'tone/build/esm/core/type/Units'
 import * as uuid from 'uuid'
-import { divideAt } from './utils'
 import { defaultEditorSettings } from './settings'
+import { divideAt } from './utils'
 
 export function emptySong(defaultNoteDuration: Subdivision = '4n'): Song {
 	return {
@@ -22,7 +23,7 @@ export function emptySong(defaultNoteDuration: Subdivision = '4n'): Song {
 export function emptySongEntity(): SongEntity {
 	return {
 		id: uuid.v4(),
-		data: { song: emptySong() },
+		data: { song: emptySong(), title: '' },
 		meta: {
 			userId: '',
 		},

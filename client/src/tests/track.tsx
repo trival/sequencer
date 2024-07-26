@@ -1,11 +1,10 @@
 import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
-import { TrackNote } from '@/datamodel'
+import { Subdivision, TrackNote } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
 import { createSongState } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
-import { Subdivision } from 'tone/build/esm/core/type/Units'
 
 const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },

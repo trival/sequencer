@@ -1,4 +1,3 @@
-import { Subdivision } from 'tone/build/esm/core/type/Units'
 import {
 	AddButton,
 	Button,
@@ -7,20 +6,20 @@ import {
 	IconButton,
 	PlayButton,
 } from '@/components/buttons'
-import { Input, Select } from './Input'
+import { Song, SongProperties, Subdivision } from '@/datamodel'
 import { subdivisions } from '@/utils/utils'
+import { Icon } from 'solid-heroicons'
 import {
-	plus,
-	minus,
 	archiveBoxArrowDown,
 	cloudArrowUp,
+	minus,
+	plus,
 } from 'solid-heroicons/outline'
 import { stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
-import { Icon } from 'solid-heroicons'
-import { Song, SongProperties } from '@/datamodel'
-import { Overlay } from './Popover'
 import * as Tone from 'tone'
+import { Input, Select } from './Input'
+import { Overlay } from './Popover'
 
 const durationOptions = subdivisions.map((s) => ({
 	value: s,

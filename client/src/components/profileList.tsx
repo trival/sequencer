@@ -18,8 +18,8 @@ export default function ProfileSongList(props: Props) {
 				((a.meta.updatedAt && new Date(a.meta.updatedAt).getTime()) || 0) -
 				((b.meta.updatedAt && new Date(b.meta.updatedAt).getTime()) || 0)
 			if (res !== 0) return res
-			if (a.meta.title && b.meta.title) {
-				return a.meta.title.localeCompare(b.meta.title)
+			if (a.data.title && b.data.title) {
+				return a.data.title.localeCompare(b.data.title)
 			}
 			return res
 		})
@@ -37,11 +37,11 @@ export default function ProfileSongList(props: Props) {
 									activeClass="text-indigo-600"
 									class="font-semibold underline"
 								>
-									{song.meta.title} ({date ? format(date, 'yyyy-MM-dd') : 'new'}
+									{song.data.title} ({date ? format(date, 'yyyy-MM-dd') : 'new'}
 									)
-									<Show when={song.meta.description}>
+									<Show when={song.data.description}>
 										<span class="ml-2 block text-sm text-gray-500">
-											{song.meta.description}
+											{song.data.description}
 										</span>
 									</Show>
 								</A>

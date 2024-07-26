@@ -1,8 +1,8 @@
 import { ParentProps, createContext, createEffect, useContext } from 'solid-js'
-import { Collection, Profile, SongEntity } from './datamodel'
+import { Collection, SongEntity } from './datamodel'
 import { createStore } from 'solid-js/store'
 import { Storage } from './utils/storage'
-import { Session } from './utils/session'
+import { Profile, Session } from './utils/session'
 import { emptySongEntity } from './utils/song'
 import { useNavigate } from '@solidjs/router'
 
@@ -42,25 +42,16 @@ export const AppStateProvider = (
 	const navigate = useNavigate()
 
 	createEffect(() => {
-		const userId = props.session.userId()
-		if (userId) {
+		const profile = props.session.profile()
+		if (profile) {
+			setState('profile', profile)
 			props.storage
-				.getProfile(userId)
-				.then((profile) => {
-					setState('profile', profile)
-				})
-				.catch((err) => {
-					console.log(err)
-					setState('profile', userId ? { userId } : null)
-				})
+				.collectionsByUser(profile.userId)
 				// eslint-disable-next-line solid/reactivity
-				.then(async () => {
-					if (userId) {
-						const collections = await props.storage.collectionsByUser(userId)
-						const songs = await props.storage.songsByUser(userId)
-
+				.then((collections) =>
+					props.storage.songsByUser(profile.userId).then((songs) => {
 						const songsById: { [id: string]: SongEntity } = {}
-						songs.forEach((s) => {
+						songs.list.forEach((s) => {
 							songsById[s.id] = s
 						})
 
@@ -70,8 +61,9 @@ export const AppStateProvider = (
 						})
 
 						setState({ collections: collectionsById, songs: songsById })
-					}
-				})
+					}),
+				)
+				.catch(console.error)
 		} else {
 			setState(emptyAppState())
 		}
@@ -83,26 +75,11 @@ export const AppStateProvider = (
 				return
 			}
 
-			if (state.profile.username) {
-				await props.storage.updateProfile(state.profile.userId, {
-					username: profile.username,
-					color: profile.color,
-				})
-			} else if (profile.username) {
-				if (!profile.color) {
-					profile.color =
-						'#' +
-						Math.floor(Math.random() * 255).toString(16) +
-						Math.floor(Math.random() * 255).toString(16) +
-						Math.floor(Math.random() * 255).toString(16)
-				}
-
-				await props.storage.createProfile({
-					userId: state.profile.userId,
-					username: profile.username,
-					color: profile.color,
-				})
-			}
+			// TODO
+			// await props.storage.updateProfile(state.profile.userId, {
+			// 	username: profile.username,
+			// 	color: profile.color,
+			// })
 
 			setState('profile', {
 				...state.profile,
@@ -127,11 +104,14 @@ export const AppStateProvider = (
 			if (song) {
 				const newSong = emptySongEntity()
 				setState('songs', newSong.id, {
-					...song,
-					id: emptySongEntity().id,
+					id: newSong.id,
 					meta: {
-						...song.meta,
-						title: (song.meta.title || '') + ' (copy)',
+						...newSong.meta,
+						basedOn: song.id,
+					},
+					data: {
+						...song.data,
+						title: `${song.data.title} (copy)`,
 					},
 				})
 				navigate(`/songs/${newSong.id}`)
@@ -141,28 +121,13 @@ export const AppStateProvider = (
 		saveSong(id, data) {
 			const song = state.songs[id]
 			if (song) {
-				if (song.meta.createdAt && state.profile?.userId === song.meta.userId) {
-					props.storage
-						.updateSong(id, data)
-						.then(() => {
-							setState('songs', song.id, data)
-						})
-						.catch(console.error)
-				} else if (state.profile?.userId) {
-					const newSong = {
-						...data,
-						meta: {
-							...data.meta,
-							userId: state.profile.userId,
-						},
-					}
-					props.storage
-						.createSong(newSong)
-						.then(() => {
-							setState('songs', song.id, newSong)
-						})
-						.catch(console.error)
-				}
+				props.storage
+					.saveSong(song)
+					.then((res) => {
+						setState('songs', res.id, res)
+						navigate(`/songs/${res.id}`)
+					})
+					.catch(console.error)
 			}
 		},
 
@@ -170,7 +135,7 @@ export const AppStateProvider = (
 			if (!id) return
 			const song = state.songs[id]
 			if (song) {
-				if (song.meta.createdAt) {
+				if (song.meta.updatedAt) {
 					props.storage.deleteSong(id).catch(console.error)
 				}
 

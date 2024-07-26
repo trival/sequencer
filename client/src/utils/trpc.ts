@@ -18,3 +18,5 @@ export const trpc = createTRPCClient<TrpcSchema>({
 		}),
 	],
 })
+
+export type TrpcClient = typeof trpc

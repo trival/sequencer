@@ -1,8 +1,12 @@
-import { SongData, KeyboardSettings, EditorSettings } from '@/datamodel'
+import {
+	SongData,
+	KeyboardSettings,
+	EditorSettings,
+	Subdivision,
+} from '@/datamodel'
 import { SongState } from '@/utils/song'
 import { SynthPlayer } from '@/utils/synth'
 import { createEffect, createMemo, createSignal } from 'solid-js'
-import { Subdivision } from 'tone/build/esm/core/type/Units'
 import { ActiveNote, Keyboard } from './keyboard'
 import { Track } from './track'
 import { SongControls } from './songControls'
@@ -191,7 +195,7 @@ export default function Player(props: PlayerProps) {
 							: props.songPlayer.play(
 									props.song.data(),
 									activeNoteIds().length === 1 ? activeNoteIds()[0] : undefined,
-							  )
+								)
 					}}
 					onStop={() => {
 						props.songPlayer.stop()
