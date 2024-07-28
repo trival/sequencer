@@ -4,7 +4,7 @@ import { plus, play, pause } from 'solid-heroicons/solid'
 import { trash, pencilSquare, power } from 'solid-heroicons/outline'
 import clsx from 'clsx'
 import { JSX, ParentProps, createSignal, mergeProps } from 'solid-js'
-import Popover from './Popover'
+import Popover from './popover'
 
 interface ButtonProps {
 	onClick?: (e: Event) => void

@@ -4,8 +4,8 @@ import { songInputSchema } from './model'
 
 export const songRouter = trpc.router({
 	byId: trpc.procedure
-		.input(z.string())
-		.query(({ input, ctx }) => ctx.services.song.byId(ctx.session, input)),
+		.input(z.object({ id: z.string() }))
+		.query(({ input, ctx }) => ctx.services.song.byId(ctx.session, input.id)),
 
 	listByUser: trpc.procedure
 		.input(
@@ -65,6 +65,8 @@ export const songRouter = trpc.router({
 		),
 
 	delete: trpc.procedure
-		.input(z.string())
-		.mutation(({ input, ctx }) => ctx.services.song.delete(ctx.session, input)),
+		.input(z.object({ id: z.string() }))
+		.mutation(({ input, ctx }) =>
+			ctx.services.song.delete(ctx.session, input.id),
+		),
 })

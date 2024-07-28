@@ -5,11 +5,11 @@ import {
 	arrowSmallUp,
 	adjustmentsVertical,
 } from 'solid-heroicons/outline'
-import { IconButton } from './buttons'
-import { Input, Select } from './Input'
+import { IconButton } from './shared/buttons'
+import { Input, Select } from './shared/input'
 import { Icon } from 'solid-heroicons'
 import { createSignal } from 'solid-js'
-import Popover from './Popover'
+import Popover from './shared/popover'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import * as Tone from 'tone'
 import { KeyboardSettingsState } from '@/utils/settings'

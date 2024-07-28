@@ -1,6 +1,6 @@
 import { Keyboard } from '@/components/keyboard'
 import { KeyboardSettingsBtn } from '@/components/keyboardSettings'
-import { Subpage } from '@/components/shared/SimpleSubpage'
+import { Subpage } from '@/components/shared/simpleSubpage'
 import { createKeyboardSettingState } from '@/utils/settings'
 import { createSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'

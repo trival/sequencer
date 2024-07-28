@@ -1,6 +1,6 @@
 import { createEffect, createSignal } from 'solid-js'
-import { FormField } from './Input'
-import { Button } from './buttons'
+import { FormField } from './shared/input'
+import { Button } from './shared/buttons'
 
 interface ProfileFormProps {
 	username: string

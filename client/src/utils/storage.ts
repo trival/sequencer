@@ -1,6 +1,9 @@
 import { Collection, songDataSchema, SongEntity } from '@/datamodel'
 import { TrpcClient } from './trpc'
-import { Song as ApiSong } from '../../../server/src/modules/songs/model'
+import {
+	Song as ApiSong,
+	SongInput,
+} from '../../../server/src/modules/songs/model'
 
 interface ListResponse<T> {
 	list: T[]
@@ -51,6 +54,19 @@ export function createTrpcStorage(client: TrpcClient): Storage {
 		return mapValidSongs(res)
 	}
 
+	store.saveSong = async (song) => {
+		const input = mapSongToApi(song)
+		const res = await client.song.save.mutate({ song: input })
+		return mapApiSongToLocal(res)
+	}
+
+	store.deleteSong = (id) => client.song.delete.mutate({ id })
+
+	// TODO:
+	store.collectionsByUser = async (userId) => []
+	store.saveCollection = async (id, collection) => {}
+	store.deleteCollection = async (id) => {}
+
 	return store
 }
 
@@ -72,6 +88,18 @@ function mapApiSongToLocal(song: ApiSong): SongEntity {
 		},
 
 		data,
+	}
+}
+
+function mapSongToApi(song: SongEntity): SongInput {
+	return {
+		id: song.id,
+		title: song.meta.title,
+		description: song.meta.description,
+		collectionId: song.meta.collection,
+		forkedFromId: song.meta.basedOn,
+		isPublic: song.meta.isPublic,
+		data: JSON.stringify(song.data),
 	}
 }
 

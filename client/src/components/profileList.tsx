@@ -1,6 +1,6 @@
 import { For, Show } from 'solid-js'
 import { useAppState } from '@/AppState'
-import { Button } from './buttons'
+import { Button } from './shared/buttons'
 import { Icon } from 'solid-heroicons'
 import { documentPlus } from 'solid-heroicons/outline'
 import { format } from 'date-fns'

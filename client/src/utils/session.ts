@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js/types/server/reactive.js'
+import { createSignal } from 'solid-js'
 import { Profile as ApiProfile } from '../../../server/src/modules/account/model'
 import { TrpcClient } from './trpc'
 

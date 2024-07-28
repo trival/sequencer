@@ -1,4 +1,4 @@
-import Popover, { Overlay } from '@/components/Popover'
+import Popover, { Overlay } from '@/components/shared/popover'
 import { createSignal } from 'solid-js'
 
 export default function PopoverTest() {
@@ -17,7 +17,7 @@ export default function PopoverTest() {
 					referenceElement={button as HTMLButtonElement}
 					onClose={() => setVisiblePopover(false)}
 					visible={isVisibilePopover()}
-					class="bg-teal-200 w-fit shadow-md rounded-md p-4"
+					class="w-fit rounded-md bg-teal-200 p-4 shadow-md"
 					popperOptions={{ placement: 'top' }}
 				>
 					hello Popover!
@@ -30,7 +30,7 @@ export default function PopoverTest() {
 				<Overlay
 					onClose={() => setVisibleOverlay(false)}
 					visible={isVisibileOverlay()}
-					class="bg-teal-200 w-fit shadow-md rounded-md p-4"
+					class="w-fit rounded-md bg-teal-200 p-4 shadow-md"
 				>
 					hello Overlay!
 				</Overlay>

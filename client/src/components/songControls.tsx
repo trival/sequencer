@@ -1,11 +1,3 @@
-import {
-	AddButton,
-	Button,
-	DeleteButton,
-	EditButton,
-	IconButton,
-	PlayButton,
-} from '@/components/buttons'
 import { Song, SongProperties, Subdivision } from '@/datamodel'
 import { subdivisions } from '@/utils/utils'
 import { Icon } from 'solid-heroicons'
@@ -18,8 +10,16 @@ import {
 import { stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
 import * as Tone from 'tone'
-import { Input, Select } from './Input'
-import { Overlay } from './Popover'
+import {
+	AddButton,
+	Button,
+	DeleteButton,
+	EditButton,
+	IconButton,
+	PlayButton,
+} from './shared/buttons'
+import { Input, Select } from './shared/input'
+import { Overlay } from './shared/popover'
 
 const durationOptions = subdivisions.map((s) => ({
 	value: s,

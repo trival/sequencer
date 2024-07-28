@@ -1,19 +1,19 @@
-import { Show, createMemo } from 'solid-js'
 import { useAppState } from '@/AppState'
-import ProfileForm from '@/components/profileForm'
-import NavBar from '@/components/songNav'
 import PlayerUI from '@/components/player'
-import { createPlayer } from '@/utils/songPlayer'
-import { createSynth } from '@/utils/synth'
-import { emptySongEntity, createSongState } from '@/utils/song'
+import ProfileForm from '@/components/profileForm'
+import { LogoutButton } from '@/components/shared/buttons'
+import { Subpage } from '@/components/shared/simpleSubpage'
+import NavBar from '@/components/songNav'
+import { SongMeta } from '@/datamodel'
 import {
 	createEditorSettingState,
 	createKeyboardSettingState,
 } from '@/utils/settings'
-import { SongMeta } from '@/datamodel'
-import { Subpage } from '@/components/shared/SimpleSubpage'
-import { LogoutButton } from '@/components/buttons'
+import { createSongState, emptySongEntity } from '@/utils/song'
+import { createPlayer } from '@/utils/songPlayer'
+import { createSynth } from '@/utils/synth'
 import { useParams } from '@solidjs/router'
+import { Show, createMemo } from 'solid-js'
 
 export default function App() {
 	const params = useParams()

@@ -1,9 +1,9 @@
 import { ProcessedTrack } from '@/utils/processedTrack'
 import clsx from 'clsx'
-import { For, Show, createEffect } from 'solid-js'
-import { IconButton } from './buttons'
 import { Icon } from 'solid-heroicons'
 import { plus } from 'solid-heroicons/outline'
+import { For, Show, createEffect } from 'solid-js'
+import { IconButton } from './shared/buttons'
 
 const secondWidthFactor = 60
 
@@ -29,8 +29,8 @@ export const Note = (props: NoteProps) => {
 					props.isActive
 						? 'bg-cyan-300'
 						: props.isEmpty
-						? 'bg-slate-200'
-						: 'bg-slate-300',
+							? 'bg-slate-200'
+							: 'bg-slate-300',
 				)}
 				onClick={() => props.onSelected?.()}
 			/>
