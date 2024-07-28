@@ -1,5 +1,6 @@
-import { For, mergeProps } from 'solid-js'
+import { createEffect, createSignal, For, mergeProps, Show } from 'solid-js'
 import clsx from 'clsx'
+import { ZodSchema } from 'zod'
 
 export interface SelectOption {
 	value: string | number
@@ -45,40 +46,72 @@ export function Select(props: SelectProps) {
 interface InputProps {
 	value?: string | number
 	onChange: (value: string | number) => void
+	onBlur?: () => void
 	type?: 'text' | 'email' | 'password' | 'number'
 	class?: string
+	required?: boolean
 }
 
 export const Input = (_props: InputProps) => {
 	const props = mergeProps({ type: 'text' }, _props)
 	return (
 		<input
-			type={props.type}
-			value={props.value}
-			onInput={(event) => props.onChange(event.target.value)}
 			class={clsx(
 				'rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6',
 				props.class,
 			)}
+			type={props.type}
+			value={props.value}
+			onInput={(event) => props.onChange(event.target.value)}
+			onBlur={() => props.onBlur?.()}
+			required={props.required}
 		/>
 	)
 }
 
 interface FormFieldProps extends InputProps {
 	label: string
+	error?: string
+	schema?: ZodSchema
+	onValidate?: (error: string | undefined) => void
 }
 export const FormField = (props: FormFieldProps) => {
+	const [schemaError, setSchemaError] = createSignal<string | undefined>()
+	const error = () => props.error || schemaError()
+
+	function validate(value: FormFieldProps['value']) {
+		const res = props.schema!.safeParse(value)
+		if (!res.success) {
+			const err = res.error.format()
+			setSchemaError(err._errors.join(', '))
+		} else {
+			setSchemaError(undefined)
+		}
+	}
+
+	createEffect(() => {
+		if (props.onValidate) props.onValidate(error())
+	})
+
 	return (
 		<label class={props.class}>
 			<span class={clsx('block text-sm font-medium leading-6 text-gray-900')}>
 				{props.label}
 			</span>
 			<Input
+				class="mt-2 w-full"
 				type={props.type}
 				value={props.value}
-				onChange={props.onChange}
-				class="mt-2 w-full"
+				onChange={(val) => {
+					if (schemaError()) validate(val)
+					props.onChange(val)
+				}}
+				onBlur={props.schema && (() => validate(props.value))}
+				required={props.required}
 			/>
+			<Show when={error()}>
+				<span class="mt-1 text-sm text-red-600">{error()}</span>
+			</Show>
 		</label>
 	)
 }

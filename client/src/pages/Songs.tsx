@@ -3,6 +3,7 @@ import { useAppState } from '@/AppState'
 import ProfileSongList from '@/components/profileList'
 import NavBar from '@/components/songNav'
 import { Subpage } from '@/components/shared/simpleSubpage'
+import { Login } from '@/components/loginForm'
 
 export default function App() {
 	const [state, { logout }] = useAppState()
@@ -13,7 +14,7 @@ export default function App() {
 			fallback={
 				<Subpage>
 					<div class="m-auto my-4 w-full max-w-[420px] rounded-lg bg-white p-6 shadow sm:p-12 md:my-16">
-						TODO: Login/Register form
+						<Login />
 					</div>
 				</Subpage>
 			}

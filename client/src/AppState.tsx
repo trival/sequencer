@@ -14,6 +14,8 @@ export interface AppState {
 
 export interface AppActions {
 	updateProfile: (profile: Partial<Profile>) => void
+
+	session: () => Session
 	logout: () => void
 
 	openNewSong(): void
@@ -87,6 +89,8 @@ export const AppStateProvider = (
 				color: profile.color,
 			})
 		},
+
+		session: () => props.session,
 
 		logout() {
 			props.session.logout()
