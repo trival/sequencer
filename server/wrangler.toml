@@ -19,6 +19,14 @@ compatibility_flags = ["nodejs_compat"]
 # [vars]
 # MY_VARIABLE = "production_value"
 
+[vars]
+SESSION_SECRET = "my-secret"
+PASSWORD_SALT = "my-salt"
+NODE_ENV = "production"
+
+[env.test.vars]
+NODE_ENV = "test"
+
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
 # [ai]

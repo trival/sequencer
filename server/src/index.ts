@@ -3,7 +3,6 @@ import { Hono } from 'hono'
 import session, { type Session } from 'hono-session'
 import type {} from 'hono-session/global'
 import { cors } from 'hono/cors'
-import * as config from './config'
 import {
 	createRepositories,
 	createServices,
@@ -34,81 +33,65 @@ interface AppEnv {
 	Bindings: Env
 }
 
-function createServer() {
-	// create context
+const app = new Hono<AppEnv>()
 
-	const app = new Hono<AppEnv>()
+app.use(async (c, next) => {
+	c.set('services', getServices(c.env.DB))
+	c.set('localSession', {
+		get userId() {
+			return c.session.userId || null
+		},
+		async saveUser(userId: string) {
+			c.session.userId = userId
+		},
+		async reset() {
+			c.session = null
+		},
+	} satisfies LocalSession)
 
-	app.use(async (c, next) => {
-		c.set('services', getServices(c.env.DB))
-		c.set('localSession', {
-			get userId() {
-				return c.session.userId || null
-			},
-			async saveUser(userId: string) {
-				c.session.userId = userId
-			},
-			async reset() {
-				c.session = null
-			},
-		} satisfies LocalSession)
+	return next()
+})
 
-		next()
+app.use(async (c, next) => {
+	const s = session({
+		secret: c.env.SESSION_SECRET,
+		cookieOptions: {
+			secure: c.env.NODE_ENV === 'production',
+		},
 	})
 
-	app.use(
-		session({
-			secret: config.sessionSecret,
-			cookieOptions: {
-				secure: process.env.NODE_ENV === 'production',
-			},
+	return s(c as any, next)
+})
+
+app.use(async (c, next) => {
+	// request logger
+	console.log('⬅️ ', c.req.method, c.req.path, c.req.parseBody(), c.req.query)
+	return next()
+})
+
+app.use(
+	'/trpc/*',
+	cors({
+		origin: (origin) => {
+			if (origin.includes('//localhost:')) {
+				return origin
+			} else if (origin.endsWith('trival.xyz')) {
+				return origin
+			}
+		},
+		credentials: true,
+	}),
+	trpcServer({
+		router: trpcRouter,
+		createContext: (opts, c) => ({
+			session: c.get('localSession'),
+			services: c.get('services'),
 		}),
-	)
+	}),
+)
 
-	app.use(async (c, next) => {
-		// request logger
-		console.log('⬅️ ', c.req.method, c.req.path, c.req.parseBody(), c.req.query)
-		next()
-	})
+app.get('/', (c) => {
+	return c.text('trival sequencer api')
+})
 
-	app.use('/reset', async (c) => {
-		if (process.env.NODE_ENV !== 'test') {
-			c.status(404)
-			c.text('Not found')
-			return
-		}
-		c.text('ok')
-	})
-
-	app.use(
-		'/trpc/*',
-		cors({
-			origin: (origin) => {
-				if (origin.endsWith('localhost:4000')) {
-					return origin
-				} else if (origin.endsWith('trival.xyz')) {
-					return origin
-				}
-			},
-			credentials: true,
-		}),
-		trpcServer({
-			router: trpcRouter,
-			createContext: (opts, c) => ({
-				session: c.get('localSession'),
-				services: c.get('services'),
-			}),
-		}),
-	)
-
-	app.get('/', (c) => {
-		return c.text('trival sequencer api')
-	})
-
-	return {
-		fetch: app.fetch,
-		port: config.port,
-	}
-}
-
-export default createServer()
+export default app

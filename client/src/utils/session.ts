@@ -42,7 +42,7 @@ export function createTrpcSession(client: TrpcClient): Session {
 	} as Session
 
 	session.login = async (username, password) => {
-		console.log('session login', username, password)
+		console.log('session login', username)
 		await client.account.login.mutate({ username, password })
 		await queryProfile()
 	}
@@ -53,7 +53,7 @@ export function createTrpcSession(client: TrpcClient): Session {
 	}
 
 	session.register = async (username, password, email) => {
-		console.log('session register', username, password, email)
+		console.log('session register', username)
 		await client.account.register.mutate({ username, password, email })
 		await queryProfile()
 	}
