@@ -1,10 +1,9 @@
 import { createTRPCClient, httpBatchLink, type HTTPHeaders } from '@trpc/client'
 import type { TrpcSchema } from '../../src/trpc-router'
-import * as config from '../../src/config'
 import SuperJSON from 'superjson'
 
 export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
-	const url = baseUrl || `http://localhost:${config.port}`
+	const url = baseUrl || `http://localhost:8787`
 
 	console.log('Using trpc base url:', url)
 

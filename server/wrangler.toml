@@ -21,7 +21,6 @@ compatibility_flags = ["nodejs_compat"]
 
 [vars]
 SESSION_SECRET = "my-secret"
-PASSWORD_SALT = "my-salt"
 NODE_ENV = "production"
 
 [env.test.vars]
