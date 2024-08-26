@@ -3,9 +3,9 @@
   "private": true,
   "scripts": {
     "test": "vitest",
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --env=dev",
     "test:watch": "vitest --watch",
-    "test:server": "DEBUG=express-session NODE_ENV=test bun --watch src/index.ts",
+    "test:server": "wrangler dev --env=test",
     "test:types": "tsc --noEmit",
     "migration:run": "cd src/db/ && drizzle-kit generate",
     "lint": "eslint --cache --ext \".js,.ts,.tsx\" index.ts",

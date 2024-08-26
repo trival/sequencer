@@ -36,6 +36,17 @@ interface AppEnv {
 const app = new Hono<AppEnv>()
 
 app.use(async (c, next) => {
+	const s = session({
+		secret: c.env.SESSION_SECRET,
+		cookieOptions: {
+			secure: c.env.NODE_ENV === 'production',
+		},
+	})
+
+	return s(c as any, next)
+})
+
+app.use(async (c, next) => {
 	c.set('services', getServices(c.env.DB))
 	c.set('localSession', {
 		get userId() {
@@ -50,17 +61,6 @@ app.use(async (c, next) => {
 	} satisfies LocalSession)
 
 	return next()
-})
-
-app.use(async (c, next) => {
-	const s = session({
-		secret: c.env.SESSION_SECRET,
-		cookieOptions: {
-			secure: c.env.NODE_ENV === 'production',
-		},
-	})
-
-	return s(c as any, next)
 })
 
 app.use(async (c, next) => {

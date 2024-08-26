@@ -20,11 +20,16 @@ compatibility_flags = ["nodejs_compat"]
 # MY_VARIABLE = "production_value"
 
 [vars]
-SESSION_SECRET = "my-secret"
 NODE_ENV = "production"
+SESSION_SECRET = "my-secret"
+
+[env.dev.vars]
+NODE_ENV = "development"
+SESSION_SECRET = "my-secret"
 
 [env.test.vars]
 NODE_ENV = "test"
+SESSION_SECRET = "my-secret"
 
 # Bind the Workers AI model catalog. Run machine learning models, powered by serverless GPUs, on Cloudflare’s global network
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#workers-ai
@@ -48,6 +53,16 @@ NODE_ENV = "test"
 # database_name = "my-database"
 # database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 [[d1_databases]]
+binding = "DB"                                       # i.e. available in your Worker on env.DB
+database_name = "sequencer-db"
+database_id = "cc3831d0-121d-4a50-94d0-fa5d18afd325"
+
+[[d1_databases]]
+binding = "DB_TEST"                                  # i.e. available in your Worker on env.DB
+database_name = "sequencer-test-db"
+database_id = "9d4dba38-b93e-4794-be9b-580724a4811e"
+
+[[env.dev.d1_databases]]
 binding = "DB"                                       # i.e. available in your Worker on env.DB
 database_name = "sequencer-db"
 database_id = "cc3831d0-121d-4a50-94d0-fa5d18afd325"
