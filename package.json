@@ -1,8 +1,6 @@
 {
   "name": "trival-sequencer",
   "version": "0.1.0",
-  "private": true,
-  "license": "MIT",
   "author": {
     "name": "Thomas Gorny",
     "email": "hello@trival.xyz"
@@ -11,9 +9,11 @@
     "type": "git",
     "url": "github.com/trival/sequencer"
   },
+  "license": "MIT",
+  "private": true,
+  "scripts": {},
   "workspaces": [
     "client",
     "server"
-  ],
-  "scripts": {}
+  ]
 }

@@ -1,79 +1,114 @@
-import cors from 'cors'
-import express from 'express'
+import { trpcServer } from '@hono/trpc-server'
+import { Hono } from 'hono'
+import session, { type Session } from 'hono-session'
+import type {} from 'hono-session/global'
+import { cors } from 'hono/cors'
 import * as config from './config'
+import {
+	createRepositories,
+	createServices,
+	type Session as LocalSession,
+	type Services,
+} from './context'
+import { getDb } from './db/db'
 import { trpcRouter } from './trpc-router'
-import { createExpressMiddleware } from '@trpc/server/adapters/express'
-import session from 'express-session'
-import { getDb, getDefaultConnection, setupAndMigrateDb } from './db/db'
-import { createRepositories, createServices } from './context'
-import { Database } from 'bun:sqlite'
-import { createSession } from './lib/session'
 
-let connection: Database
-
-function getServices() {
-	if (connection) {
-		connection.close()
-	}
-	connection = getDefaultConnection()
-	const db = getDb(connection)
-	setupAndMigrateDb(db)
+function getServices(dbConnection: D1Database) {
+	const db = getDb(dbConnection)
 	const repos = createRepositories(db)
 	return createServices(repos)
 }
 
-async function main() {
-	// create context
-	let services = getServices()
+declare module 'hono-session' {
+	export interface Session {
+		userId?: string
+	}
+}
 
-	// express implementation
-	const app = express()
+interface AppEnv {
+	Variables: {
+		session: Session
+		localSession: LocalSession
+		services: Services
+	}
+	Bindings: Env
+}
+
+function createServer() {
+	// create context
+
+	const app = new Hono<AppEnv>()
+
+	app.use(async (c, next) => {
+		c.set('services', getServices(c.env.DB))
+		c.set('localSession', {
+			get userId() {
+				return c.session.userId || null
+			},
+			async saveUser(userId: string) {
+				c.session.userId = userId
+			},
+			async reset() {
+				c.session = null
+			},
+		} satisfies LocalSession)
+
+		next()
+	})
 
 	app.use(
 		session({
 			secret: config.sessionSecret,
-			resave: false,
-			saveUninitialized: false,
-			cookie: {
+			cookieOptions: {
 				secure: process.env.NODE_ENV === 'production',
 			},
 		}),
 	)
 
-	app.use((req, _res, next) => {
+	app.use(async (c, next) => {
 		// request logger
-		console.log('⬅️ ', req.method, req.path, req.body ?? req.query)
+		console.log('⬅️ ', c.req.method, c.req.path, c.req.parseBody(), c.req.query)
 		next()
 	})
 
-	app.use('/reset', async (_req, res) => {
+	app.use('/reset', async (c) => {
 		if (process.env.NODE_ENV !== 'test') {
-			return res.status(404).send('Not found')
+			c.status(404)
+			c.text('Not found')
+			return
 		}
-		services = getServices()
-		res.send('ok')
+		c.text('ok')
 	})
 
 	app.use(
-		'/trpc',
+		'/trpc/*',
 		cors({
-			origin: config.corsOrigin,
+			origin: (origin) => {
+				if (origin.endsWith('localhost:4000')) {
+					return origin
+				} else if (origin.endsWith('trival.xyz')) {
+					return origin
+				}
+			},
 			credentials: true,
 		}),
-		createExpressMiddleware({
+		trpcServer({
 			router: trpcRouter,
-			createContext: ({ req }) => ({
-				session: createSession(req),
-				services,
+			createContext: (opts, c) => ({
+				session: c.get('localSession'),
+				services: c.get('services'),
 			}),
 		}),
 	)
 
-	app.get('/', (_req, res) => res.send('trival sequencer api'))
-
-	app.listen(config.port, () => {
-		console.log(`listening on port ${config.port}`)
+	app.get('/', (c) => {
+		return c.text('trival sequencer api')
 	})
+
+	return {
+		fetch: app.fetch,
+		port: config.port,
+	}
 }
 
-void main()
+export default createServer()

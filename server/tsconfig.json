@@ -1,17 +1,23 @@
 {
   "compilerOptions": {
     // Enable latest features
-    "lib": ["ESNext", "DOM"],
+    "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
-    "allowJs": true,
+    "moduleResolution": "Bundler",
 
-    // Bundler mode
-    "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
     "noEmit": true,
+    "allowJs": true,
+
+    "jsx": "react-jsx",
+    "jsxImportSource": "hono/jsx",
 
     // Best practices
     "strict": true,
@@ -21,6 +27,12 @@
     // Some stricter flags (disabled by default)
     "noUnusedLocals": true,
     "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
+    "noPropertyAccessFromIndexSignature": false,
+    "forceConsistentCasingInFileNames": true,
+
+    "types": [
+      "@cloudflare/workers-types/2023-07-01",
+      "@cloudflare/vitest-pool-workers" // For `cloudflare:test` types
+    ] /* Specify type package names to be included without being referenced in a source file. */
   }
 }

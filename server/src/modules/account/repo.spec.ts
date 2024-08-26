@@ -1,15 +1,18 @@
-import { Database } from 'bun:sqlite'
-import { afterEach, describe, expect, it } from 'bun:test'
-import { getDb, setupAndMigrateDb } from '../../db/db'
+import { env } from 'cloudflare:test'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { getDb, type Db } from '../../db/db'
 import { user } from '../../db/schema/user'
 import type { Account } from './model'
-import { createAccountDbRepository } from './repo'
+import { createAccountDbRepository, type AccountRepository } from './repo'
 
 describe('AccountRepo', () => {
-	const db = getDb(new Database(':memory:'))
-	setupAndMigrateDb(db)
+	let db: Db
+	let repo: AccountRepository
 
-	const repo = createAccountDbRepository(db)
+	beforeEach(() => {
+		db = getDb(env.DB)
+		repo = createAccountDbRepository(db)
+	})
 
 	afterEach(async () => {
 		await db.delete(user).execute()

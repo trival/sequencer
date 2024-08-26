@@ -1,16 +1,14 @@
-import { Database } from 'bun:sqlite'
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { checkErrorCode } from '../../../test/lib/utils'
-import { getDb, setupAndMigrateDb } from '../../db/db'
-import { song } from '../../db/schema/song'
-import { user } from '../../db/schema/user'
+import { getDb } from '../../db/db'
 import { uuid, wait } from '../../lib/utils'
 import type { Account } from '../account/model'
 import { createAccountDbRepository } from '../account/repo'
 import { createSongDbRepository } from './repo'
-import { createSongService } from './service'
+import { createSongService, type SongService } from './service'
 import type { Session } from '../../context'
 import type { SongInput } from './model'
+import { env } from 'cloudflare:test'
 
 const makeSong = (song?: Partial<SongInput>): SongInput =>
 	({
@@ -21,13 +19,7 @@ const makeSong = (song?: Partial<SongInput>): SongInput =>
 	}) as SongInput
 
 describe('song service', () => {
-	const db = getDb(new Database(':memory:'), { debug: false })
-	setupAndMigrateDb(db)
-
-	const repo = createSongDbRepository(db)
-	const userRepo = createAccountDbRepository(db)
-
-	const service = createSongService(repo)
+	let service: SongService
 
 	const userId1 = uuid()
 	const userId2 = uuid()
@@ -57,13 +49,13 @@ describe('song service', () => {
 	const sesX = {} as Session
 
 	beforeEach(async () => {
+		const db = getDb(env.DB, { debug: false })
+		const repo = createSongDbRepository(db)
+		const userRepo = createAccountDbRepository(db)
+
+		service = createSongService(repo)
 		await userRepo.save(user1)
 		await userRepo.save(user2)
-	})
-
-	afterEach(async () => {
-		db.delete(song).execute()
-		db.delete(user).execute()
 	})
 
 	it('should save a song', async () => {
@@ -107,7 +99,7 @@ describe('song service', () => {
 			updatedAt: expect.any(Date),
 		})
 
-		expect(res4.updatedAt > res3.updatedAt).toBeTrue()
+		expect(res4.updatedAt > res3.updatedAt).toBe(true)
 	})
 
 	it('should respect song visibility', async () => {

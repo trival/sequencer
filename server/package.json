@@ -2,35 +2,37 @@
   "name": "trival-sequencer-server",
   "private": true,
   "scripts": {
-    "start": "bun src/index.ts",
-    "dev": "bun --watch src/index.ts",
-    "test": "NODE_ENV=test bun test",
-    "test:watch": "NODE_ENV=test bun test --env-file=\".env.test\" --watch",
+    "test": "vitest",
+    "dev": "wrangler dev",
+    "test:watch": "vitest --watch",
     "test:server": "DEBUG=express-session NODE_ENV=test bun --watch src/index.ts",
     "test:types": "tsc --noEmit",
     "migration:run": "cd src/db/ && drizzle-kit generate",
-    "lint": "eslint --cache --ext \".js,.ts,.tsx\" index.ts"
+    "lint": "eslint --cache --ext \".js,.ts,.tsx\" index.ts",
+    "deploy": "wrangler deploy",
+    "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@hono/trpc-server": "^0.3.2",
     "@trpc/server": "^11.0.0-rc.467",
-    "cors": "^2.8.5",
     "drizzle-orm": "^0.32.1",
-    "express": "^4.19.2",
-    "express-session": "^1.18.0",
+    "hono": "^4.5.9",
+    "hono-session": "^1.0.4",
     "superjson": "^2.2.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.4.25",
+    "@cloudflare/workers-types": "^4.20240821.1",
     "@trpc/client": "^11.0.0-rc.467",
     "@types/bun": "^1.1.6",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/express-session": "^1.18.0",
     "@types/node": "^20.14.12",
     "drizzle-kit": "^0.23.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "typescript": "^5.5.4",
+    "vitest": "~1.5.0",
+    "wrangler": "^3.72.2"
   },
   "module": "index.ts",
   "type": "module"

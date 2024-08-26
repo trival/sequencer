@@ -8,12 +8,6 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 
 	console.log('Using trpc base url:', url)
 
-	function resetTestServer() {
-		return fetch(`${url}/reset`, {
-			method: 'POST',
-		})
-	}
-
 	let sid = ''
 
 	const client = createTRPCClient<TrpcSchema>({
@@ -26,7 +20,7 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 					// set session id cookie
 					const headers: HTTPHeaders = {}
 					if (sid) {
-						headers.cookie = `connect.sid=${sid}`
+						headers.cookie = `sid=${sid}`
 					}
 					return headers
 				},
@@ -36,7 +30,7 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 						// extract session id cookie
 						const cookie = res.headers.get('set-cookie')
 						if (cookie) {
-							const match = cookie.match(/connect\.sid=([^;]+)/)
+							const match = cookie.match(/sid=([^;]+)/)
 							if (match) {
 								sid = match[1]
 							}
@@ -52,6 +46,5 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 	return {
 		client,
 		baseUrl: url,
-		resetTestServer,
 	}
 }

@@ -1,14 +1,10 @@
-import { beforeAll, describe, expect, it } from 'bun:test'
+import { describe, expect, it } from 'vitest'
 import type { Profile } from '../../src/modules/account/model'
 import { getTrpcClient } from '../lib/trpcClient'
 
 describe('account api', () => {
-	const { client, resetTestServer } = getTrpcClient()
+	const { client } = getTrpcClient()
 	const { client: client2 } = getTrpcClient()
-
-	beforeAll(async () => {
-		await resetTestServer()
-	})
 
 	it('should create and query an account', async () => {
 		let profile = await client.account.profile.query({})
@@ -29,11 +25,11 @@ describe('account api', () => {
 			username: 'foo',
 			email: 'foo@bar.de',
 		})
-		expect(p.createdAt >= before).toBeTrue()
-		expect(p.createdAt <= after).toBeTrue()
-		expect(p.isPublic).toBeTrue()
+		expect(p.createdAt >= before).toBe(true)
+		expect(p.createdAt <= after).toBe(true)
+		expect(p.isPublic).toBe(true)
 		expect(p.color).toMatch(/^#[0-9a-f]{6}$/)
-		expect(p.id).toBeString()
+		expect(p.id).toBeTypeOf('string')
 
 		profile = await client2.account.profile.query({ userId: p.id })
 

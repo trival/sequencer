@@ -1,14 +1,10 @@
-import { describe, it, expect, beforeAll } from 'bun:test'
+import { describe, it, expect } from 'vitest'
 import { getTrpcClient } from '../lib/trpcClient'
 import { uuid } from '../../src/lib/utils'
 
 describe('song api', () => {
-	const { client, resetTestServer } = getTrpcClient()
+	const { client } = getTrpcClient()
 	// const { client: client2 } = getTrpcClient()
-
-	beforeAll(async () => {
-		await resetTestServer()
-	})
 
 	it('should create and query a song', async () => {
 		await client.account.register.mutate({
@@ -38,6 +34,6 @@ describe('song api', () => {
 			isPublic: true,
 			data: 'song data',
 		})
-		expect(song.updatedAt >= now).toBeTrue()
+		expect(song.updatedAt >= now).toBe(true)
 	})
 })
