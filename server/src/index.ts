@@ -20,7 +20,7 @@ function getServices(dbConnection: D1Database) {
 
 declare module 'hono-session' {
 	export interface Session {
-		userId?: string
+		userId?: string | null
 	}
 }
 
@@ -50,12 +50,15 @@ app.use(async (c, next) => {
 	c.set('services', getServices(c.env.DB))
 	c.set('localSession', {
 		get userId() {
+			c.session.renew()
 			return c.session.userId || null
 		},
 		async saveUser(userId: string) {
 			c.session.userId = userId
 		},
 		async reset() {
+			c.session.userId = null
+			c.session.regenerate()
 			c.session = null
 		},
 	} satisfies LocalSession)
@@ -65,7 +68,13 @@ app.use(async (c, next) => {
 
 app.use(async (c, next) => {
 	// request logger
-	console.log('⬅️ ', c.req.method, c.req.path, c.req.parseBody(), c.req.query)
+	console.log(
+		'⬅️ ',
+		c.req.method,
+		c.req.path,
+		await c.req.parseBody(),
+		c.req.query(),
+	)
 	return next()
 })
 

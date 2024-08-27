@@ -2,10 +2,9 @@
   "name": "trival-sequencer-server",
   "private": true,
   "scripts": {
-    "test": "vitest",
     "dev": "wrangler dev --env=dev",
-    "test:watch": "vitest --watch",
-    "test:server": "wrangler dev --env=test",
+    "test": "vitest --run",
+    "test:watch": "vitest",
     "test:types": "tsc --noEmit",
     "migration:run": "cd src/db/ && drizzle-kit generate",
     "lint": "eslint --cache --ext \".js,.ts,.tsx\" index.ts",

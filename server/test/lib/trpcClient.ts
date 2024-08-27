@@ -1,9 +1,10 @@
 import { createTRPCClient, httpBatchLink, type HTTPHeaders } from '@trpc/client'
-import type { TrpcSchema } from '../../src/trpc-router'
+import { SELF } from 'cloudflare:test'
 import SuperJSON from 'superjson'
+import type { TrpcSchema } from '../../src/trpc-router'
 
 export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
-	const url = baseUrl || `http://localhost:8787`
+	const url = baseUrl || `https://example.com`
 
 	console.log('Using trpc base url:', url)
 
@@ -24,19 +25,17 @@ export const getTrpcClient = ({ baseUrl }: { baseUrl?: string } = {}) => {
 					return headers
 				},
 
-				fetch(input, init) {
-					return fetch(input, init).then((res) => {
-						// extract session id cookie
-						const cookie = res.headers.get('set-cookie')
-						if (cookie) {
-							const match = cookie.match(/sid=([^;]+)/)
-							if (match) {
-								sid = match[1]
-							}
+				async fetch(input, init) {
+					const res = await SELF.fetch(input, init)
+					// extract session id cookie
+					const cookie = res.headers.get('set-cookie')
+					if (cookie) {
+						const match = cookie.match(/sid=([^;]+)/)
+						if (match) {
+							sid = match[1]
 						}
-
-						return res
-					})
+					}
+					return res
 				},
 			}),
 		],

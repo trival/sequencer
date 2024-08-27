@@ -66,6 +66,9 @@ describe('account api', () => {
 			isPublic: true,
 		})
 
+		profile = await client2.account.profile.query()
+		expect(profile).toBeNull()
+
 		profile = await client2.account.profile.query({ userId: p.id })
 
 		expect(profile).toEqual({

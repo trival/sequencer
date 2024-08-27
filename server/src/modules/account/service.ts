@@ -67,11 +67,13 @@ export const createAccountService = (
 
 	service.login = async (session, username, password) => {
 		const account = await repo.byUsername(username)
+
 		if (!account) {
 			throw apiError('UNAUTHORIZED', 'Invalid username or password')
 		}
 
-		const valid = await verifyPassword(password, account.passwordHash)
+		const valid = await verifyPassword(account.passwordHash, password)
+
 		if (!valid) {
 			throw apiError('UNAUTHORIZED', 'Invalid username or password')
 		}
@@ -160,7 +162,7 @@ export const createAccountService = (
 			throw apiError('NOT_FOUND')
 		}
 
-		const valid = await verifyPassword(password, account.passwordHash)
+		const valid = await verifyPassword(account.passwordHash, password)
 		if (!valid) {
 			throw apiError('UNAUTHORIZED', 'Invalid password')
 		}
@@ -180,6 +182,7 @@ async function hashPassword(
 	const encoder = new TextEncoder()
 	// Use provided salt if available, otherwise generate a new one
 	const salt = providedSalt || crypto.getRandomValues(new Uint8Array(16))
+
 	const keyMaterial = await crypto.subtle.importKey(
 		'raw',
 		encoder.encode(password),
