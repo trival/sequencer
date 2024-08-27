@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer'
+
 export const wait = (ms: number) =>
 	new Promise((resolve) => setTimeout(resolve, ms))
 

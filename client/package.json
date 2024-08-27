@@ -12,7 +12,8 @@
     "dev": "vite --host --port 4000",
     "build": "vite build",
     "serve": "vite preview",
-    "types": "tsc --noEmit"
+    "types": "tsc --noEmit",
+    "lint": "eslint --fix --ext \".js,.ts,.tsx\" src/**/*"
   },
   "dependencies": {
     "@fontsource/fira-sans": "^5.0.20",

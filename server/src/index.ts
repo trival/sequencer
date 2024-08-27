@@ -54,6 +54,7 @@ app.use(async (c, next) => {
 			return c.session.userId || null
 		},
 		async saveUser(userId: string) {
+			await c.session.regenerate()
 			c.session.userId = userId
 		},
 		async reset() {

@@ -1,3 +1,4 @@
+import type { D1Database } from '@cloudflare/workers-types/experimental'
 import { drizzle } from 'drizzle-orm/d1'
 import { collection } from './schema/collection'
 import { song } from './schema/song'

@@ -4,11 +4,9 @@ a little scetchbook for melodies and harmonies with a mobile friendly interface.
 
 ## Developmet
 
-Prefer using bun as a package manager. The server runs bun too.
-
 ```bash
-bun install
-bun run dev
+npm install
+npm run dev
 ```
 
 ## License

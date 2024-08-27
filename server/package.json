@@ -7,9 +7,9 @@
     "test:watch": "vitest",
     "test:types": "tsc --noEmit",
     "migration:run": "cd src/db/ && drizzle-kit generate",
-    "lint": "eslint --cache --ext \".js,.ts,.tsx\" index.ts",
-    "deploy": "wrangler deploy",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "lint": "eslint --fix --ext \".js,.ts,.tsx\" src/**/*",
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "@hono/trpc-server": "^0.3.2",
@@ -24,10 +24,10 @@
     "@cloudflare/vitest-pool-workers": "^0.4.25",
     "@cloudflare/workers-types": "^4.20240821.1",
     "@trpc/client": "^11.0.0-rc.467",
-    "@types/bun": "^1.1.6",
     "@types/node": "^20.14.12",
     "drizzle-kit": "^0.23.0",
     "eslint": "^8.57.0",
+    "eslint-plugin-prettier": "^5.2.1",
     "prettier": "^3.3.3",
     "typescript": "^5.5.4",
     "vitest": "~1.5.0",

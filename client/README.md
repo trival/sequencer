@@ -5,11 +5,9 @@ friendly interface. Implemented with Solid.js and Tone.js.
 
 ## Developmet
 
-Prefer using bun as a package manager. The server runs bun too.
-
 ```bash
-bun install
-bun run dev
+npm install
+npm run dev
 ```
 
 ## License
