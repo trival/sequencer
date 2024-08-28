@@ -102,6 +102,30 @@ describe('song service', () => {
 		expect(res4.updatedAt > res3.updatedAt).toBe(true)
 	})
 
+	it('should save an empty song', async () => {
+		const songData = makeSong()
+		songData.data = undefined
+
+		const res = await service.save(ses1, songData)
+
+		expect(res).toMatchObject({
+			...songData,
+			userId: userId1,
+			isPublic: true,
+			data: '',
+		})
+
+		const res2 = await service.save(ses1, { ...songData, title: 'new title' })
+
+		expect(res2).toMatchObject({
+			...res,
+			title: 'new title',
+			updatedAt: expect.any(Date),
+		})
+
+		expect(res2.updatedAt > res.updatedAt).toBe(true)
+	})
+
 	it('should respect song visibility', async () => {
 		const s1 = await service.save(
 			ses1,

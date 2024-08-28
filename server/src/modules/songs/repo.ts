@@ -158,7 +158,7 @@ function songDataToDb(data: Song): SongDbInsert {
 		isPublic: data.isPublic,
 		collectionId: data.collectionId || null,
 
-		data: Buffer.from(data.data),
+		data: Buffer.from(data.data || ''),
 	}
 }
 
