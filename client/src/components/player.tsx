@@ -1,9 +1,4 @@
-import {
-	EditorSettings,
-	KeyboardSettings,
-	SongData,
-	Subdivision,
-} from '@/datamodel'
+import { EditorSettings, KeyboardSettings, Subdivision } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
 import { SongState } from '@/utils/song'
 import { SongPlayer } from '@/utils/songPlayer'
@@ -19,7 +14,8 @@ interface PlayerProps {
 	editorSettings: EditorSettings
 	synth: SynthPlayer
 	songPlayer: SongPlayer
-	onSave: (song: SongData) => void
+	// TODO: remove and refactor
+	onSave: () => void
 }
 
 export default function Player(props: PlayerProps) {
@@ -205,13 +201,7 @@ export default function Player(props: PlayerProps) {
 					onAddBefore={onNoteAddedBefore}
 					onAddAfter={onNoteAddedAfter}
 					onDurationChanged={onDurationChanged}
-					onSave={() =>
-						props.onSave({
-							song: props.songState.data(),
-							keyboardSettings: props.keyboardSettings,
-							editorSettings: props.editorSettings,
-						})
-					}
+					onSave={() => props.onSave()}
 				/>
 			</div>
 		</div>

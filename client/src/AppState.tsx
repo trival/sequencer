@@ -6,10 +6,24 @@ import { Profile, Session } from './utils/session'
 import { emptySongEntity } from './utils/song'
 import { useNavigate } from '@solidjs/router'
 
+interface SongStateData {
+	initialData: SongEntity
+	changes: SongEntity[]
+	currentChangeIdx: number
+}
+
 export interface AppState {
 	profile: Profile | null
 	collections: { [id: string]: Collection }
-	songs: { [id: string]: SongEntity }
+	songs: {
+		[id: string]: SongStateData
+	}
+}
+
+export function getCurrentSongDraft(
+	data?: SongStateData | null | undefined,
+): SongEntity | null {
+	return data?.changes[data?.currentChangeIdx] ?? null
 }
 
 export interface AppActions {
@@ -21,7 +35,9 @@ export interface AppActions {
 	openNewSong(): void
 	openSongCopy(id: string): void
 
-	saveSong(id: string, song: SongEntity): void
+	updateSong(data: SongEntity): void
+	syncSongWithRemote(id: string): void
+
 	deleteSong(id: string): void
 }
 
@@ -31,6 +47,18 @@ function emptyAppState(): AppState {
 		collections: {},
 		songs: {},
 	}
+}
+
+function songStateDataFromEntity(song: SongEntity): SongStateData {
+	return {
+		initialData: song,
+		changes: [{ ...song }],
+		currentChangeIdx: 0,
+	}
+}
+
+function emptySongStateData(): SongStateData {
+	return songStateDataFromEntity(emptySongEntity())
 }
 
 type AppCtx = [AppState, AppActions]
@@ -52,9 +80,9 @@ export const AppStateProvider = (
 				// eslint-disable-next-line solid/reactivity
 				.then((collections) =>
 					props.storage.songsByUser(profile.userId).then((songs) => {
-						const songsById: { [id: string]: SongEntity } = {}
+						const songsById: { [id: string]: SongStateData } = {}
 						songs.list.forEach((s) => {
-							songsById[s.id] = s
+							songsById[s.id] = songStateDataFromEntity(s)
 						})
 
 						const collectionsById: { [id: string]: Collection } = {}
@@ -98,16 +126,17 @@ export const AppStateProvider = (
 		},
 
 		openNewSong() {
-			const newSong = emptySongEntity()
-			setState('songs', newSong.id, newSong)
-			navigate(`/songs/${newSong.id}`)
+			const newSong = emptySongStateData()
+			const id = newSong.initialData.id
+			setState('songs', id, newSong)
+			navigate(`/songs/${id}`)
 		},
 
 		openSongCopy(id) {
-			const song = state.songs[id]
+			const song = getCurrentSongDraft(state.songs[id])
 			if (song) {
-				const newSong = emptySongEntity()
-				setState('songs', newSong.id, {
+				let newSong = emptySongEntity()
+				newSong = {
 					id: newSong.id,
 					meta: {
 						...newSong.meta,
@@ -115,18 +144,31 @@ export const AppStateProvider = (
 						title: `${song.meta.title} (copy)`,
 					},
 					data: { ...song.data },
-				})
+				}
+				setState('songs', newSong.id, songStateDataFromEntity(newSong))
 				navigate(`/songs/${newSong.id}`)
 			}
 		},
 
-		saveSong(id, data) {
-			const song = state.songs[id]
+		updateSong(data) {
+			const songState = state.songs[data.id]
+			if (songState) {
+				const updatedSongState = {
+					...songState,
+					changes: [...songState.changes, data],
+					currentChangeIdx: songState.currentChangeIdx + 1,
+				}
+				setState('songs', data.id, updatedSongState)
+			}
+		},
+
+		syncSongWithRemote(id) {
+			const song = getCurrentSongDraft(state.songs[id])
 			if (song) {
 				props.storage
 					.saveSong(song)
 					.then((res) => {
-						setState('songs', res.id, res)
+						setState('songs', res.id, songStateDataFromEntity(res))
 						navigate(`/songs/${res.id}`)
 					})
 					.catch(console.error)
@@ -135,7 +177,7 @@ export const AppStateProvider = (
 
 		deleteSong(id) {
 			if (!id) return
-			const song = state.songs[id]
+			const song = getCurrentSongDraft(state.songs[id])
 			if (song) {
 				if (song.meta.updatedAt) {
 					props.storage.deleteSong(id).catch(console.error)

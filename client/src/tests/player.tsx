@@ -39,8 +39,8 @@ export default function PlayerTest() {
 	return (
 		<PlayerUI
 			songState={state}
-			onSave={(song) => {
-				console.log(song)
+			onSave={() => {
+				console.log('saving!', song)
 			}}
 			songPlayer={player}
 			synth={synth}

@@ -1,5 +1,5 @@
 import { For, Show } from 'solid-js'
-import { useAppState } from '@/AppState'
+import { getCurrentSongDraft, useAppState } from '@/AppState'
 import { Button } from './shared/buttons'
 import { Icon } from 'solid-heroicons'
 import { documentPlus } from 'solid-heroicons/outline'
@@ -13,7 +13,10 @@ interface Props {
 export default function ProfileSongList(props: Props) {
 	const [state, actions] = useAppState()
 	const songs = () =>
-		Object.values(state.songs).sort((a, b) => {
+		Object.values(state.songs).sort((aData, bData) => {
+			const a = getCurrentSongDraft(aData)!
+			const b = getCurrentSongDraft(bData)!
+
 			const res =
 				((a.meta.updatedAt && new Date(a.meta.updatedAt).getTime()) || 0) -
 				((b.meta.updatedAt && new Date(b.meta.updatedAt).getTime()) || 0)
@@ -28,7 +31,8 @@ export default function ProfileSongList(props: Props) {
 		<div class={props.class}>
 			<ul>
 				<For each={songs()}>
-					{(song) => {
+					{(songData) => {
+						const song = getCurrentSongDraft(songData)!
 						const date = song.meta.updatedAt && new Date(song.meta.updatedAt)
 						return (
 							<li class="mb-2">
