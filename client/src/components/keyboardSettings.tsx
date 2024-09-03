@@ -1,21 +1,22 @@
+import { KeyboardSettings } from '@/datamodel'
+import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
+import { Icon } from 'solid-heroicons'
 import {
+	adjustmentsVertical,
 	arrowSmallDown,
 	arrowSmallLeft,
 	arrowSmallRight,
 	arrowSmallUp,
-	adjustmentsVertical,
 } from 'solid-heroicons/outline'
+import { createSignal } from 'solid-js'
+import * as Tone from 'tone'
 import { IconButton } from './shared/buttons'
 import { Input, Select } from './shared/input'
-import { Icon } from 'solid-heroicons'
-import { createSignal } from 'solid-js'
 import Popover from './shared/popover'
-import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
-import * as Tone from 'tone'
-import { KeyboardSettingsState } from '@/utils/settings'
 
 type KeyboardSettingsProps = {
-	state: KeyboardSettingsState
+	settings: KeyboardSettings
+	onSettingsUpdate: (settings: Partial<KeyboardSettings>) => void
 	class?: string
 }
 
@@ -47,40 +48,43 @@ export function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 				visible={isOpen()}
 				class="rounded bg-gray-100/90 shadow-md shadow-gray-500/60"
 			>
-				<KeyboardSettingsEditor state={props.state} />
+				<KeyboardSettingsEditor
+					settings={props.settings}
+					onSettingsUpdate={props.onSettingsUpdate}
+				/>
 			</Popover>
 		</>
 	)
 }
 
 function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
-	const offsetX = () => props.state.data().offsetX
-	const offsetY = () => props.state.data().offsetY
+	const offsetX = () => props.settings.offsetX
+	const offsetY = () => props.settings.offsetY
 
 	return (
 		<div>
 			<div class="flex justify-center">
 				<IconButton
 					class="m-3 p-1"
-					onClick={() => props.state.update({ offsetX: offsetX() + 1 })}
+					onClick={() => props.onSettingsUpdate({ offsetX: offsetX() + 1 })}
 				>
 					<Icon path={arrowSmallLeft} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={() => props.state.update({ offsetY: offsetY() - 1 })}
+					onClick={() => props.onSettingsUpdate({ offsetY: offsetY() - 1 })}
 				>
 					<Icon path={arrowSmallUp} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={() => props.state.update({ offsetY: offsetY() + 1 })}
+					onClick={() => props.onSettingsUpdate({ offsetY: offsetY() + 1 })}
 				>
 					<Icon path={arrowSmallDown} class="h-6 w-6" />
 				</IconButton>
 				<IconButton
 					class="m-3 p-1"
-					onClick={() => props.state.update({ offsetX: offsetX() - 1 })}
+					onClick={() => props.onSettingsUpdate({ offsetX: offsetX() - 1 })}
 				>
 					<Icon path={arrowSmallRight} class="h-6 w-6" />
 				</IconButton>
@@ -88,9 +92,9 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 			<div class="mx-2 mb-2 flex justify-center">
 				<Select
 					class="w-40"
-					value={props.state.data().scaleHighlight}
+					value={props.settings.scaleHighlight}
 					onSelect={(value) =>
-						props.state.update({
+						props.onSettingsUpdate({
 							scaleHighlight: value as ScaleHighlight,
 						})
 					}
@@ -100,14 +104,14 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 				/>
 				<Select
 					class="ml-2 w-20"
-					value={props.state.data().baseNote}
+					value={props.settings.baseNote}
 					onSelect={(value) =>
-						props.state.update({
+						props.onSettingsUpdate({
 							baseNote: value as number,
 						})
 					}
 					options={[...Array(12).keys()].map((i) => {
-						const start = props.state.data().baseNote - 4
+						const start = props.settings.baseNote - 4
 						const note = start + i
 						return {
 							value: note,
@@ -122,9 +126,9 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 			<div class="mx-2 mb-2 flex justify-center">
 				<Select
 					class="w-40"
-					value={props.state.data().toneColorType}
+					value={props.settings.toneColorType}
 					onSelect={(value) =>
-						props.state.update({
+						props.onSettingsUpdate({
 							toneColorType: value as ToneColorType,
 						})
 					}
@@ -135,9 +139,9 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 				<Input
 					type="number"
 					class="ml-2 w-20 px-2"
-					value={props.state.data().keyLength}
+					value={props.settings.keyLength}
 					onChange={(value) =>
-						props.state.update({
+						props.onSettingsUpdate({
 							keyLength: parseInt(value as string),
 						})
 					}
@@ -149,9 +153,9 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					<Input
 						type="number"
 						class="ml-2 w-20 px-2"
-						value={props.state.data().maxCols}
+						value={props.settings.maxCols}
 						onChange={(value) =>
-							props.state.update({
+							props.onSettingsUpdate({
 								maxCols: parseInt(value as string),
 							})
 						}
@@ -162,9 +166,9 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					<Input
 						type="number"
 						class="ml-2 w-20 px-2"
-						value={props.state.data().maxRows}
+						value={props.settings.maxRows}
 						onChange={(value) =>
-							props.state.update({
+							props.onSettingsUpdate({
 								maxRows: parseInt(value as string),
 							})
 						}

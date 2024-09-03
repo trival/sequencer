@@ -1,14 +1,9 @@
 import { useAppState } from '@/AppState'
+import { Login } from '@/components/loginForm'
 import PlayerUI from '@/components/player'
-import ProfileForm from '@/components/profileForm'
-import { LogoutButton } from '@/components/shared/buttons'
 import { Subpage } from '@/components/shared/simpleSubpage'
 import NavBar from '@/components/songNav'
-import { SongMeta } from '@/datamodel'
-import {
-	createEditorSettingState,
-	createKeyboardSettingState,
-} from '@/utils/settings'
+import { defaultEditorSettings, SongMeta } from '@/datamodel'
 import { createSongState, emptySongEntity } from '@/utils/song'
 import { createPlayer } from '@/utils/songPlayer'
 import { createSynth } from '@/utils/synth'
@@ -17,7 +12,7 @@ import { Show, createMemo } from 'solid-js'
 
 export default function App() {
 	const params = useParams()
-	const [state, { updateProfile, saveSong, logout }] = useAppState()
+	const [state, { uploadDraft: saveSong, logout }] = useAppState()
 
 	const currentSong = createMemo(
 		() => (params.id && state.songs[params.id]) || null,
@@ -31,17 +26,22 @@ export default function App() {
 		return createPlayer(synth())
 	})
 
-	const keyboardState = createMemo(() => {
-		return createKeyboardSettingState(currentSong()?.data.keyboardSettings)
+	const keyboardSettings = createMemo(() => {
+		return currentSong()?.data.keyboardSettings
 	})
 
-	const editorState = createMemo(() => {
-		return createEditorSettingState(currentSong()?.data.editorSettings)
+	const editorSettings = createMemo(() => {
+		return currentSong()?.data.editorSettings
 	})
 
 	const songState = createMemo(() => {
-		const song = currentSong() || emptySongEntity()
-		return createSongState(song.data.song, editorState().data())
+		const defaultSong = emptySongEntity()
+		const song = () => currentSong()?.data.song || defaultSong.data.song
+		return createSongState(
+			song,
+			editorSettings()?.defaultNoteDuration ||
+				defaultEditorSettings.defaultNoteDuration,
+		)
 	})
 
 	function saveSongMeta(id: string, meta: Partial<SongMeta>) {
@@ -68,47 +68,32 @@ export default function App() {
 			fallback={
 				<Subpage>
 					<div class="m-auto my-4 w-full max-w-[420px] rounded-lg bg-white p-6 shadow sm:p-12 md:my-16">
-						TODO: Add a login/register form here
+						<Login />
 					</div>
 				</Subpage>
 			}
 		>
-			{state.profile?.username ? (
-				<>
-					<NavBar
-						currentSong={currentSong()}
-						onUpdateSongMeta={(id, meta) => {
-							saveSongMeta(id, meta)
-						}}
-						onLogout={() => logout()}
-						keyboardState={currentSong() ? keyboardState() : undefined}
-					/>
-					<Show when={currentSong()}>
-						<PlayerUI
-							onSave={(songData) => {
-								const song = currentSong()!
-								saveSong(song.id, { ...song, data: songData })
-							}}
-							song={songState()}
-							songPlayer={player()}
-							synth={synth()}
-							editorSettings={editorState().data()}
-							keyboardSettings={keyboardState().data()}
-						/>
-					</Show>
-				</>
-			) : (
-				<Subpage navOpts={<LogoutButton onLogout={() => logout()} />}>
-					<div class="m-auto my-4 bg-white px-6 py-12 shadow sm:w-full sm:max-w-[480px] sm:rounded-lg sm:px-12 md:my-16">
-						<ProfileForm
-							username=""
-							onSubmit={(username, color) => {
-								updateProfile({ username, color })
-							}}
-						/>
-					</div>
-				</Subpage>
-			)}
+			<NavBar
+				currentSong={currentSong()}
+				onUpdateSongMeta={(id, meta) => {
+					saveSongMeta(id, meta)
+				}}
+				onLogout={() => logout()}
+				keyboardState={currentSong() ? keyboardState() : undefined}
+			/>
+			<Show when={currentSong()}>
+				<PlayerUI
+					onSave={(songData) => {
+						const song = currentSong()!
+						saveSong(song.id, { ...song, data: songData })
+					}}
+					songState={songState()}
+					songPlayer={player()}
+					synth={synth()}
+					editorSettings={editorState().data()}
+					keyboardSettings={keyboardState().data()}
+				/>
+			</Show>
 		</Show>
 	)
 }

@@ -2,34 +2,9 @@ import { Subdivision as ToneSubdivision } from 'tone/build/esm/core/type/Units'
 import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 import { z } from 'zod'
 
-export const collectionSchema = z.object({
-	id: z.string(),
-	userId: z.string(),
-	title: z.string(),
-	description: z.string().optional(),
-})
+// === Basic types ===
 
-export type Collection = z.infer<typeof collectionSchema>
-
-export const keyboardSettingsSchema = z.object({
-	baseNote: z.number(),
-	offsetX: z.number(),
-	offsetY: z.number(),
-	maxRows: z.number(),
-	maxCols: z.number(),
-	keyLength: z.number(),
-	scaleHighlight: z.nativeEnum(ScaleHighlight),
-	toneColorType: z.nativeEnum(ToneColorType),
-})
-
-export type KeyboardSettings = z.infer<typeof keyboardSettingsSchema>
-
-// export interface EditorSettings {
-// 	pxPerBeat: number
-// 	defaultNoteDuration: Subdivision
-// }
-
-const subdivisionValues = [
+export const subdivisionValues = [
 	'0',
 	'1m',
 	'1n',
@@ -58,12 +33,58 @@ const subdivisionSchema = z.enum(subdivisionValues)
 
 export type Subdivision = z.infer<typeof subdivisionSchema>
 
+// === Collection ===
+
+export const collectionSchema = z.object({
+	id: z.string(),
+	userId: z.string(),
+	title: z.string(),
+	description: z.string().optional(),
+})
+
+export type Collection = z.infer<typeof collectionSchema>
+
+// === Keyboard Settings ===
+
+export const keyboardSettingsSchema = z.object({
+	baseNote: z.number(),
+	offsetX: z.number(),
+	offsetY: z.number(),
+	maxRows: z.number(),
+	maxCols: z.number(),
+	keyLength: z.number(),
+	scaleHighlight: z.nativeEnum(ScaleHighlight),
+	toneColorType: z.nativeEnum(ToneColorType),
+})
+
+export type KeyboardSettings = z.infer<typeof keyboardSettingsSchema>
+
+export const defaultKeyboardSettings: KeyboardSettings = {
+	baseNote: 48, // 'C3 midi number'
+	offsetX: 0,
+	offsetY: 0,
+	maxCols: 12,
+	maxRows: 12,
+	keyLength: 58,
+	scaleHighlight: ScaleHighlight.Major,
+	toneColorType: ToneColorType.CircleOfFiths,
+}
+
+// === Editor Settings ===
+
 export const editorSettingsSchema = z.object({
 	pxPerBeat: z.number(),
 	defaultNoteDuration: subdivisionSchema,
 })
 
 export type EditorSettings = z.infer<typeof editorSettingsSchema>
+
+export const defaultEditorSettings: EditorSettings = {
+	pxPerBeat: 100,
+	defaultNoteDuration: '4n',
+}
+
+// === Song ===
 
 export const songMetaSchema = z.object({
 	userId: z.string(),

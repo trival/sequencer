@@ -2,7 +2,7 @@ import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
 import { Subdivision, TrackNote } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
-import { createSongState } from '@/utils/song'
+import { createSongState, emptySong } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 
@@ -18,10 +18,16 @@ const initialMelody: TrackNote[] = [
 ]
 
 export default function TestTracksPage() {
-	const { data, addNote, removeNote, changeDuration } = createSongState({
+	const [song, setSong] = createSignal({
+		...emptySong(),
 		bpm: 160,
 		tracks: [{ notes: initialMelody, instrument: 0 }],
 	})
+
+	const { data, addNote, removeNote, changeDuration } = createSongState(
+		song,
+		setSong,
+	)
 
 	const [activeNoteIdx, setActiveNoteIdx] = createSignal<
 		[number, number] | null

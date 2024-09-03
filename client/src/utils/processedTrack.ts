@@ -88,7 +88,7 @@ export function processSong(song: Song): ProcessedTrack[] {
 		tracks.push(track)
 	}
 
-	Tone.Transport.bpm.value = currentBpm
+	Tone.getTransport().bpm.value = currentBpm
 
 	return tracks
 }

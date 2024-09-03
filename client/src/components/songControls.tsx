@@ -1,5 +1,9 @@
-import { Song, SongProperties, Subdivision } from '@/datamodel'
-import { subdivisions } from '@/utils/utils'
+import {
+	Song,
+	SongProperties,
+	Subdivision,
+	subdivisionValues,
+} from '@/datamodel'
 import { Icon } from 'solid-heroicons'
 import {
 	archiveBoxArrowDown,
@@ -21,7 +25,7 @@ import {
 import { Input, Select } from './shared/input'
 import { Overlay } from './shared/popover'
 
-const durationOptions = subdivisions.map((s) => ({
+const durationOptions = subdivisionValues.map((s) => ({
 	value: s,
 	label: s,
 }))

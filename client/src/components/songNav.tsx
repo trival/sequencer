@@ -1,5 +1,4 @@
-import { SongEntity, SongMeta } from '@/datamodel'
-import { KeyboardSettingsState } from '@/utils/settings'
+import { KeyboardSettings, SongEntity, SongMeta } from '@/datamodel'
 import { A } from '@solidjs/router'
 import clsx from 'clsx'
 import { Icon } from 'solid-heroicons'
@@ -16,7 +15,8 @@ export interface SongNavProps {
 	currentSong?: SongEntity | null
 	onUpdateSongMeta?: (id: string, meta: Partial<SongMeta>) => void
 	onLogout: () => void
-	keyboardState?: KeyboardSettingsState
+	keyboardSettings?: KeyboardSettings
+	onUpdateKeyboardSettings?: (settings: Partial<KeyboardSettings>) => void
 }
 
 export default function NavBar(props: SongNavProps) {
@@ -34,8 +34,11 @@ export default function NavBar(props: SongNavProps) {
 			<A href="/" class="font-semibold underline">
 				<Logo class="mx-3 h-6 w-6" />
 			</A>
-			<Show when={props.keyboardState}>
-				<KeyboardSettingsBtn state={props.keyboardState!} />
+			<Show when={props.keyboardSettings}>
+				<KeyboardSettingsBtn
+					settings={props.keyboardSettings!}
+					onSettingsUpdate={props.onUpdateKeyboardSettings!}
+				/>
 			</Show>
 
 			<span class="flex-grow" />

@@ -25,13 +25,13 @@ export function createPlayer(synth: SynthPlayer): SongPlayer {
 	>(null)
 
 	const play = async (song: Song, startNoteIdx?: [number, number]) => {
-		Tone.Transport.stop()
-		Tone.Transport.cancel()
-		Tone.Transport.start()
+		Tone.getTransport().stop()
+		Tone.getTransport().cancel()
+		Tone.getTransport().start()
 
 		const tracks = processSong(song)
 
-		Tone.Transport.bpm.value = song.bpm
+		Tone.getTransport().bpm.value = song.bpm
 
 		let offset = 0
 		if (startNoteIdx !== undefined) {
@@ -84,8 +84,8 @@ export function createPlayer(synth: SynthPlayer): SongPlayer {
 			seq.stop()
 		})
 
-		Tone.Transport.stop()
-		Tone.Transport.cancel()
+		Tone.getTransport().stop()
+		Tone.getTransport().cancel()
 		setPlayingSequences(null)
 		setPlayingNotes([])
 	}

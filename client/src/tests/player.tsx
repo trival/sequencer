@@ -1,13 +1,14 @@
-import { toMidi } from '@/utils/utils'
-import { TrackNote } from '@/datamodel'
 import PlayerUI from '@/components/player'
-import { createSongState, songFromMelody } from '@/utils/song'
-import { createSynth } from '@/utils/synth'
-import { createPlayer } from '@/utils/songPlayer'
 import {
-	createEditorSettingState,
-	createKeyboardSettingState,
-} from '@/utils/settings'
+	defaultEditorSettings,
+	defaultKeyboardSettings,
+	TrackNote,
+} from '@/datamodel'
+import { createSongState, songFromMelody } from '@/utils/song'
+import { createPlayer } from '@/utils/songPlayer'
+import { createSynth } from '@/utils/synth'
+import { toMidi } from '@/utils/utils'
+import { createSignal } from 'solid-js'
 
 const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('C3')], duration: '4n' },
@@ -21,27 +22,30 @@ const initialMelody: TrackNote[] = [
 ]
 
 export default function PlayerTest() {
-	const song = songFromMelody(initialMelody)
-	song.bpm = 160
+	const [song, setSong] = createSignal({
+		...songFromMelody(initialMelody),
+		bpm: 160,
+	})
 
 	const synth = createSynth()
 	const player = createPlayer(synth)
 
-	const editorState = createEditorSettingState()
-	const keyboardState = createKeyboardSettingState()
-
-	const state = createSongState(song, editorState.data())
+	const state = createSongState(
+		song,
+		setSong,
+		defaultEditorSettings.defaultNoteDuration,
+	)
 
 	return (
 		<PlayerUI
-			song={state}
+			songState={state}
 			onSave={(song) => {
 				console.log(song)
 			}}
 			songPlayer={player}
 			synth={synth}
-			editorSettings={editorState.data()}
-			keyboardSettings={keyboardState.data()}
+			editorSettings={defaultEditorSettings}
+			keyboardSettings={defaultKeyboardSettings}
 		/>
 	)
 }

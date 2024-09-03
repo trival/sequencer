@@ -1,5 +1,4 @@
 import {
-	EditorSettings,
 	Song,
 	SongEntity,
 	SongProperties,
@@ -7,10 +6,8 @@ import {
 	Track,
 	TrackNote,
 } from '@/datamodel'
-import { createSignal } from 'solid-js'
 import { TimeObject } from 'tone/build/esm/core/type/Units'
 import * as uuid from 'uuid'
-import { defaultEditorSettings } from './settings'
 import { divideAt } from './utils'
 
 export function emptySong(defaultNoteDuration: Subdivision = '4n'): Song {
@@ -74,30 +71,31 @@ export interface SongState {
 }
 
 export const createSongState = (
-	data: Song,
-	editorSetting: EditorSettings = defaultEditorSettings,
+	data: () => Song,
+	onSongChange: (song: Song) => void,
+	defaultNoteDuration: Subdivision = '4n',
 ): SongState => {
-	if (!data.tracks.length) {
-		data.tracks = emptySong(editorSetting.defaultNoteDuration).tracks
+	// TODO: Refactor this validation to upper scope
+	if (!data().tracks.length) {
+		onSongChange({
+			...data(),
+			tracks: emptySong(defaultNoteDuration).tracks,
+		})
 	}
 
-	const [song, setSong] = createSignal<Song>(data)
-
 	const removeNote = (trackIdx: number, noteIdx: number) => {
-		setSong((song) => {
-			const tracks = [...song.tracks]
-			const track = tracks[trackIdx]
-			if (track) {
-				const newNotes = track.notes.filter((_, i) => i !== noteIdx)
-				if (!newNotes.length) {
-					tracks.splice(trackIdx, 1)
-				} else {
-					tracks[trackIdx] = { ...track, notes: newNotes }
-				}
-				return { ...song, tracks }
+		const song = data()
+		const tracks = [...song.tracks]
+		const track = tracks[trackIdx]
+		if (track) {
+			const newNotes = track.notes.filter((_, i) => i !== noteIdx)
+			if (!newNotes.length) {
+				tracks.splice(trackIdx, 1)
+			} else {
+				tracks[trackIdx] = { ...track, notes: newNotes }
 			}
-			return song
-		})
+			onSongChange({ ...song, tracks })
+		}
 	}
 
 	const changeDuration = (
@@ -105,34 +103,30 @@ export const createSongState = (
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => {
-		setSong((song) => {
-			const tracks = [...song.tracks]
-			const track = tracks[trackIdx]
-			if (track) {
-				const notes = [...track.notes]
-				const note = notes[noteIdx]
-				if (note) {
-					notes[noteIdx] = { ...note, duration }
-					tracks[trackIdx] = { ...track, notes }
-					return { ...song, tracks }
-				}
+		const song = data()
+		const tracks = [...song.tracks]
+		const track = tracks[trackIdx]
+		if (track) {
+			const notes = [...track.notes]
+			const note = notes[noteIdx]
+			if (note) {
+				notes[noteIdx] = { ...note, duration }
+				tracks[trackIdx] = { ...track, notes }
+				onSongChange({ ...song, tracks })
 			}
-			return song
-		})
+		}
 	}
 
 	const addNote = (trackIdx: number, noteIdx: number, noteData: TrackNote) => {
-		setSong((song) => {
-			const tracks = [...song.tracks]
-			const track = tracks[trackIdx]
-			if (track) {
-				const [before, after] = divideAt(track.notes, noteIdx)
-				const notes = [...before, noteData, ...after]
-				tracks[trackIdx] = { ...track, notes }
-				return { ...song, tracks }
-			}
-			return song
-		})
+		const song = data()
+		const tracks = [...song.tracks]
+		const track = tracks[trackIdx]
+		if (track) {
+			const [before, after] = divideAt(track.notes, noteIdx)
+			const notes = [...before, noteData, ...after]
+			tracks[trackIdx] = { ...track, notes }
+			onSongChange({ ...song, tracks })
+		}
 	}
 
 	const updateNoteTones = (
@@ -140,38 +134,39 @@ export const createSongState = (
 		noteIdx: number,
 		midiNotes: number[],
 	) => {
-		setSong((song) => {
-			const tracks = [...song.tracks]
-			const track = tracks[trackIdx]
-			if (!track) return song
-			const notes = [...track.notes]
-			const note = notes[noteIdx]
-			if (!note) return song
-			notes[noteIdx] = { ...note, midiNotes }
-			tracks[trackIdx] = { ...track, notes }
-			return { ...song, tracks }
-		})
+		const song = data()
+
+		const tracks = [...song.tracks]
+		const track = tracks[trackIdx]
+		if (!track) return
+
+		const notes = [...track.notes]
+		const note = notes[noteIdx]
+		if (!note) return
+
+		notes[noteIdx] = { ...note, midiNotes }
+		tracks[trackIdx] = { ...track, notes }
+		onSongChange({ ...song, tracks })
 	}
 
-	const updateProps = (data: Partial<SongProperties>) => {
-		setSong((prev) => ({ ...prev, ...data }))
+	const updateProps = (newProps: Partial<SongProperties>) => {
+		onSongChange({ ...data(), ...newProps })
 	}
 
 	const addTrack = (trackIdx?: number) => {
-		setSong((song) => {
-			const tracks = [...song.tracks]
-			const newTrack = emptyTrack(editorSetting.defaultNoteDuration)
-			if (trackIdx === undefined) {
-				tracks.push(newTrack)
-			} else {
-				tracks.splice(trackIdx, 0, newTrack)
-			}
-			return { ...song, tracks }
-		})
+		const song = data()
+		const tracks = [...song.tracks]
+		const newTrack = emptyTrack(defaultNoteDuration)
+		if (trackIdx === undefined) {
+			tracks.push(newTrack)
+		} else {
+			tracks.splice(trackIdx, 0, newTrack)
+		}
+		return { ...song, tracks }
 	}
 
 	return {
-		data: song,
+		data,
 		updateProps,
 		removeNote,
 		addNote,

@@ -24,11 +24,9 @@ import { render } from 'solid-js/web'
 import { AppStateProvider } from './AppState'
 import { createTrpcSession } from './utils/session'
 import { createTrpcStorage } from './utils/storage'
-import { trpc } from './utils/trpc'
+import { createTrpc } from './utils/trpc'
 
 const root = document.getElementById('root')
-const session = createTrpcSession(trpc)
-const storage = createTrpcStorage(trpc)
 
 const tests = (
 	<>
@@ -58,26 +56,28 @@ const tests = (
 render(
 	() => (
 		<Router>
+			<Route path="/" component={lazy(() => import('@/pages/Home'))} />
 			<Route
-				path="/"
-				component={(props) => (
-					<AppStateProvider storage={storage} session={session}>
-						{props.children}
-					</AppStateProvider>
-				)}
+				path="/keyboard"
+				component={lazy(() => import('@/pages/Keyboard'))}
+			/>
+			<Route
+				path="/songs"
+				component={(props) => {
+					const trpc = createTrpc()
+					const session = createTrpcSession(trpc)
+					const storage = createTrpcStorage(trpc)
+					return (
+						<AppStateProvider storage={storage} session={session}>
+							{props.children}
+						</AppStateProvider>
+					)
+				}}
 			>
-				<Route path="/" component={lazy(() => import('@/pages/Home'))} />
-				<Route
-					path="/keyboard"
-					component={lazy(() => import('@/pages/Keyboard'))}
-				/>
-				<Route path="/songs" component={lazy(() => import('@/pages/Songs'))} />
-				<Route
-					path="/songs/:id"
-					component={lazy(() => import('@/pages/Song'))}
-				/>
-				{tests}
+				<Route path="/" component={lazy(() => import('@/pages/Songs'))} />
+				<Route path="/:id" component={lazy(() => import('@/pages/Song'))} />
 			</Route>
+			{tests}
 		</Router>
 	),
 	root!,
