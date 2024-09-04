@@ -1,7 +1,6 @@
 # trival sequencer
 
 a little scetchbook for melodies and harmonies with a mobile friendly interface.
-Implemented with Solid.js, Tone.js and Supabase.
 
 ## Developmet
 

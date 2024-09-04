@@ -1,0 +1,56 @@
+{
+  "name": "trival-sequencer-client",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "author": {
+    "name": "Thomas Gorny",
+    "email": "hello@trival.xyz"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "serve dist",
+    "dev": "vite --host --port 4000",
+    "build": "vite build",
+    "serve": "vite preview",
+    "types": "tsc --noEmit",
+    "lint": "eslint --fix --ext \".js,.ts,.tsx\" src/**/*"
+  },
+  "dependencies": {
+    "@fontsource/fira-sans": "^5.0.20",
+    "@popperjs/core": "^2.11.8",
+    "@solidjs/router": "0.14.1",
+    "@trpc/client": "^11.0.0-rc.467",
+    "date-fns": "^3.6.0",
+    "serve": "^14.2.3",
+    "solid-heroicons": "^3.2.4",
+    "solid-js": "^1.8.19",
+    "solid-motionone": "^1.0.0",
+    "superjson": "^2.2.1",
+    "tone": "^14.9.17",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/forms": "^0.5.7",
+    "@types/express-session": "^1.18.0",
+    "@types/uuid": "^10.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "autoprefixer": "^10.4.19",
+    "clsx": "^2.1.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-solid": "^0.14.1",
+    "postcss": "^8.4.40",
+    "prettier": "^3.3.3",
+    "prettier-plugin-tailwindcss": "^0.6.5",
+    "tailwindcss": "^3.4.7",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5",
+    "vite-plugin-solid": "^2.10.2"
+  },
+  "engines": {
+    "node": "20.*"
+  }
+}
