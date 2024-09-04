@@ -5,6 +5,7 @@ import { Icon } from 'solid-heroicons'
 import { documentPlus } from 'solid-heroicons/outline'
 import { format } from 'date-fns'
 import { A } from '@solidjs/router'
+import { defined } from '@/utils/utils'
 
 interface Props {
 	class?: string
@@ -13,26 +14,25 @@ interface Props {
 export default function ProfileSongList(props: Props) {
 	const [state, actions] = useAppState()
 	const songs = () =>
-		Object.values(state.songs).sort((aData, bData) => {
-			const a = getCurrentSongDraft(aData)!
-			const b = getCurrentSongDraft(bData)!
-
-			const res =
-				((a.meta.updatedAt && new Date(a.meta.updatedAt).getTime()) || 0) -
-				((b.meta.updatedAt && new Date(b.meta.updatedAt).getTime()) || 0)
-			if (res !== 0) return res
-			if (a.meta.title && b.meta.title) {
-				return a.meta.title.localeCompare(b.meta.title)
-			}
-			return res
-		})
+		Object.values(state.songs)
+			.map(getCurrentSongDraft)
+			.filter(defined)
+			.sort((a, b) => {
+				const res =
+					((a.meta.updatedAt && new Date(a.meta.updatedAt).getTime()) || 0) -
+					((b.meta.updatedAt && new Date(b.meta.updatedAt).getTime()) || 0)
+				if (res !== 0) return res
+				if (a.meta.title && b.meta.title) {
+					return a.meta.title.localeCompare(b.meta.title)
+				}
+				return res
+			})
 
 	return (
 		<div class={props.class}>
 			<ul>
 				<For each={songs()}>
-					{(songData) => {
-						const song = getCurrentSongDraft(songData)!
+					{(song) => {
 						const date = song.meta.updatedAt && new Date(song.meta.updatedAt)
 						return (
 							<li class="mb-2">
