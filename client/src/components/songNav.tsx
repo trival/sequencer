@@ -67,12 +67,10 @@ export default function NavBar(props: SongNavProps) {
 			<A href="/" class="font-semibold underline">
 				<Logo class="mx-3 h-6 w-6" />
 			</A>
-			<Show when={props.currentSong?.data.keyboardSettings}>
-				<KeyboardSettingsBtn
-					settings={props.currentSong!.data.keyboardSettings || {}}
-					onSettingsUpdate={updateKeyboardSettings}
-				/>
-			</Show>
+			<KeyboardSettingsBtn
+				settings={props.currentSong!.data.keyboardSettings}
+				onSettingsUpdate={updateKeyboardSettings}
+			/>
 
 			<span class="flex-grow" />
 
@@ -83,6 +81,7 @@ export default function NavBar(props: SongNavProps) {
 				<Show when={props.onUpdateSong}>
 					<IconButtonPopover
 						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
+						title="Edit metadata"
 						color="custom"
 						class="m-0 ml-2"
 					>
@@ -109,7 +108,7 @@ export default function NavBar(props: SongNavProps) {
 					onUpdateSong={updateSongData}
 				/>
 
-				<A color="custom" class="m-0 mr-2" href="/songs">
+				<A color="custom" class="m-0 mr-2" href="/songs" title="Close">
 					<Icon path={xMark} class="h-6 w-6" />
 				</A>
 			</Show>

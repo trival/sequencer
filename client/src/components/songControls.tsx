@@ -159,7 +159,7 @@ export function SongControls(props: SongControlsProps) {
 								value={props.song.bpm}
 								onChange={(val) => {
 									const bpm = parseInt(val as string)
-									Tone.Transport.bpm.value = bpm
+									Tone.getTransport().bpm.value = bpm
 									props.onPropsChanged!({ bpm })
 								}}
 							/>
@@ -169,7 +169,7 @@ export function SongControls(props: SongControlsProps) {
 					{props.onSave && (
 						<Button
 							onClick={() => props.onSave?.()}
-							class="mx-2 my-auto rounded border border-indigo-500 pb-1 pl-1 pr-1 pt-1"
+							class="mx-2 my-auto rounded border border-indigo-500 pb-2 pl-2 pr-2 pt-2"
 							title="Save"
 							color="indigo"
 						>

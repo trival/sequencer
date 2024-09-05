@@ -15,7 +15,7 @@ import { Input, Select } from './shared/input'
 import Popover from './shared/popover'
 
 type KeyboardSettingsProps = {
-	settings: Partial<KeyboardSettings>
+	settings?: Partial<KeyboardSettings>
 	onSettingsUpdate: (settings: Partial<KeyboardSettings>) => void
 	class?: string
 }
@@ -98,7 +98,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 			<div class="mx-2 mb-2 flex justify-center">
 				<Select
 					class="w-40"
-					value={props.settings.scaleHighlight}
+					value={settings().scaleHighlight}
 					onSelect={(value) =>
 						props.onSettingsUpdate({
 							scaleHighlight: value as ScaleHighlight,
@@ -110,7 +110,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 				/>
 				<Select
 					class="ml-2 w-20"
-					value={props.settings.baseNote}
+					value={settings().baseNote}
 					onSelect={(value) =>
 						props.onSettingsUpdate({
 							baseNote: value as number,
@@ -132,7 +132,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 			<div class="mx-2 mb-2 flex justify-center">
 				<Select
 					class="w-40"
-					value={props.settings.toneColorType}
+					value={settings().toneColorType}
 					onSelect={(value) =>
 						props.onSettingsUpdate({
 							toneColorType: value as ToneColorType,
@@ -145,7 +145,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 				<Input
 					type="number"
 					class="ml-2 w-20 px-2"
-					value={props.settings.keyLength}
+					value={settings().keyLength}
 					onChange={(value) =>
 						props.onSettingsUpdate({
 							keyLength: parseInt(value as string),
@@ -159,7 +159,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					<Input
 						type="number"
 						class="ml-2 w-20 px-2"
-						value={props.settings.maxCols}
+						value={settings().maxCols}
 						onChange={(value) =>
 							props.onSettingsUpdate({
 								maxCols: parseInt(value as string),
@@ -172,7 +172,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					<Input
 						type="number"
 						class="ml-2 w-20 px-2"
-						value={props.settings.maxRows}
+						value={settings().maxRows}
 						onChange={(value) =>
 							props.onSettingsUpdate({
 								maxRows: parseInt(value as string),
