@@ -44,13 +44,8 @@ export default function SongMetaForm(props: SongMetaFormProps) {
 				value={description()}
 			/>
 
-			<div>
-				<Button
-					type="button"
-					color="white"
-					disabled={isInitial()}
-					onClick={() => reset()}
-				>
+			<div class="flex justify-end">
+				<Button color="white" disabled={isInitial()} onClick={() => reset()}>
 					Abort
 				</Button>
 				<Button

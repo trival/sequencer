@@ -2,6 +2,7 @@ Quick UI improvements:
 
 - [ ] no confirmation on delete note
 - [ ] no confirmation on note duration change
+- [ ] auto open duration dialog when adding a note via song controls
 
 Basic App Navigation:
 
@@ -12,8 +13,8 @@ Basic App Navigation:
 
 Player interaction:
 
+- [ ] split a note after a given duration
 - [ ] duplicate a track
-- [ ] import/edit track json data
 - [ ] mute/unmute tracks, solo tracks
 - [ ] indicate notes present on other tracks on at the same time on the keyboard
       when editing a note
@@ -34,9 +35,11 @@ Future whishlist:
 
 - [ ] transpose selected notes/track or whole song
 - [ ] record notes from playing the keyboard (probably with a metronome)
+- [ ] send midi signals via webmidi
 
 Done:
 
+- [x] import/edit track json data
 - [x] basic app navigation
 - [x] fast add note button
 - [x] no keyboard edit mode when playing, just playalong

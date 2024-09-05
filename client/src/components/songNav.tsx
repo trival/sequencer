@@ -77,7 +77,9 @@ export default function NavBar(props: SongNavProps) {
 			<span class="flex-grow" />
 
 			<Show when={props.currentSong}>
-				<h3 class="ml-4 font-semibold">{props.currentSong!.meta.title}</h3>
+				<h3 class="ml-2 text-right font-semibold">
+					{props.currentSong!.meta.title}
+				</h3>
 				<Show when={props.onUpdateSong}>
 					<IconButtonPopover
 						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
