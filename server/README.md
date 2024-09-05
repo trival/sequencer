@@ -40,6 +40,15 @@ Finally, deploy the Worker:
 npm run deploy
 ```
 
+## interacting with remote db
+
+```bash
+npx wrangler d1 execute sequencer-db --remote --command="select * from user;"
+```
+
+also possible to use `--file=<path/to/commands.sql>` to run a file with multiple
+commands.
+
 ## License
 
 This project is licensed under the MIT license. See the [LICENSE](../LICENSE)

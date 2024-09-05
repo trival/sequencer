@@ -44,62 +44,62 @@ function activeBorders(cs: ActiveColor[]): string {
 		cs.length === 1
 			? [cs[0], cs[0], cs[0], cs[0]]
 			: cs.length === 2
-			? [cs[0], cs[1], cs[0], cs[1]]
-			: cs.length === 3
-			? [cs[0], cs[1], cs[0], cs[2]]
-			: [cs[0], cs[1], cs[2], cs[3]]
+				? [cs[0], cs[1], cs[0], cs[1]]
+				: cs.length === 3
+					? [cs[0], cs[1], cs[0], cs[2]]
+					: [cs[0], cs[1], cs[2], cs[3]]
 
 	const bt =
 		top === 'magenta'
 			? tw`border-t-fuchsia-400`
 			: top === 'blue'
-			? tw`border-t-blue-400`
-			: top === 'cyan'
-			? tw`border-t-cyan-400`
-			: top === 'green'
-			? tw`border-t-green-400`
-			: top === 'yellow'
-			? tw`border-t-yellow-400`
-			: tw`border-t-red-400`
+				? tw`border-t-blue-400`
+				: top === 'cyan'
+					? tw`border-t-cyan-400`
+					: top === 'green'
+						? tw`border-t-green-400`
+						: top === 'yellow'
+							? tw`border-t-yellow-400`
+							: tw`border-t-red-400`
 
 	const br =
 		right === 'magenta'
 			? tw`border-r-fuchsia-400`
 			: right === 'blue'
-			? tw`border-r-blue-400`
-			: right === 'cyan'
-			? tw`border-r-cyan-400`
-			: right === 'green'
-			? tw`border-r-green-400`
-			: right === 'yellow'
-			? tw`border-r-yellow-400`
-			: tw`border-r-red-400`
+				? tw`border-r-blue-400`
+				: right === 'cyan'
+					? tw`border-r-cyan-400`
+					: right === 'green'
+						? tw`border-r-green-400`
+						: right === 'yellow'
+							? tw`border-r-yellow-400`
+							: tw`border-r-red-400`
 
 	const bb =
 		bottom === 'magenta'
 			? tw`border-b-fuchsia-400`
 			: bottom === 'blue'
-			? tw`border-b-blue-400`
-			: bottom === 'cyan'
-			? tw`border-b-cyan-400`
-			: bottom === 'green'
-			? tw`border-b-green-400`
-			: bottom === 'yellow'
-			? tw`border-b-yellow-400`
-			: tw`border-b-red-400`
+				? tw`border-b-blue-400`
+				: bottom === 'cyan'
+					? tw`border-b-cyan-400`
+					: bottom === 'green'
+						? tw`border-b-green-400`
+						: bottom === 'yellow'
+							? tw`border-b-yellow-400`
+							: tw`border-b-red-400`
 
 	const bl =
 		left === 'magenta'
 			? tw`border-l-fuchsia-400`
 			: left === 'blue'
-			? tw`border-l-blue-400`
-			: left === 'cyan'
-			? tw`border-l-cyan-400`
-			: left === 'green'
-			? tw`border-l-green-400`
-			: left === 'yellow'
-			? tw`border-l-yellow-400`
-			: tw`border-l-red-400`
+				? tw`border-l-blue-400`
+				: left === 'cyan'
+					? tw`border-l-cyan-400`
+					: left === 'green'
+						? tw`border-l-green-400`
+						: left === 'yellow'
+							? tw`border-l-yellow-400`
+							: tw`border-l-red-400`
 
 	const borderBase = tw`border-4 scale-110`
 

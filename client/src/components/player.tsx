@@ -186,12 +186,14 @@ export default function Player(props: PlayerProps) {
 					activeNoteIds={activeNoteIds()}
 					onPropsChanged={(data) => props.songState.updateProps(data)}
 					onPlay={() => {
-						isPlaying()
-							? props.songPlayer.stop()
-							: props.songPlayer.play(
-									props.songState.data(),
-									activeNoteIds().length === 1 ? activeNoteIds()[0] : undefined,
-								)
+						if (isPlaying()) {
+							props.songPlayer.stop()
+						} else {
+							props.songPlayer.play(
+								props.songState.data(),
+								activeNoteIds().length === 1 ? activeNoteIds()[0] : undefined,
+							)
+						}
 					}}
 					onStop={() => {
 						props.songPlayer.stop()

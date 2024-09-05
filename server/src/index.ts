@@ -96,7 +96,11 @@ app.use(
 		createContext: (opts, c) => ({
 			session: c.get('localSession'),
 			services: c.get('services'),
+			isProduction: c.env.NODE_ENV === 'production',
 		}),
+		onError: ({ error, type, path, input, ctx }) => {
+			console.error('trpc error', { error, type, path, input, ctx })
+		},
 	}),
 )
 

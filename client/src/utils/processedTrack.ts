@@ -74,9 +74,11 @@ export function processSong(song: Song): ProcessedTrack[] {
 			note.durationSec = Tone.Time(note.duration).toSeconds()
 			note.startTimeSec = Tone.Time(collectDurations(subdivisions)).toSeconds()
 
-			Array.isArray(noteData.duration)
-				? subdivisions.push(...noteData.duration)
-				: subdivisions.push(noteData.duration)
+			if (Array.isArray(noteData.duration)) {
+				subdivisions.push(...noteData.duration)
+			} else {
+				subdivisions.push(noteData.duration)
+			}
 		})
 
 		const duration = collectDurations(subdivisions)
