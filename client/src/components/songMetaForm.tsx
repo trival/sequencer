@@ -59,7 +59,7 @@ export default function SongMetaForm(props: SongMetaFormProps) {
 					color="indigo"
 					disabled={isInitial()}
 				>
-					Save
+					Change
 				</Button>
 			</div>
 		</form>

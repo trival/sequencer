@@ -1,4 +1,4 @@
-import { KeyboardSettings } from '@/datamodel'
+import { defaultKeyboardSettings, KeyboardSettings } from '@/datamodel'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { Icon } from 'solid-heroicons'
 import {
@@ -8,14 +8,14 @@ import {
 	arrowSmallRight,
 	arrowSmallUp,
 } from 'solid-heroicons/outline'
-import { createSignal } from 'solid-js'
+import { createEffect, createSignal } from 'solid-js'
 import * as Tone from 'tone'
 import { IconButton } from './shared/buttons'
 import { Input, Select } from './shared/input'
 import Popover from './shared/popover'
 
 type KeyboardSettingsProps = {
-	settings: KeyboardSettings
+	settings: Partial<KeyboardSettings>
 	onSettingsUpdate: (settings: Partial<KeyboardSettings>) => void
 	class?: string
 }
@@ -58,8 +58,14 @@ export function KeyboardSettingsBtn(props: KeyboardSettingsProps) {
 }
 
 function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
-	const offsetX = () => props.settings.offsetX
-	const offsetY = () => props.settings.offsetY
+	const [settings, setSettings] = createSignal(defaultKeyboardSettings)
+
+	createEffect(() => {
+		setSettings((settings) => ({ ...settings, ...props.settings }))
+	})
+
+	const offsetX = () => settings().offsetX
+	const offsetY = () => settings().offsetY
 
 	return (
 		<div>
@@ -111,7 +117,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 						})
 					}
 					options={[...Array(12).keys()].map((i) => {
-						const start = props.settings.baseNote - 4
+						const start = settings().baseNote - 4
 						const note = start + i
 						return {
 							value: note,

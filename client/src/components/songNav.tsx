@@ -1,4 +1,4 @@
-import { KeyboardSettings, SongEntity, SongMeta } from '@/datamodel'
+import { KeyboardSettings, SongData, SongEntity, SongMeta } from '@/datamodel'
 import { A } from '@solidjs/router'
 import clsx from 'clsx'
 import { Icon } from 'solid-heroicons'
@@ -10,13 +10,12 @@ import { KeyboardSettingsBtn } from './keyboardSettings'
 import ProfileSongList from './profileList'
 import { IconButton, IconButtonPopover, LogoutButton } from './shared/buttons'
 import SongMetaForm from './songMetaForm'
+import { SongCodeEditor } from './songCodeEditor'
 
 export interface SongNavProps {
 	currentSong?: SongEntity | null
-	onUpdateSongMeta?: (id: string, meta: Partial<SongMeta>) => void
+	onUpdateSong?: (song: SongEntity) => void
 	onLogout: () => void
-	keyboardSettings?: KeyboardSettings
-	onUpdateKeyboardSettings?: (settings: Partial<KeyboardSettings>) => void
 }
 
 export default function NavBar(props: SongNavProps) {
@@ -29,15 +28,49 @@ export default function NavBar(props: SongNavProps) {
 		document.removeEventListener('click', close)
 	})
 
+	function updateSongMeta(meta: Partial<SongMeta>) {
+		const song = props.currentSong
+		if (song && props.onUpdateSong) {
+			const updatedSong = {
+				...song,
+				meta: { ...song.meta, ...meta },
+			}
+			props.onUpdateSong(updatedSong)
+		}
+	}
+
+	function updateSongData(songData: SongData) {
+		const song = props.currentSong
+		if (song && props.onUpdateSong) {
+			props.onUpdateSong({ ...song, data: songData })
+		}
+	}
+
+	function updateKeyboardSettings(settings: Partial<KeyboardSettings>) {
+		const song = props.currentSong
+		if (song && props.onUpdateSong) {
+			props.onUpdateSong({
+				...song,
+				data: {
+					...song.data,
+					keyboardSettings: {
+						...song.data.keyboardSettings,
+						...settings,
+					},
+				},
+			})
+		}
+	}
+
 	return (
 		<nav class="relative z-10 flex items-center px-2 py-1 lg:px-4 lg:py-4">
 			<A href="/" class="font-semibold underline">
 				<Logo class="mx-3 h-6 w-6" />
 			</A>
-			<Show when={props.keyboardSettings}>
+			<Show when={props.currentSong?.data.keyboardSettings}>
 				<KeyboardSettingsBtn
-					settings={props.keyboardSettings!}
-					onSettingsUpdate={props.onUpdateKeyboardSettings!}
+					settings={props.currentSong!.data.keyboardSettings || {}}
+					onSettingsUpdate={updateKeyboardSettings}
 				/>
 			</Show>
 
@@ -45,7 +78,7 @@ export default function NavBar(props: SongNavProps) {
 
 			<Show when={props.currentSong}>
 				<h3 class="ml-4 font-semibold">{props.currentSong!.meta.title}</h3>
-				<Show when={props.onUpdateSongMeta}>
+				<Show when={props.onUpdateSong}>
 					<IconButtonPopover
 						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
 						color="custom"
@@ -57,12 +90,10 @@ export default function NavBar(props: SongNavProps) {
 									title={props.currentSong!.meta.title || ''}
 									description={props.currentSong!.meta.description || ''}
 									onSubmit={(title, description) => {
-										if (props.currentSong) {
-											props.onUpdateSongMeta!(props.currentSong.id, {
-												title,
-												description,
-											})
-										}
+										updateSongMeta!({
+											title,
+											description,
+										})
 										close()
 									}}
 								/>
@@ -70,6 +101,11 @@ export default function NavBar(props: SongNavProps) {
 						)}
 					</IconButtonPopover>
 				</Show>
+
+				<SongCodeEditor
+					song={props.currentSong!.data}
+					onUpdateSong={updateSongData}
+				/>
 
 				<A color="custom" class="m-0 mr-2" href="/songs">
 					<Icon path={xMark} class="h-6 w-6" />
