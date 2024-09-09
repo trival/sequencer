@@ -69,13 +69,7 @@ app.use(async (c, next) => {
 
 app.use(async (c, next) => {
 	// request logger
-	console.log(
-		'⬅️ ',
-		c.req.method,
-		c.req.path,
-		await c.req.parseBody(),
-		c.req.query(),
-	)
+	console.log('⬅️ ', c.req.method, c.req.path, c.req.query())
 	return next()
 })
 

@@ -4,11 +4,12 @@ import type { TrpcSchema } from '../../../server/src/trpc-router'
 import SuperJSON from 'superjson'
 
 // Initialize the tRPC client
-export const createTrpc = () =>
-	createTRPCClient<TrpcSchema>({
+export const createTrpc = () => {
+	const serverUrl = import.meta.env.VITE_TRPC_DEV_SERVER_URL || '/api'
+	return createTRPCClient<TrpcSchema>({
 		links: [
 			httpBatchLink({
-				url: import.meta.env.VITE_TRPC_SERVER_URL + '/trpc',
+				url: serverUrl + '/trpc',
 				transformer: SuperJSON,
 				fetch(input, init) {
 					return fetch(input, {
@@ -19,5 +20,6 @@ export const createTrpc = () =>
 			}),
 		],
 	})
+}
 
 export type TrpcClient = ReturnType<typeof createTrpc>
