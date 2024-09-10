@@ -11,7 +11,7 @@
   "scripts": {
     "start": "serve dist",
     "dev": "vite --host --port 4000",
-    "build": "vite build && mkdir dist/functions && cp -r functions/* dist/functions",
+    "build": "vite build",
     "serve": "vite preview",
     "types": "tsc --noEmit",
     "lint": "eslint --fix src/**/*.{js,ts,tsx}"
@@ -52,8 +52,5 @@
     "typescript-eslint": "^8.4.0",
     "vite": "^5.3.5",
     "vite-plugin-solid": "^2.10.2"
-  },
-  "engines": {
-    "node": "20.*"
   }
 }
