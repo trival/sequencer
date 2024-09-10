@@ -13,7 +13,7 @@ import SongMetaForm from './songMetaForm'
 import { SongCodeEditor } from './songCodeEditor'
 
 export interface SongNavProps {
-	currentSong?: SongEntity | null
+	currentSong: SongEntity | null
 	onUpdateSong?: (song: SongEntity) => void
 	onLogout: () => void
 }
@@ -67,41 +67,41 @@ export default function NavBar(props: SongNavProps) {
 			<A href="/" class="font-semibold underline">
 				<Logo class="mx-3 h-6 w-6" />
 			</A>
-			<KeyboardSettingsBtn
-				settings={props.currentSong!.data.keyboardSettings}
-				onSettingsUpdate={updateKeyboardSettings}
-			/>
-
-			<span class="flex-grow" />
 
 			<Show when={props.currentSong}>
+				<KeyboardSettingsBtn
+					settings={props.currentSong!.data.keyboardSettings}
+					onSettingsUpdate={updateKeyboardSettings}
+				/>
+
+				<span class="flex-grow" />
+
 				<h3 class="ml-2 text-right font-semibold">
 					{props.currentSong!.meta.title}
 				</h3>
-				<Show when={props.onUpdateSong}>
-					<IconButtonPopover
-						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
-						title="Edit metadata"
-						color="custom"
-						class="m-0 ml-2"
-					>
-						{(close) => (
-							<div class="w-64">
-								<SongMetaForm
-									title={props.currentSong!.meta.title || ''}
-									description={props.currentSong!.meta.description || ''}
-									onSubmit={(title, description) => {
-										updateSongMeta!({
-											title,
-											description,
-										})
-										close()
-									}}
-								/>
-							</div>
-						)}
-					</IconButtonPopover>
-				</Show>
+
+				<IconButtonPopover
+					buttonElement={<Icon path={pencil} class="h-5 w-5" />}
+					title="Edit metadata"
+					color="custom"
+					class="m-0 ml-2"
+				>
+					{(close) => (
+						<div class="w-64">
+							<SongMetaForm
+								title={props.currentSong!.meta.title || ''}
+								description={props.currentSong!.meta.description || ''}
+								onSubmit={(title, description) => {
+									updateSongMeta!({
+										title,
+										description,
+									})
+									close()
+								}}
+							/>
+						</div>
+					)}
+				</IconButtonPopover>
 
 				<SongCodeEditor
 					song={props.currentSong!.data}
