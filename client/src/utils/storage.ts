@@ -76,6 +76,7 @@ function mapApiSongToLocal(song: ApiSong): SongEntity {
 
 	return {
 		id: song.id,
+		timestamp: song.updatedAt.getTime(),
 
 		meta: {
 			title: song.title,

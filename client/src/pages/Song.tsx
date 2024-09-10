@@ -9,7 +9,6 @@ import {
 	EditorSettings,
 	KeyboardSettings,
 	Song,
-	SongMeta,
 } from '@/datamodel'
 import { createSongState, emptySongEntity } from '@/utils/song'
 import { createPlayer } from '@/utils/songPlayer'
@@ -66,33 +65,6 @@ export default function App() {
 		)
 	})
 
-	function updateSongMeta(id: string, meta: Partial<SongMeta>) {
-		const song = getCurrentSongDraft(state.songs[id])
-		if (song) {
-			const updatedSong = {
-				...song,
-				meta: { ...song.meta, ...meta },
-			}
-			updateSongDraft(updatedSong)
-		}
-	}
-
-	function updateKeyboardSettings(settings: Partial<KeyboardSettings>) {
-		const song = currentSong()
-		if (song) {
-			updateSongDraft({
-				...song,
-				data: {
-					...song.data,
-					keyboardSettings: {
-						...song.data.keyboardSettings,
-						...settings,
-					},
-				},
-			})
-		}
-	}
-
 	// TODO
 	// function updateEditorSettings(settings: Partial<EditorSettings>) {
 	// 	const song = currentSong()
@@ -123,14 +95,8 @@ export default function App() {
 		>
 			<NavBar
 				currentSong={currentSong()}
-				onUpdateSongMeta={(id, meta) => {
-					updateSongMeta(id, meta)
-				}}
+				onUpdateSong={updateSongDraft}
 				onLogout={() => logout()}
-				keyboardSettings={keyboardSettings()}
-				onUpdateKeyboardSettings={(settings) => {
-					updateKeyboardSettings(settings)
-				}}
 			/>
 			<Show when={currentSong()}>
 				<PlayerUI

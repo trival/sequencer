@@ -137,7 +137,7 @@ export const AppStateProvider = (
 			if (song) {
 				let newSong = emptySongEntity()
 				newSong = {
-					id: newSong.id,
+					...newSong,
 					meta: {
 						...newSong.meta,
 						basedOn: song.id,
@@ -155,7 +155,7 @@ export const AppStateProvider = (
 			if (songState) {
 				const updatedSongState = {
 					...songState,
-					changes: [...songState.changes, data],
+					changes: [...songState.changes, { ...data, timestamp: Date.now() }],
 					currentChangeIdx: songState.currentChangeIdx + 1,
 				}
 				setState('songs', data.id, updatedSongState)
@@ -167,8 +167,20 @@ export const AppStateProvider = (
 			if (song) {
 				props.storage
 					.saveSong(song)
+					// eslint-disable-next-line solid/reactivity
 					.then((res) => {
-						setState('songs', res.id, songStateDataFromEntity(res))
+						if (state.songs[res.id]) {
+							setState('songs', res.id, 'initialData', res)
+							setState(
+								'songs',
+								res.id,
+								'changes',
+								state.songs[res.id].currentChangeIdx,
+								res,
+							)
+						} else {
+							setState('songs', res.id, songStateDataFromEntity(res))
+						}
 						navigate(`/songs/${res.id}`)
 					})
 					.catch(console.error)

@@ -5,12 +5,7 @@ import {
 	subdivisionValues,
 } from '@/datamodel'
 import { Icon } from 'solid-heroicons'
-import {
-	archiveBoxArrowDown,
-	cloudArrowUp,
-	minus,
-	plus,
-} from 'solid-heroicons/outline'
+import { cloudArrowUp, minus, plus } from 'solid-heroicons/outline'
 import { stop } from 'solid-heroicons/solid'
 import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
 import * as Tone from 'tone'
@@ -23,7 +18,6 @@ import {
 	PlayButton,
 } from './shared/buttons'
 import { Input, Select } from './shared/input'
-import { Overlay } from './shared/popover'
 
 const durationOptions = subdivisionValues.map((s) => ({
 	value: s,
@@ -58,8 +52,6 @@ interface SongControlsProps {
 }
 
 export function SongControls(props: SongControlsProps) {
-	const [isDataOverlayOpen, setDataOverlayOpen] = createSignal(false)
-
 	const singleActiveIdx = () => {
 		const ids = props.activeNoteIds
 		if (ids?.length !== 1) return null
@@ -167,35 +159,17 @@ export function SongControls(props: SongControlsProps) {
 								value={props.song.bpm}
 								onChange={(val) => {
 									const bpm = parseInt(val as string)
-									Tone.Transport.bpm.value = bpm
+									Tone.getTransport().bpm.value = bpm
 									props.onPropsChanged!({ bpm })
 								}}
 							/>
 						</label>
 					)}
 
-					<Button
-						onClick={() => setDataOverlayOpen(true)}
-						class="my-auto ml-8 rounded pb-1 pl-1 pr-1 pt-1"
-						title="Export"
-					>
-						<Icon path={archiveBoxArrowDown} class="h-6 w-6" />
-					</Button>
-					<Overlay
-						onClose={() => setDataOverlayOpen(false)}
-						visible={isDataOverlayOpen()}
-						class="m-10 max-h-[90vh] overflow-y-auto rounded-lg bg-slate-100 p-10 shadow-lg"
-					>
-						<pre>
-							<code class="mono select-text text-xs">
-								{JSON.stringify(props.song, null, '  ')}
-							</code>
-						</pre>
-					</Overlay>
 					{props.onSave && (
 						<Button
 							onClick={() => props.onSave?.()}
-							class="mx-2 my-auto rounded border border-indigo-500 pb-1 pl-1 pr-1 pt-1"
+							class="mx-2 my-auto rounded border border-indigo-500 pb-2 pl-2 pr-2 pt-2"
 							title="Save"
 							color="indigo"
 						>

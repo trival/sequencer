@@ -1,4 +1,4 @@
-import { KeyboardSettings, SongEntity, SongMeta } from '@/datamodel'
+import { KeyboardSettings, SongData, SongEntity, SongMeta } from '@/datamodel'
 import { A } from '@solidjs/router'
 import clsx from 'clsx'
 import { Icon } from 'solid-heroicons'
@@ -10,13 +10,12 @@ import { KeyboardSettingsBtn } from './keyboardSettings'
 import ProfileSongList from './profileList'
 import { IconButton, IconButtonPopover, LogoutButton } from './shared/buttons'
 import SongMetaForm from './songMetaForm'
+import { SongCodeEditor } from './songCodeEditor'
 
 export interface SongNavProps {
-	currentSong?: SongEntity | null
-	onUpdateSongMeta?: (id: string, meta: Partial<SongMeta>) => void
+	currentSong: SongEntity | null
+	onUpdateSong?: (song: SongEntity) => void
 	onLogout: () => void
-	keyboardSettings?: KeyboardSettings
-	onUpdateKeyboardSettings?: (settings: Partial<KeyboardSettings>) => void
 }
 
 export default function NavBar(props: SongNavProps) {
@@ -29,49 +28,87 @@ export default function NavBar(props: SongNavProps) {
 		document.removeEventListener('click', close)
 	})
 
+	function updateSongMeta(meta: Partial<SongMeta>) {
+		const song = props.currentSong
+		if (song && props.onUpdateSong) {
+			const updatedSong = {
+				...song,
+				meta: { ...song.meta, ...meta },
+			}
+			props.onUpdateSong(updatedSong)
+		}
+	}
+
+	function updateSongData(songData: SongData) {
+		const song = props.currentSong
+		if (song && props.onUpdateSong) {
+			props.onUpdateSong({ ...song, data: songData })
+		}
+	}
+
+	function updateKeyboardSettings(settings: Partial<KeyboardSettings>) {
+		const song = props.currentSong
+		if (song && props.onUpdateSong) {
+			props.onUpdateSong({
+				...song,
+				data: {
+					...song.data,
+					keyboardSettings: {
+						...song.data.keyboardSettings,
+						...settings,
+					},
+				},
+			})
+		}
+	}
+
 	return (
 		<nav class="relative z-10 flex items-center px-2 py-1 lg:px-4 lg:py-4">
 			<A href="/" class="font-semibold underline">
 				<Logo class="mx-3 h-6 w-6" />
 			</A>
-			<Show when={props.keyboardSettings}>
-				<KeyboardSettingsBtn
-					settings={props.keyboardSettings!}
-					onSettingsUpdate={props.onUpdateKeyboardSettings!}
-				/>
-			</Show>
-
-			<span class="flex-grow" />
 
 			<Show when={props.currentSong}>
-				<h3 class="ml-4 font-semibold">{props.currentSong!.meta.title}</h3>
-				<Show when={props.onUpdateSongMeta}>
-					<IconButtonPopover
-						buttonElement={<Icon path={pencil} class="h-5 w-5" />}
-						color="custom"
-						class="m-0 ml-2"
-					>
-						{(close) => (
-							<div class="w-64">
-								<SongMetaForm
-									title={props.currentSong!.meta.title || ''}
-									description={props.currentSong!.meta.description || ''}
-									onSubmit={(title, description) => {
-										if (props.currentSong) {
-											props.onUpdateSongMeta!(props.currentSong.id, {
-												title,
-												description,
-											})
-										}
-										close()
-									}}
-								/>
-							</div>
-						)}
-					</IconButtonPopover>
-				</Show>
+				<KeyboardSettingsBtn
+					settings={props.currentSong!.data.keyboardSettings}
+					onSettingsUpdate={updateKeyboardSettings}
+				/>
 
-				<A color="custom" class="m-0 mr-2" href="/songs">
+				<span class="flex-grow" />
+
+				<h3 class="ml-2 text-right font-semibold">
+					{props.currentSong!.meta.title}
+				</h3>
+
+				<IconButtonPopover
+					buttonElement={<Icon path={pencil} class="h-5 w-5" />}
+					title="Edit metadata"
+					color="custom"
+					class="m-0 ml-2"
+				>
+					{(close) => (
+						<div class="w-64">
+							<SongMetaForm
+								title={props.currentSong!.meta.title || ''}
+								description={props.currentSong!.meta.description || ''}
+								onSubmit={(title, description) => {
+									updateSongMeta!({
+										title,
+										description,
+									})
+									close()
+								}}
+							/>
+						</div>
+					)}
+				</IconButtonPopover>
+
+				<SongCodeEditor
+					song={props.currentSong!.data}
+					onUpdateSong={updateSongData}
+				/>
+
+				<A color="custom" class="m-0 mr-2" href="/songs" title="Close">
 					<Icon path={xMark} class="h-6 w-6" />
 				</A>
 			</Show>
