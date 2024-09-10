@@ -1,4 +1,4 @@
-import { KeyboardSettings, SongData, SongEntity, SongMeta } from '@/datamodel'
+import { KeyboardSettings, SongEntity, SongMeta } from '@/datamodel'
 import { A } from '@solidjs/router'
 import clsx from 'clsx'
 import { Icon } from 'solid-heroicons'
@@ -10,7 +10,6 @@ import { KeyboardSettingsBtn } from './keyboardSettings'
 import ProfileSongList from './profileList'
 import { IconButton, IconButtonPopover, LogoutButton } from './shared/buttons'
 import SongMetaForm from './songMetaForm'
-import { SongCodeEditor } from './songCodeEditor'
 
 export interface SongNavProps {
 	currentSong: SongEntity | null
@@ -36,13 +35,6 @@ export default function NavBar(props: SongNavProps) {
 				meta: { ...song.meta, ...meta },
 			}
 			props.onUpdateSong(updatedSong)
-		}
-	}
-
-	function updateSongData(songData: SongData) {
-		const song = props.currentSong
-		if (song && props.onUpdateSong) {
-			props.onUpdateSong({ ...song, data: songData })
 		}
 	}
 
@@ -102,11 +94,6 @@ export default function NavBar(props: SongNavProps) {
 						</div>
 					)}
 				</IconButtonPopover>
-
-				<SongCodeEditor
-					song={props.currentSong!.data}
-					onUpdateSong={updateSongData}
-				/>
 
 				<A color="custom" class="m-0 mr-2" href="/songs" title="Close">
 					<Icon path={xMark} class="h-6 w-6" />

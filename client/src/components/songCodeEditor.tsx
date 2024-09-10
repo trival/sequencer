@@ -30,8 +30,8 @@ export const SongCodeEditor = (props: SongCodeEditorProps) => {
 			<IconButton
 				color="custom"
 				onClick={() => setDataOverlayOpen(true)}
-				class="mr-3"
-				title="Export"
+				class="mx-3"
+				title="Edit song data as code"
 			>
 				<Icon path={codeBracket} class="h-6 w-6" />
 			</IconButton>

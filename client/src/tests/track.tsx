@@ -2,7 +2,7 @@ import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
 import { Subdivision, TrackNote } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
-import { createSongState, emptySong } from '@/utils/song'
+import { createSongActions, emptySong } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 
@@ -24,7 +24,7 @@ export default function TestTracksPage() {
 		tracks: [{ notes: initialMelody, instrument: 0 }],
 	})
 
-	const { data, addNote, removeNote, changeDuration } = createSongState(
+	const { addNote, removeNote, changeDuration } = createSongActions(
 		song,
 		setSong,
 	)
@@ -77,7 +77,7 @@ export default function TestTracksPage() {
 		changeDuration(trackIdx, noteIdx, duration)
 	}
 
-	const tracks = () => processSong(data())
+	const tracks = () => processSong(song())
 	const activeNotes = () => {
 		const idx = activeNoteIdx()
 		if (idx) {
@@ -95,7 +95,7 @@ export default function TestTracksPage() {
 				onNoteClicked={onNoteClicked}
 			/>
 			<SongControls
-				song={data()}
+				songData={{ song: song() }}
 				defaultDuration="4n"
 				isPlaying={isPlaying()}
 				onPlay={() => setIsPlaying(!isPlaying())}

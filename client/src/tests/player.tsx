@@ -4,7 +4,7 @@ import {
 	defaultKeyboardSettings,
 	TrackNote,
 } from '@/datamodel'
-import { createSongState, songFromMelody } from '@/utils/song'
+import { createSongActions, songFromMelody } from '@/utils/song'
 import { createPlayer } from '@/utils/songPlayer'
 import { createSynth } from '@/utils/synth'
 import { toMidi } from '@/utils/utils'
@@ -30,7 +30,7 @@ export default function PlayerTest() {
 	const synth = createSynth()
 	const player = createPlayer(synth)
 
-	const state = createSongState(
+	const state = createSongActions(
 		song,
 		setSong,
 		defaultEditorSettings.defaultNoteDuration,
@@ -38,9 +38,10 @@ export default function PlayerTest() {
 
 	return (
 		<PlayerUI
-			songState={state}
+			songData={{ song: song() }}
+			songActions={state}
 			onSave={() => {
-				console.log('saving!', song)
+				console.log('saving!', song())
 			}}
 			songPlayer={player}
 			synth={synth}

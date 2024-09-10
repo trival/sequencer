@@ -10,7 +10,7 @@ import {
 	KeyboardSettings,
 	Song,
 } from '@/datamodel'
-import { createSongState, emptySongEntity } from '@/utils/song'
+import { createSongActions, emptySongEntity } from '@/utils/song'
 import { createPlayer } from '@/utils/songPlayer'
 import { createSynth } from '@/utils/synth'
 import { useParams } from '@solidjs/router'
@@ -55,10 +55,10 @@ export default function App() {
 		}
 	}
 
-	const songState = createMemo(() => {
+	const songActions = createMemo(() => {
 		const defaultSong = emptySongEntity()
 		const song = () => currentSong()?.data.song || defaultSong.data.song
-		return createSongState(
+		return createSongActions(
 			song,
 			updateSong,
 			editorSettings().defaultNoteDuration,
@@ -100,10 +100,14 @@ export default function App() {
 			/>
 			<Show when={currentSong()}>
 				<PlayerUI
+					songData={currentSong()!.data}
+					onSongDataChanged={(songData) =>
+						updateSongDraft({ ...currentSong()!, data: songData })
+					}
 					onSave={() => {
 						syncSongWithRemote(currentSong()!.id)
 					}}
-					songState={songState()}
+					songActions={songActions()}
 					songPlayer={player()}
 					synth={synth()}
 					editorSettings={editorSettings()}

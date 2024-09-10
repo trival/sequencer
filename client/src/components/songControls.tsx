@@ -1,5 +1,5 @@
 import {
-	Song,
+	SongData,
 	SongProperties,
 	Subdivision,
 	subdivisionValues,
@@ -18,6 +18,7 @@ import {
 	PlayButton,
 } from './shared/buttons'
 import { Input, Select } from './shared/input'
+import { SongCodeEditor } from './songCodeEditor'
 
 const durationOptions = subdivisionValues.map((s) => ({
 	value: s,
@@ -25,7 +26,8 @@ const durationOptions = subdivisionValues.map((s) => ({
 }))
 
 interface SongControlsProps {
-	song: Song
+	songData: SongData
+	onSongDataChanged?: (songData: SongData) => void
 	isPlaying?: boolean
 	activeNoteIds?: [number, number][]
 	defaultDuration: Subdivision
@@ -45,9 +47,9 @@ interface SongControlsProps {
 		noteIdx: number,
 		duration: Subdivision | Subdivision[],
 	) => void
+	onPropsChanged?: (props: Partial<SongProperties>) => void
 	onPlay?: () => void
 	onStop?: () => void
-	onPropsChanged?: (props: Partial<SongProperties>) => void
 	onSave?: () => void
 }
 
@@ -60,7 +62,7 @@ export function SongControls(props: SongControlsProps) {
 
 	const activeNote = () => {
 		const idx = singleActiveIdx()
-		return idx ? props.song.tracks[idx[0]]?.notes[idx[1]] : null
+		return idx ? props.songData.song.tracks[idx[0]]?.notes[idx[1]] : null
 	}
 
 	const activeDuration = () => {
@@ -156,7 +158,7 @@ export function SongControls(props: SongControlsProps) {
 							<Input
 								class="w-20"
 								type="number"
-								value={props.song.bpm}
+								value={props.songData.song.bpm}
 								onChange={(val) => {
 									const bpm = parseInt(val as string)
 									Tone.getTransport().bpm.value = bpm
@@ -164,6 +166,13 @@ export function SongControls(props: SongControlsProps) {
 								}}
 							/>
 						</label>
+					)}
+
+					{props.onSongDataChanged && (
+						<SongCodeEditor
+							onUpdateSong={props.onSongDataChanged}
+							song={props.songData}
+						/>
 					)}
 
 					{props.onSave && (
