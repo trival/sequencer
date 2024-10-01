@@ -21,7 +21,7 @@
     "@popperjs/core": "^2.11.8",
     "@solidjs/router": "~0.14.1",
     "@trpc/client": "^11.0.0-rc.467",
-    "date-fns": "^3.6.0",
+    "date-fns": "4.1.0",
     "serve": "^14.2.3",
     "solid-heroicons": "^3.2.4",
     "solid-js": "^1.8.19",
