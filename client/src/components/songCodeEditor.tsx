@@ -1,11 +1,12 @@
 import { SongData, songDataSchema } from '@/datamodel'
 import { Icon } from 'solid-heroicons'
-import { codeBracket } from 'solid-heroicons/outline'
+import { codeBracket, folderArrowDown } from 'solid-heroicons/outline'
 import { createEffect, createSignal } from 'solid-js'
 import { Button, IconButton } from './shared/buttons'
 import { Overlay } from './shared/popover'
 
 export interface SongCodeEditorProps {
+	title: string
 	song: SongData
 	onUpdateSong: (song: SongData) => void
 }
@@ -24,6 +25,13 @@ export const SongCodeEditor = (props: SongCodeEditorProps) => {
 			setEditedData(text)
 		}
 	})
+
+	const pad2 = (n: number) => n.toString().padStart(2, '0')
+
+	const getCurrentDateTime = () => {
+		const date = new Date()
+		return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}_${pad2(date.getHours())}-${pad2(date.getMinutes())}`
+	}
 
 	return (
 		<>
@@ -52,6 +60,19 @@ export const SongCodeEditor = (props: SongCodeEditorProps) => {
 				</textarea>
 
 				<div class="mt-6 flex justify-end gap-6">
+					<Button
+						onClick={() => {
+							const a = document.createElement('a')
+							a.href = `data:application/json,${encodeURIComponent(editedData())}`
+							a.download = `${props.title}_${getCurrentDateTime()}.json`
+							a.click()
+							setDataOverlayOpen(false)
+						}}
+						title="Download JSON"
+					>
+						<Icon path={folderArrowDown} class="h-6 w-6" />
+					</Button>
+					<span class="flex-grow" />
 					<Button color="white" onClick={() => setDataOverlayOpen(false)}>
 						Cancel
 					</Button>
