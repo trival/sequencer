@@ -2,6 +2,7 @@ import PlayerUI from '@/components/player'
 import {
 	defaultEditorSettings,
 	defaultKeyboardSettings,
+	SongEntity,
 	TrackNote,
 } from '@/datamodel'
 import { createSongActions, songFromMelody } from '@/utils/song'
@@ -38,7 +39,7 @@ export default function PlayerTest() {
 
 	return (
 		<PlayerUI
-			songData={{ song: song() }}
+			songEntity={{ data: { song: song() } } as SongEntity}
 			songActions={state}
 			onSave={() => {
 				console.log('saving!', song())

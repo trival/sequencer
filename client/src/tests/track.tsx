@@ -1,6 +1,6 @@
 import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
-import { Subdivision, TrackNote } from '@/datamodel'
+import { SongEntity, Subdivision, TrackNote } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
 import { createSongActions, emptySong } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
@@ -95,7 +95,7 @@ export default function TestTracksPage() {
 				onNoteClicked={onNoteClicked}
 			/>
 			<SongControls
-				songData={{ song: song() }}
+				songEntity={{ data: { song: song() } } as SongEntity}
 				defaultDuration="4n"
 				isPlaying={isPlaying()}
 				onPlay={() => setIsPlaying(!isPlaying())}

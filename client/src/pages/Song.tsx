@@ -100,7 +100,7 @@ export default function App() {
 			/>
 			<Show when={currentSong()}>
 				<PlayerUI
-					songData={currentSong()!.data}
+					songEntity={currentSong()!}
 					onSongDataChanged={(songData) =>
 						updateSongDraft({ ...currentSong()!, data: songData })
 					}

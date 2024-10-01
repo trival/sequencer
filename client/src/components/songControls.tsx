@@ -1,13 +1,22 @@
 import {
 	SongData,
+	SongEntity,
 	SongProperties,
 	Subdivision,
 	subdivisionValues,
 } from '@/datamodel'
+import { truthy } from '@/utils/utils'
 import { Icon } from 'solid-heroicons'
 import { cloudArrowUp, minus, plus } from 'solid-heroicons/outline'
 import { stop } from 'solid-heroicons/solid'
-import { For, Show, createEffect, createSignal, mergeProps } from 'solid-js'
+import {
+	For,
+	Show,
+	createEffect,
+	createMemo,
+	createSignal,
+	mergeProps,
+} from 'solid-js'
 import * as Tone from 'tone'
 import {
 	AddButton,
@@ -26,7 +35,7 @@ const durationOptions = subdivisionValues.map((s) => ({
 }))
 
 interface SongControlsProps {
-	songData: SongData
+	songEntity: SongEntity
 	onSongDataChanged?: (songData: SongData) => void
 	isPlaying?: boolean
 	activeNoteIds?: [number, number][]
@@ -60,9 +69,11 @@ export function SongControls(props: SongControlsProps) {
 		return ids[0]
 	}
 
+	const songData = createMemo(() => props.songEntity.data)
+
 	const activeNote = () => {
 		const idx = singleActiveIdx()
-		return idx ? props.songData.song.tracks[idx[0]]?.notes[idx[1]] : null
+		return idx ? songData().song.tracks[idx[0]]?.notes[idx[1]] : null
 	}
 
 	const activeDuration = () => {
@@ -158,7 +169,7 @@ export function SongControls(props: SongControlsProps) {
 							<Input
 								class="w-20"
 								type="number"
-								value={props.songData.song.bpm}
+								value={songData().song.bpm}
 								onChange={(val) => {
 									const bpm = parseInt(val as string)
 									Tone.getTransport().bpm.value = bpm
@@ -171,7 +182,14 @@ export function SongControls(props: SongControlsProps) {
 					{props.onSongDataChanged && (
 						<SongCodeEditor
 							onUpdateSong={props.onSongDataChanged}
-							song={props.songData}
+							song={songData()}
+							title={[
+								props.songEntity.id,
+								props.songEntity.meta.title,
+								props.songEntity.meta.collection,
+							]
+								.filter(truthy)
+								.join('_')}
 						/>
 					)}
 
