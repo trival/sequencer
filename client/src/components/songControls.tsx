@@ -7,7 +7,7 @@ import {
 } from '@/datamodel'
 import { truthy } from '@/utils/utils'
 import { Icon } from 'solid-heroicons'
-import { cloudArrowUp, minus, plus } from 'solid-heroicons/outline'
+import { cloudArrowUp, minus, plus, trash } from 'solid-heroicons/outline'
 import { stop } from 'solid-heroicons/solid'
 import {
 	For,
@@ -21,7 +21,6 @@ import * as Tone from 'tone'
 import {
 	AddButton,
 	Button,
-	DeleteButton,
 	EditButton,
 	IconButton,
 	PlayButton,
@@ -137,11 +136,17 @@ export function SongControls(props: SongControlsProps) {
 						</EditButton>
 					)}
 					{props.onRemove && (
-						<DeleteButton
-							onConfirm={() =>
+						<IconButton
+							color="rose"
+							title="Delete"
+							type="button"
+							onClick={() =>
 								props.onRemove!(singleActiveIdx()![0], singleActiveIdx()![1])
 							}
-						/>
+							class="m-2 p-2"
+						>
+							<Icon path={trash} class="h-6 w-6" aria-hidden="true" />
+						</IconButton>
 					)}
 					{props.onAddAfter && (
 						<AddButton>
