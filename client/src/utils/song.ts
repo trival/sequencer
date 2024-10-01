@@ -162,7 +162,7 @@ export const createSongActions = (
 		} else {
 			tracks.splice(trackIdx, 0, newTrack)
 		}
-		return { ...song, tracks }
+		onSongChange({ ...song, tracks })
 	}
 
 	return {
