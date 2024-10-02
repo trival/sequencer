@@ -17,6 +17,8 @@ const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('G3')], duration: '2n' },
 ]
 
+const defaultDuration = '4n'
+
 export default function TestTracksPage() {
 	const [song, setSong] = createSignal({
 		...emptySong(),
@@ -44,22 +46,14 @@ export default function TestTracksPage() {
 		}
 	}
 
-	const onNoteAddedBefore = (
-		trackIdx: number,
-		noteIdx: number,
-		duration: Subdivision | Subdivision[],
-	) => {
+	const onNoteAddedBefore = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteAddedBefore', trackIdx, noteIdx)
-		addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
+		addNote(trackIdx, noteIdx, { duration: defaultDuration, midiNotes: [] })
 	}
 
-	const onNoteAddedAfter = (
-		trackIdx: number,
-		noteIdx: number,
-		duration: Subdivision | Subdivision[],
-	) => {
+	const onNoteAddedAfter = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteAddedAfter', trackIdx, noteIdx)
-		addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
+		addNote(trackIdx, noteIdx + 1, { duration: defaultDuration, midiNotes: [] })
 		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
@@ -96,7 +90,7 @@ export default function TestTracksPage() {
 			/>
 			<SongControls
 				songEntity={{ data: { song: song() } } as SongEntity}
-				defaultDuration="4n"
+				defaultDuration={defaultDuration}
 				isPlaying={isPlaying()}
 				onPlay={() => setIsPlaying(!isPlaying())}
 				onStop={() => {
