@@ -1,8 +1,8 @@
 import { SongControls } from '@/components/songControls'
 import { Track } from '@/components/track'
-import { Subdivision, TrackNote } from '@/datamodel'
+import { SongEntity, Subdivision, TrackNote } from '@/datamodel'
 import { processSong } from '@/utils/processedTrack'
-import { createSongState, emptySong } from '@/utils/song'
+import { createSongActions, emptySong } from '@/utils/song'
 import { toMidi } from '@/utils/utils'
 import { createSignal } from 'solid-js'
 
@@ -17,6 +17,8 @@ const initialMelody: TrackNote[] = [
 	{ midiNotes: [toMidi('G3')], duration: '2n' },
 ]
 
+const defaultDuration = '4n'
+
 export default function TestTracksPage() {
 	const [song, setSong] = createSignal({
 		...emptySong(),
@@ -24,7 +26,7 @@ export default function TestTracksPage() {
 		tracks: [{ notes: initialMelody, instrument: 0 }],
 	})
 
-	const { data, addNote, removeNote, changeDuration } = createSongState(
+	const { addNote, removeNote, changeDuration } = createSongActions(
 		song,
 		setSong,
 	)
@@ -44,22 +46,14 @@ export default function TestTracksPage() {
 		}
 	}
 
-	const onNoteAddedBefore = (
-		trackIdx: number,
-		noteIdx: number,
-		duration: Subdivision | Subdivision[],
-	) => {
+	const onNoteAddedBefore = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteAddedBefore', trackIdx, noteIdx)
-		addNote(trackIdx, noteIdx, { duration, midiNotes: [] })
+		addNote(trackIdx, noteIdx, { duration: defaultDuration, midiNotes: [] })
 	}
 
-	const onNoteAddedAfter = (
-		trackIdx: number,
-		noteIdx: number,
-		duration: Subdivision | Subdivision[],
-	) => {
+	const onNoteAddedAfter = (trackIdx: number, noteIdx: number) => {
 		console.log('onNoteAddedAfter', trackIdx, noteIdx)
-		addNote(trackIdx, noteIdx + 1, { duration, midiNotes: [] })
+		addNote(trackIdx, noteIdx + 1, { duration: defaultDuration, midiNotes: [] })
 		onNoteClicked(trackIdx, noteIdx + 1)
 	}
 
@@ -77,7 +71,7 @@ export default function TestTracksPage() {
 		changeDuration(trackIdx, noteIdx, duration)
 	}
 
-	const tracks = () => processSong(data())
+	const tracks = () => processSong(song())
 	const activeNotes = () => {
 		const idx = activeNoteIdx()
 		if (idx) {
@@ -95,8 +89,8 @@ export default function TestTracksPage() {
 				onNoteClicked={onNoteClicked}
 			/>
 			<SongControls
-				song={data()}
-				defaultDuration="4n"
+				songEntity={{ data: { song: song() } } as SongEntity}
+				defaultDuration={defaultDuration}
 				isPlaying={isPlaying()}
 				onPlay={() => setIsPlaying(!isPlaying())}
 				onStop={() => {

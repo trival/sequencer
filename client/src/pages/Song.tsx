@@ -9,9 +9,8 @@ import {
 	EditorSettings,
 	KeyboardSettings,
 	Song,
-	SongMeta,
 } from '@/datamodel'
-import { createSongState, emptySongEntity } from '@/utils/song'
+import { createSongActions, emptySongEntity } from '@/utils/song'
 import { createPlayer } from '@/utils/songPlayer'
 import { createSynth } from '@/utils/synth'
 import { useParams } from '@solidjs/router'
@@ -56,42 +55,15 @@ export default function App() {
 		}
 	}
 
-	const songState = createMemo(() => {
+	const songActions = createMemo(() => {
 		const defaultSong = emptySongEntity()
 		const song = () => currentSong()?.data.song || defaultSong.data.song
-		return createSongState(
+		return createSongActions(
 			song,
 			updateSong,
 			editorSettings().defaultNoteDuration,
 		)
 	})
-
-	function updateSongMeta(id: string, meta: Partial<SongMeta>) {
-		const song = getCurrentSongDraft(state.songs[id])
-		if (song) {
-			const updatedSong = {
-				...song,
-				meta: { ...song.meta, ...meta },
-			}
-			updateSongDraft(updatedSong)
-		}
-	}
-
-	function updateKeyboardSettings(settings: Partial<KeyboardSettings>) {
-		const song = currentSong()
-		if (song) {
-			updateSongDraft({
-				...song,
-				data: {
-					...song.data,
-					keyboardSettings: {
-						...song.data.keyboardSettings,
-						...settings,
-					},
-				},
-			})
-		}
-	}
 
 	// TODO
 	// function updateEditorSettings(settings: Partial<EditorSettings>) {
@@ -123,21 +95,19 @@ export default function App() {
 		>
 			<NavBar
 				currentSong={currentSong()}
-				onUpdateSongMeta={(id, meta) => {
-					updateSongMeta(id, meta)
-				}}
+				onUpdateSong={updateSongDraft}
 				onLogout={() => logout()}
-				keyboardSettings={keyboardSettings()}
-				onUpdateKeyboardSettings={(settings) => {
-					updateKeyboardSettings(settings)
-				}}
 			/>
 			<Show when={currentSong()}>
 				<PlayerUI
+					songEntity={currentSong()!}
+					onSongDataChanged={(songData) =>
+						updateSongDraft({ ...currentSong()!, data: songData })
+					}
 					onSave={() => {
 						syncSongWithRemote(currentSong()!.id)
 					}}
-					songState={songState()}
+					songActions={songActions()}
 					songPlayer={player()}
 					synth={synth()}
 					editorSettings={editorSettings()}

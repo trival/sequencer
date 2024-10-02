@@ -161,6 +161,7 @@ export type SongData = z.infer<typeof songDataSchema>
 
 export interface SongEntity {
 	id: string
+	timestamp: number
 	meta: SongMeta
 	data: SongData
 }

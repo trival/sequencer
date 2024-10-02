@@ -1,21 +1,47 @@
+Quick UI improvements:
+
+- [ ] no confirmation on delete note
+- [ ] no confirmation on note duration change
+- [ ] auto open duration dialog when adding a note via song controls
+
+Basic App Navigation:
+
+- [ ] toast to indicate remote action status
+- [ ] add track collections, improve track organization
+- [ ] Better song list
+- [ ] delete a song
+
+Player interaction:
+
+- [ ] split a note after a given duration
+- [ ] duplicate a track
+- [ ] mute/unmute tracks, solo tracks
+- [ ] indicate notes present on other tracks on at the same time on the keyboard
+      when editing a note
+
+- [ ] general track settings with
+  - [ ] default note duration
+  - [ ] size per second
+  - [ ] swing tempo
+  - [ ] add/delete additional instrument
+  - [ ] instrument settings (color, values)
+
+Multi selection interactions
+
+- [ ] select and copy/delete multiple notes
+- [ ] merge notes
+
+Future whishlist:
+
+- [ ] transpose selected notes/track or whole song
+- [ ] record notes from playing the keyboard (probably with a metronome)
+- [ ] send midi signals via webmidi
+
+Done:
+
+- [x] import/edit track json data
 - [x] basic app navigation
 - [x] fast add note button
 - [x] no keyboard edit mode when playing, just playalong
 - [x] add/delete additional tracks
 - [x] change max keyboard size
-
-- [ ] select and copy/delete multiple notes
-- [ ] duplicate a track
-- [ ] toast to indicate remote action status
-- [ ] import/edit track json data
-- [ ] mute/unmute tracks, solo tracks
-- [ ] indicate notes present on other tracks on at the same time on the keyboard
-      when editing a note
-- [ ] add track collections, improve track organization
-
-- [ ] general track settings with
-  - [ ] default note duration
-  - [ ] size per second
-  - [ ] shuffle
-  - [ ] add/delete additional instrument
-  - [ ] instrument settings (color, values)

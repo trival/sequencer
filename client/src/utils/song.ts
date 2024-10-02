@@ -20,6 +20,7 @@ export function emptySong(defaultNoteDuration: Subdivision = '4n'): Song {
 export function emptySongEntity(): SongEntity {
 	return {
 		id: uuid.v4(),
+		timestamp: Date.now(),
 		data: { song: emptySong() },
 		meta: {
 			userId: '',
@@ -52,8 +53,7 @@ export function toDurations(duration: TimeObject): Subdivision[] {
 	return result
 }
 
-export interface SongState {
-	data: () => Song
+export interface SongActions {
 	updateProps: (data: Partial<SongProperties>) => void
 	removeNote: (trackIdx: number, noteIdx: number) => void
 	addNote: (trackIdx: number, noteIdx: number, noteData: TrackNote) => void
@@ -70,11 +70,11 @@ export interface SongState {
 	addTrack: (trackIdx?: number) => void
 }
 
-export const createSongState = (
+export const createSongActions = (
 	data: () => Song,
 	onSongChange: (song: Song) => void,
 	defaultNoteDuration: Subdivision = '4n',
-): SongState => {
+): SongActions => {
 	// TODO: Refactor this validation to upper scope
 	if (!data().tracks.length) {
 		onSongChange({
@@ -162,11 +162,10 @@ export const createSongState = (
 		} else {
 			tracks.splice(trackIdx, 0, newTrack)
 		}
-		return { ...song, tracks }
+		onSongChange({ ...song, tracks })
 	}
 
 	return {
-		data,
 		updateProps,
 		removeNote,
 		addNote,
