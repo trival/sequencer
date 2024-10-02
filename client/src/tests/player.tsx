@@ -31,7 +31,7 @@ export default function PlayerTest() {
 	const synth = createSynth()
 	const player = createPlayer(synth)
 
-	const state = createSongActions(
+	const actions = createSongActions(
 		song,
 		setSong,
 		defaultEditorSettings.defaultNoteDuration,
@@ -40,7 +40,7 @@ export default function PlayerTest() {
 	return (
 		<PlayerUI
 			songEntity={{ data: { song: song() } } as SongEntity}
-			songActions={state}
+			songActions={actions}
 			onSave={() => {
 				console.log('saving!', song())
 			}}
