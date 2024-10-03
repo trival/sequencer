@@ -1,8 +1,8 @@
 import { tw } from '@/styles/tw-utils'
-import { Icon } from 'solid-heroicons'
-import { plus, play, pause } from 'solid-heroicons/solid'
-import { trash, pencilSquare, power } from 'solid-heroicons/outline'
 import clsx from 'clsx'
+import { Icon } from 'solid-heroicons'
+import { pencilSquare, power, trash } from 'solid-heroicons/outline'
+import { pause, play, plus } from 'solid-heroicons/solid'
 import { JSX, ParentProps, createSignal, mergeProps } from 'solid-js'
 import Popover from './popover'
 
@@ -90,7 +90,10 @@ export const IconButtonPopover = (
 				type="button"
 				color={props.color}
 				class={clsx('m-2 p-2', props.class)}
-				onClick={() => setOpen(!isOpen())}
+				onClick={(e) => {
+					setOpen(!isOpen())
+					props.onClick?.(e)
+				}}
 				title={props.title}
 				disabled={props.disabled}
 			>
@@ -100,7 +103,7 @@ export const IconButtonPopover = (
 				referenceElement={btnRef as HTMLButtonElement}
 				onClose={() => setOpen(false)}
 				visible={isOpen()}
-				class="absolute z-10 my-2 rounded bg-gray-100/90 p-4 shadow-md"
+				class="absolute z-10 my-2 rounded bg-gray-100/90 p-2 shadow-md"
 				popperOptions={{
 					placement: 'bottom-start',
 					modifiers: [{ name: 'offset', options: { offset: [0, 10] } }],
@@ -112,59 +115,48 @@ export const IconButtonPopover = (
 	)
 }
 
-interface DeleteButtonProps {
-	onConfirm: () => void
-}
-
-export const DeleteButton = (props: DeleteButtonProps) => {
+export const DeleteButton = (props: ButtonProps) => {
 	return (
-		<IconButtonPopover
+		<IconButton
 			color="rose"
-			buttonElement={<Icon path={trash} class="h-6 w-6" aria-hidden="true" />}
 			title="Delete"
+			type="button"
+			onClick={props.onClick}
+			class={clsx('m-2 p-2', props.class)}
+			ref={props.ref}
 		>
-			{(close) => (
-				<Button
-					color="rose"
-					onClick={() => {
-						close()
-						props.onConfirm()
-					}}
-				>
-					Confirm
-				</Button>
-			)}
-		</IconButtonPopover>
+			<Icon path={trash} class="h-6 w-6" aria-hidden="true" />
+		</IconButton>
 	)
 }
 
-export const AddButton = (props: {
-	children: (close: () => void) => JSX.Element
-}) => {
+export const AddButton = (props: ButtonProps) => {
 	return (
-		<IconButtonPopover
+		<IconButton
 			color="indigo"
-			buttonElement={<Icon path={plus} class="h-6 w-6" aria-hidden="true" />}
 			title="Add"
+			type="button"
+			onClick={props.onClick}
+			class={clsx('m-2 p-2', props.class)}
+			ref={props.ref}
 		>
-			{props.children}
-		</IconButtonPopover>
+			<Icon path={plus} class="h-6 w-6" aria-hidden="true" />
+		</IconButton>
 	)
 }
 
-export const EditButton = (props: {
-	children: (close: () => void) => JSX.Element
-}) => {
+export const EditButton = (props: ButtonProps) => {
 	return (
-		<IconButtonPopover
+		<IconButton
 			color="teal"
-			buttonElement={
-				<Icon path={pencilSquare} class="h-6 w-6" aria-hidden="true" />
-			}
 			title="Edit"
+			type="button"
+			onClick={props.onClick}
+			class={clsx('m-2 p-2', props.class)}
+			ref={props.ref}
 		>
-			{props.children}
-		</IconButtonPopover>
+			<Icon path={pencilSquare} class="h-6 w-6" aria-hidden="true" />
+		</IconButton>
 	)
 }
 
