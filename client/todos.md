@@ -1,8 +1,11 @@
+Bugs:
+
+- [ ] Synth Player hangs after saving
+
 Quick UI improvements:
 
-- [ ] no confirmation on delete note
-- [ ] no confirmation on note duration change
-- [ ] auto open duration dialog when adding a note via song controls
+- [ ] auto open duration dialog when adding a note via song controls and track
+      controls
 
 Basic App Navigation:
 
@@ -18,13 +21,14 @@ Player interaction:
 - [ ] mute/unmute tracks, solo tracks
 - [ ] indicate notes present on other tracks on at the same time on the keyboard
       when editing a note
+- [ ] individual track volume (or instrument volume)
 
 - [ ] general track settings with
   - [ ] default note duration
   - [ ] size per second
   - [ ] swing tempo
   - [ ] add/delete additional instrument
-  - [ ] instrument settings (color, values)
+  - [ ] instrument settings (color, volume, sound settings)
 
 Multi selection interactions
 
@@ -34,6 +38,7 @@ Multi selection interactions
 Future whishlist:
 
 - [ ] transpose selected notes/track or whole song
+- [ ] record rhythm from tapping a button
 - [ ] record notes from playing the keyboard (probably with a metronome)
 - [ ] send midi signals via webmidi
 
@@ -45,3 +50,5 @@ Done:
 - [x] no keyboard edit mode when playing, just playalong
 - [x] add/delete additional tracks
 - [x] change max keyboard size
+- [x] no confirmation on delete note
+- [x] no confirmation on note duration change
