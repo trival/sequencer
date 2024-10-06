@@ -328,7 +328,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 }
 
 export function sharpToFlat(note: string): string {
-	note = note.replace('C#', 'Db')
+	// note = note.replace('C#', 'Db')
 	note = note.replace('D#', 'Eb')
 	note = note.replace('G#', 'Ab')
 	note = note.replace('A#', 'Bb')
