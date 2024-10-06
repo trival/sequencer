@@ -1,6 +1,6 @@
 import { Subdivision as ToneSubdivision } from 'tone/build/esm/core/type/Units'
-import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 import { z } from 'zod'
+import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 
 // === Basic types ===
 

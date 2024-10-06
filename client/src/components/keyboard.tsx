@@ -1,3 +1,5 @@
+import { ActiveColor, KeyboardSettings } from '@/datamodel'
+import { tw } from '@/styles/tw-utils'
 import {
 	ToneHighlight,
 	ToneValue,
@@ -7,7 +9,6 @@ import {
 	mod,
 } from '@/utils/tone-colors'
 import clsx from 'clsx'
-import * as Tone from 'tone'
 import {
 	For,
 	createEffect,
@@ -17,8 +18,7 @@ import {
 	onCleanup,
 	onMount,
 } from 'solid-js'
-import { ActiveColor, KeyboardSettings } from '@/datamodel'
-import { tw } from '@/styles/tw-utils'
+import * as Tone from 'tone'
 
 type Mode = 'Record' | 'Play'
 
@@ -315,7 +315,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 											return false
 										}}
 									>
-										{cell.frequency.toNote().replaceAll('#', '♯')}
+										{sharpToFlat(cell.frequency.toNote())}
 									</button>
 								)}
 							</For>
@@ -325,4 +325,12 @@ export const Keyboard = (_props: KeyboardProps) => {
 			</div>
 		</div>
 	)
+}
+
+export function sharpToFlat(note: string): string {
+	note = note.replace('C#', 'Db')
+	note = note.replace('D#', 'Eb')
+	note = note.replace('G#', 'Ab')
+	note = note.replace('A#', 'Bb')
+	return note.replaceAll('#', '♯').replaceAll('b', '♭')
 }
