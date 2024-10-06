@@ -113,7 +113,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					value={settings().baseNote}
 					onSelect={(value) =>
 						props.onSettingsUpdate({
-							baseNote: value as number,
+							baseNote: Number(value),
 						})
 					}
 					options={[...Array(12).keys()].map((i) => {
