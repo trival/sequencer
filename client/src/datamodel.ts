@@ -1,6 +1,6 @@
 import { Subdivision as ToneSubdivision } from 'tone/build/esm/core/type/Units'
-import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 import { z } from 'zod'
+import { ScaleHighlight, ToneColorType } from './utils/tone-colors'
 
 // === Basic types ===
 
@@ -47,12 +47,12 @@ export type Collection = z.infer<typeof collectionSchema>
 // === Keyboard Settings ===
 
 export const keyboardSettingsSchema = z.object({
-	baseNote: z.number(),
-	offsetX: z.number(),
-	offsetY: z.number(),
-	maxRows: z.number(),
-	maxCols: z.number(),
-	keyLength: z.number(),
+	baseNote: z.coerce.number(),
+	offsetX: z.coerce.number(),
+	offsetY: z.coerce.number(),
+	maxRows: z.coerce.number(),
+	maxCols: z.coerce.number(),
+	keyLength: z.coerce.number(),
 	scaleHighlight: z.nativeEnum(ScaleHighlight),
 	toneColorType: z.nativeEnum(ToneColorType),
 })
@@ -73,7 +73,7 @@ export const defaultKeyboardSettings: KeyboardSettings = {
 // === Editor Settings ===
 
 export const editorSettingsSchema = z.object({
-	pxPerBeat: z.number(),
+	pxPerBeat: z.coerce.number(),
 	defaultNoteDuration: subdivisionSchema,
 })
 
@@ -99,7 +99,7 @@ export const songMetaSchema = z.object({
 export type SongMeta = z.infer<typeof songMetaSchema>
 
 export const trackNoteSchema = z.object({
-	midiNotes: z.array(z.number()),
+	midiNotes: z.array(z.coerce.number()),
 	duration: z.union([subdivisionSchema, z.array(subdivisionSchema)]),
 })
 
@@ -107,7 +107,7 @@ export type TrackNote = z.infer<typeof trackNoteSchema>
 
 export const trackSchema = z.object({
 	notes: z.array(trackNoteSchema),
-	instrument: z.number(),
+	instrument: z.coerce.number(),
 })
 
 export type Track = z.infer<typeof trackSchema>
@@ -124,20 +124,20 @@ export enum ActiveColor {
 export const instrumentSchema = z
 	.object({
 		color: z.nativeEnum(ActiveColor),
-		volume: z.number(),
-		attack: z.number(),
-		decay: z.number(),
-		sustain: z.number(),
-		release: z.number(),
+		volume: z.coerce.number(),
+		attack: z.coerce.number(),
+		decay: z.coerce.number(),
+		sustain: z.coerce.number(),
+		release: z.coerce.number(),
 	})
 	.partial()
 
 export type Instrument = z.infer<typeof instrumentSchema>
 
 export const songPropertiesSchema = z.object({
-	bpm: z.number(),
-	swing: z.number().optional(),
-	timeSignature: z.number().optional(),
+	bpm: z.coerce.number(),
+	swing: z.coerce.number().optional(),
+	timeSignature: z.coerce.number().optional(),
 })
 
 export type SongProperties = z.infer<typeof songPropertiesSchema>

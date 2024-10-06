@@ -10,6 +10,7 @@ import {
 } from 'solid-heroicons/outline'
 import { createEffect, createSignal } from 'solid-js'
 import * as Tone from 'tone'
+import { sharpToFlat } from './keyboard'
 import { IconButton } from './shared/buttons'
 import { Input, Select } from './shared/input'
 import Popover from './shared/popover'
@@ -113,7 +114,7 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 					value={settings().baseNote}
 					onSelect={(value) =>
 						props.onSettingsUpdate({
-							baseNote: value as number,
+							baseNote: Number(value),
 						})
 					}
 					options={[...Array(12).keys()].map((i) => {
@@ -121,10 +122,9 @@ function KeyboardSettingsEditor(props: KeyboardSettingsProps) {
 						const note = start + i
 						return {
 							value: note,
-							label: Tone.Frequency(note, 'midi')
-								.toNote()
-								.replaceAll('#', '♯')
-								.replaceAll(/\d/g, ''),
+							label: sharpToFlat(
+								Tone.Frequency(note, 'midi').toNote(),
+							).replaceAll(/\d/g, ''),
 						}
 					})}
 				/>

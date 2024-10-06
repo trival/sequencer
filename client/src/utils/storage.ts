@@ -1,9 +1,9 @@
 import { Collection, songDataSchema, SongEntity } from '@/datamodel'
-import { TrpcClient } from './trpc'
 import {
 	Song as ApiSong,
 	SongInput,
 } from '../../../server/src/modules/songs/model'
+import { TrpcClient } from './trpc'
 
 interface ListResponse<T> {
 	list: T[]
