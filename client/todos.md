@@ -41,6 +41,8 @@ Future whishlist:
 - [ ] record rhythm from tapping a button
 - [ ] record notes from playing the keyboard (probably with a metronome)
 - [ ] send midi signals via webmidi
+- [ ] name notes according to the selected scale base note (e.g. C#, F# and G#,
+      when in key of A)
 
 Done:
 
