@@ -273,7 +273,7 @@ export const Keyboard = (_props: KeyboardProps) => {
 				'max-height': `${props.maxVHeight}vh`,
 			}}
 		>
-			<div class="flex h-full w-full flex-col justify-evenly">
+			<div class="flex h-full w-full touch-none flex-col justify-evenly">
 				<For each={keys()}>
 					{(row) => (
 						<div class="flex w-full touch-none justify-evenly whitespace-nowrap">
