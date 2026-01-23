@@ -14,8 +14,9 @@ const [midiSupported, setMidiSupported] = createSignal(true)
 
 /**
  * Initialize Web MIDI API access and populate available outputs
+ * @internal - Use createMidiOutput().init() instead
  */
-export async function initMIDI() {
+async function initMIDI() {
 	if (!navigator.requestMIDIAccess) {
 		console.warn('Web MIDI is not supported in this browser.')
 		setMidiSupported(false)
@@ -76,61 +77,91 @@ export function isMidiSupported() {
 }
 
 /**
- * Send a MIDI Note On message
- * @param deviceId The ID of the MIDI output device
- * @param channel MIDI channel (0-15)
- * @param noteNumber MIDI note number (0-127)
- * @param velocity Note velocity (0-127)
+ * Creates a MIDI output manager with synth-like interface
+ * Handles device selection, note tracking, and MIDI message sending
  */
-export function sendNoteOn(
-	deviceId: string,
-	channel: number,
-	noteNumber: number,
-	velocity: number,
-) {
-	if (!midiAccess) {
-		console.warn('MIDI not initialized. Call initMIDI() first.')
-		return
+export function createMidiOutput() {
+	const [deviceId, setDeviceId] = createSignal<string | undefined>()
+
+	// Track active notes per channel (16 channels, 0-15)
+	const activeNotesPerChannel: Set<number>[] = Array.from(
+		{ length: 16 },
+		() => new Set<number>(),
+	)
+
+	const [playingNotes, setPlayingNotes] = createSignal<number[][]>(
+		activeNotesPerChannel.map((set) => Array.from(set)),
+	)
+
+	/**
+	 * Play notes on a specific MIDI channel
+	 * @param channel MIDI channel (0-15)
+	 * @param notes Array of MIDI note numbers to play
+	 * @param velocity Note velocity (0-127), defaults to 127
+	 */
+	const play = (channel: number, notes: number[], velocity: number = 127) => {
+		const currentDeviceId = deviceId()
+		if (!currentDeviceId || !midiAccess) {
+			return
+		}
+
+		// @ts-ignore
+		const midiOut = midiAccess.outputs.get(currentDeviceId)
+		if (!midiOut) {
+			console.warn(`No MIDI output found with ID: ${currentDeviceId}`)
+			return
+		}
+
+		const channelIdx = channel & 0x0f
+		const NOTE_ON = 0x90 | channelIdx
+
+		// Send Note On for each note
+		notes.forEach((note) => {
+			midiOut.send([NOTE_ON, note & 0x7f, velocity & 0x7f])
+			activeNotesPerChannel[channelIdx].add(note)
+		})
+
+		// Update playing notes signal
+		setPlayingNotes(activeNotesPerChannel.map((set) => Array.from(set)))
 	}
 
-	// @ts-ignore
-	const midiOut = midiAccess.outputs.get(deviceId)
-	if (!midiOut) {
-		console.warn(`No MIDI output found with ID: ${deviceId}`)
-		return
+	/**
+	 * Stop notes on a specific MIDI channel
+	 * @param channel MIDI channel (0-15)
+	 * @param notes Array of MIDI note numbers to stop
+	 */
+	const stop = (channel: number, notes: number[]) => {
+		const currentDeviceId = deviceId()
+		if (!currentDeviceId || !midiAccess) {
+			return
+		}
+
+		// @ts-ignore
+		const midiOut = midiAccess.outputs.get(currentDeviceId)
+		if (!midiOut) {
+			console.warn(`No MIDI output found with ID: ${currentDeviceId}`)
+			return
+		}
+
+		const channelIdx = channel & 0x0f
+		const NOTE_OFF = 0x80 | channelIdx
+
+		// Send Note Off for each note
+		notes.forEach((note) => {
+			midiOut.send([NOTE_OFF, note & 0x7f, 0])
+			activeNotesPerChannel[channelIdx].delete(note)
+		})
+
+		// Update playing notes signal
+		setPlayingNotes(activeNotesPerChannel.map((set) => Array.from(set)))
 	}
 
-	// 0x90 = Note On, channel is added to the status byte
-	const NOTE_ON = 0x90 | (channel & 0x0f)
-	midiOut.send([NOTE_ON, noteNumber & 0x7f, velocity & 0x7f])
-}
-
-/**
- * Send a MIDI Note Off message
- * @param deviceId The ID of the MIDI output device
- * @param channel MIDI channel (0-15)
- * @param noteNumber MIDI note number (0-127)
- * @param velocity Note off velocity (0-127)
- */
-export function sendNoteOff(
-	deviceId: string,
-	channel: number,
-	noteNumber: number,
-	velocity: number = 0,
-) {
-	if (!midiAccess) {
-		console.warn('MIDI not initialized. Call initMIDI() first.')
-		return
+	return {
+		play,
+		stop,
+		playingNotes,
+		deviceId,
+		setDeviceId,
+		init: initMIDI,
 	}
-
-	// @ts-ignore
-	const midiOut = midiAccess.outputs.get(deviceId)
-	if (!midiOut) {
-		console.warn(`No MIDI output found with ID: ${deviceId}`)
-		return
-	}
-
-	// 0x80 = Note Off, channel is added to the status byte
-	const NOTE_OFF = 0x80 | (channel & 0x0f)
-	midiOut.send([NOTE_OFF, noteNumber & 0x7f, velocity & 0x7f])
 }
