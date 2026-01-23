@@ -3,8 +3,8 @@ import { KeyboardSettingsBtn } from '@/components/keyboardSettings'
 import { MidiSettingsBtn } from '@/components/midiSettings'
 import { Subpage } from '@/components/shared/simpleSubpage'
 import { defaultKeyboardSettings } from '@/datamodel'
-import { createSynth } from '@/utils/synth'
 import { createLocalStorageKeyboardSettings } from '@/utils/localStorageSettings'
+import { createSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
 import { createMidiOutput } from '@/utils/webmidi'
@@ -61,6 +61,8 @@ export default function KeyboardPage() {
 						setMidiDeviceId={midi.setDeviceId}
 						midiChannel={midiChannel}
 						setMidiChannel={setMidiChannel}
+						midiOutputs={midi.outputs}
+						isMidiSupported={midi.isSupported}
 					/>
 				</span>
 			}

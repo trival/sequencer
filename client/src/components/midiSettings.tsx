@@ -1,10 +1,10 @@
 import { IconButton } from '@/components/shared/buttons'
 import { Input, Select } from '@/components/shared/input'
 import Popover from '@/components/shared/popover'
-import { getMidiOutputs, isMidiSupported } from '@/utils/webmidi'
+import { MidiDevice } from '@/utils/webmidi'
 import { Icon } from 'solid-heroicons'
 import { musicalNote } from 'solid-heroicons/outline'
-import { createSignal, Show } from 'solid-js'
+import { Accessor, createSignal, Show } from 'solid-js'
 
 export interface MidiSettingsProps {
 	midiEnabled: () => boolean
@@ -13,6 +13,8 @@ export interface MidiSettingsProps {
 	setMidiDeviceId: (id: string | undefined) => void
 	midiChannel: () => number
 	setMidiChannel: (channel: number) => void
+	midiOutputs: Accessor<MidiDevice[]>
+	isMidiSupported: Accessor<boolean>
 }
 
 export function MidiSettingsBtn(props: MidiSettingsProps) {
@@ -43,7 +45,7 @@ export function MidiSettingsBtn(props: MidiSettingsProps) {
 				class="rounded bg-gray-100/90 shadow-md shadow-gray-500/60"
 			>
 				<div class="p-4">
-					<Show when={!isMidiSupported()}>
+					<Show when={!props.isMidiSupported()}>
 						<div class="mb-3 text-sm text-red-600">
 							Web MIDI is not supported in this browser
 						</div>
@@ -54,7 +56,7 @@ export function MidiSettingsBtn(props: MidiSettingsProps) {
 							checked={props.midiEnabled()}
 							onChange={(e) => props.setMidiEnabled(e.target.checked)}
 							class="mr-2 h-4 w-4"
-							disabled={!isMidiSupported()}
+							disabled={!props.isMidiSupported()}
 						/>
 						<span class="text-sm">Enable MIDI Output</span>
 					</label>
@@ -64,7 +66,7 @@ export function MidiSettingsBtn(props: MidiSettingsProps) {
 							label="MIDI Device"
 							value={props.midiDeviceId() || ''}
 							onSelect={(value) => props.setMidiDeviceId(value as string)}
-							options={getMidiOutputs()().map((device) => ({
+							options={props.midiOutputs().map((device) => ({
 								value: device.id,
 								label: `${device.manufacturer} ${device.name}`.trim(),
 							}))}

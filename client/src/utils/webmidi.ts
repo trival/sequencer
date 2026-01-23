@@ -56,27 +56,6 @@ function populateOutputs() {
 }
 
 /**
- * Get the current list of available MIDI output devices
- */
-export function getMidiOutputs() {
-	return midiOutputs
-}
-
-/**
- * Check if MIDI is initialized
- */
-export function isMidiInitialized() {
-	return midiInitialized
-}
-
-/**
- * Check if MIDI is supported in the current browser
- */
-export function isMidiSupported() {
-	return midiSupported
-}
-
-/**
  * Creates a MIDI output manager with synth-like interface
  * Handles device selection, note tracking, and MIDI message sending
  */
@@ -163,5 +142,8 @@ export function createMidiOutput() {
 		deviceId,
 		setDeviceId,
 		init: initMIDI,
+		isInitialized: midiInitialized,
+		outputs: midiOutputs,
+		isSupported: midiSupported,
 	}
 }
