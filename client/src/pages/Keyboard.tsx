@@ -8,7 +8,7 @@ import { createSynth } from '@/utils/synth'
 import { ScaleHighlight, ToneColorType } from '@/utils/tone-colors'
 import { toMidi } from '@/utils/utils'
 import { createMidiOutput } from '@/utils/webmidi'
-import { createSignal, onMount } from 'solid-js'
+import { createMemo, createSignal, onMount } from 'solid-js'
 
 export default function KeyboardPage() {
 	const synth = createSynth()
@@ -23,8 +23,10 @@ export default function KeyboardPage() {
 		midi.init()
 	})
 
+	const isMidiActive = createMemo(() => midiEnabled() && midi.deviceId())
+
 	const onActivateNote = (note: number) => {
-		if (midiEnabled() && midi.deviceId()) {
+		if (isMidiActive()) {
 			midi.play(midiChannel(), [note])
 		} else {
 			synth.play(0, [note])
@@ -32,7 +34,7 @@ export default function KeyboardPage() {
 	}
 
 	const onDeactivateNote = (note: number) => {
-		if (midiEnabled() && midi.deviceId()) {
+		if (isMidiActive()) {
 			midi.stop(midiChannel(), [note])
 		} else {
 			synth.stop(0, [note])
@@ -70,7 +72,7 @@ export default function KeyboardPage() {
 			<div class="z-0 flex h-[calc(100%-2rem)] w-full justify-center lg:h-[calc(100%-3.5rem)]">
 				<Keyboard
 					activeNotes={
-						midiEnabled()
+						isMidiActive()
 							? midi.playingNotes().flatMap((n) => n.map((note) => ({ note })))
 							: synth.playingNotes().flatMap((n) => n.map((note) => ({ note })))
 					}
