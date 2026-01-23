@@ -17,6 +17,10 @@ const [midiSupported, setMidiSupported] = createSignal(true)
  * @internal - Use createMidiOutput().init() instead
  */
 async function initMIDI() {
+	if (midiInitialized()) {
+		return
+	}
+
 	if (!navigator.requestMIDIAccess) {
 		console.warn('Web MIDI is not supported in this browser.')
 		setMidiSupported(false)
