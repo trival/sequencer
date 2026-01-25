@@ -64,9 +64,9 @@ export function getMinorPentatonicHighlight(tone: ToneValue): ToneHighlight {
 	switch (tone) {
 		case 0:
 			return ToneHighlight.Strong
+		case 3:
 		case 5:
 		case 7:
-		case 3:
 		case 10:
 			return ToneHighlight.Soft
 		default:
@@ -78,10 +78,122 @@ export function getMajorHighlight(tone: ToneValue): ToneHighlight {
 	switch (tone) {
 		case 0:
 			return ToneHighlight.Strong
-		case 5:
-		case 7:
 		case 2:
 		case 4:
+		case 5:
+		case 7:
+		case 9:
+		case 11:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getMinorHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 2:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getDorianHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 2:
+		case 3:
+		case 5:
+		case 7:
+		case 9:
+		case 10:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getPhrygianHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 1:
+		case 3:
+		case 5:
+		case 7:
+		case 8:
+		case 10:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getLydianHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 2:
+		case 4:
+		case 6:
+		case 7:
+		case 9:
+		case 11:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getMixolydianHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 2:
+		case 4:
+		case 5:
+		case 7:
+		case 9:
+		case 10:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getLocrianHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 1:
+		case 3:
+		case 5:
+		case 6:
+		case 8:
+		case 10:
+			return ToneHighlight.Soft
+		default:
+			return ToneHighlight.None
+	}
+}
+
+export function getMelodicMinorHighlight(tone: ToneValue): ToneHighlight {
+	switch (tone) {
+		case 0:
+			return ToneHighlight.Strong
+		case 2:
+		case 3:
+		case 5:
+		case 7:
 		case 9:
 		case 11:
 			return ToneHighlight.Soft
@@ -96,6 +208,13 @@ export enum ScaleHighlight {
 	Simple = 'Simple',
 	MinorPentatonic = 'MinorPentatonic',
 	Major = 'Major',
+	Minor = 'Minor',
+	Dorian = 'Dorian',
+	Phrygian = 'Phrygian',
+	Lydian = 'Lydian',
+	Mixolydian = 'Mixolydian',
+	Locrian = 'Locrian',
+	MelodicMinor = 'MelodicMinor',
 }
 
 export enum ToneColorType {
@@ -124,6 +243,41 @@ export function getScaleToneColor(
 			return {
 				value: tone,
 				highlight: getMajorHighlight(highlightTone),
+			}
+		case ScaleHighlight.Minor:
+			return {
+				value: tone,
+				highlight: getMinorHighlight(highlightTone),
+			}
+		case ScaleHighlight.Dorian:
+			return {
+				value: tone,
+				highlight: getDorianHighlight(highlightTone),
+			}
+		case ScaleHighlight.Phrygian:
+			return {
+				value: tone,
+				highlight: getPhrygianHighlight(highlightTone),
+			}
+		case ScaleHighlight.Lydian:
+			return {
+				value: tone,
+				highlight: getLydianHighlight(highlightTone),
+			}
+		case ScaleHighlight.Mixolydian:
+			return {
+				value: tone,
+				highlight: getMixolydianHighlight(highlightTone),
+			}
+		case ScaleHighlight.Locrian:
+			return {
+				value: tone,
+				highlight: getLocrianHighlight(highlightTone),
+			}
+		case ScaleHighlight.MelodicMinor:
+			return {
+				value: tone,
+				highlight: getMelodicMinorHighlight(highlightTone),
 			}
 		case ScaleHighlight.Tonic:
 			return {
